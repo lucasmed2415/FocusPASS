@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;" />
+  <!-- BOUCLIER CSP STRICT : Bloque les plugins, les iframes externes, les injections d'URL et les exfiltrations -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; object-src 'none'; base-uri 'none'; form-action 'none';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="referrer" content="no-referrer" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -12,6 +14,10 @@
   <title>FocusPASS — Suivi & Organisation</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23000000'/%3E%3Crect x='4' y='4' width='92' height='92' rx='20' fill='none' stroke='%23ffffff' stroke-width='4' stroke-opacity='0.25'/%3E%3Ctext x='50' y='71' font-family='Inter, system-ui, sans-serif' font-size='62' font-weight='900' fill='%23ffffff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
   <script>
+    // Protection Anti-Clickjacking (empêche l'inclusion dans un site malveillant)
+    if (window.top !== window.self) {
+      try { window.top.location = window.self.location; } catch (e) {}
+    }
     const _w = console.warn;
     console.warn = (...a) => (typeof a[0] === 'string' && a[0].includes('cdn.tailwindcss.com')) ? null : _w.apply(console, a);
   </script>
@@ -20,29 +26,31 @@
   <style>
     :root, [data-theme="oled"] {
       --bg-main: #000000;
-      --bg-card: #0b0b0e;
-      --bg-input: #141418;
+      --bg-card: #0a0a0d;
+      --bg-input: #131318;
       --text-main: #ffffff;
-      --text-muted: #8e8e93;
-      --border-color: #232329;
+      --text-muted: #8e8e95;
+      --border-color: #22222a;
       --btn-bg: #ffffff;
       --btn-text: #000000;
       --theme-accent: #ffffff;
       --theme-accent-soft: rgba(255, 255, 255, 0.12);
-      --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+      --card-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+      --ambient-glow: radial-gradient(circle at 50% -10%, rgba(59, 130, 246, 0.12), transparent 60%);
     }
     [data-theme="dark"] {
-      --bg-main: #0b1120;
-      --bg-card: #162033;
-      --bg-input: #23304a;
+      --bg-main: #090e1a;
+      --bg-card: #131c2e;
+      --bg-input: #1e2942;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
-      --border-color: #2c3b59;
-      --btn-bg: #f1f5f9;
+      --border-color: #293856;
+      --btn-bg: #f8fafc;
       --btn-text: #0f172a;
       --theme-accent: #f8fafc;
       --theme-accent-soft: rgba(248, 250, 252, 0.12);
-      --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+      --card-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+      --ambient-glow: radial-gradient(circle at 50% -10%, rgba(99, 102, 241, 0.15), transparent 60%);
     }
     [data-theme="light"] {
       --bg-main: #f1f5f9;
@@ -55,7 +63,8 @@
       --btn-text: #ffffff;
       --theme-accent: #0f172a;
       --theme-accent-soft: rgba(15, 23, 42, 0.08);
-      --card-shadow: 0 10px 25px -8px rgba(15, 23, 42, 0.06), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+      --card-shadow: 0 12px 28px -10px rgba(15, 23, 42, 0.07), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+      --ambient-glow: radial-gradient(circle at 50% -10%, rgba(59, 130, 246, 0.08), transparent 60%);
     }
 
     * { box-sizing: border-box; }
@@ -63,21 +72,23 @@
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background-color: var(--bg-main);
+      background-image: var(--ambient-glow);
+      background-attachment: fixed;
       color: var(--text-main);
       transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       -webkit-tap-highlight-color: transparent;
       -webkit-font-smoothing: antialiased;
       padding-top: env(safe-area-inset-top);
-      padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+      padding-bottom: calc(6.2rem + env(safe-area-inset-bottom));
       user-select: none;
       overflow-x: hidden;
     }
-    @media (min-width: 768px) { body { padding-bottom: 3rem; } }
+    @media (min-width: 768px) { body { padding-bottom: 3.5rem; } }
 
     .safe-bottom-nav { padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)); }
     .font-mono-timer { font-family: 'JetBrains Mono', monospace; }
 
-    /* Cartes & Surfaces raffinées */
+    /* Cartes & Surfaces Premium */
     .card {
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -88,11 +99,20 @@
     .task-row {
       background-color: var(--bg-main);
       border: 1px solid var(--border-color);
-      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background-color 0.2s ease;
+      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
     }
     .task-row:hover {
       border-color: rgba(142, 142, 147, 0.45);
       transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Cases à cocher raffinées */
+    input[type="checkbox"] {
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    input[type="checkbox"]:active {
+      transform: scale(0.85);
     }
 
     .input-field {
@@ -113,10 +133,10 @@
       background-color: var(--btn-bg);
       color: var(--btn-text);
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
-      transition: opacity 0.2s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, color 0.25s ease;
+      transition: opacity 0.2s ease, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, color 0.25s ease, box-shadow 0.2s ease;
     }
-    .theme-btn-primary:hover { opacity: 0.92; transform: translateY(-1px); }
-    .theme-btn-primary:active { transform: scale(0.97); }
+    .theme-btn-primary:hover { opacity: 0.94; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28); }
+    .theme-btn-primary:active { transform: scale(0.96); }
     .theme-accent-text { color: var(--theme-accent); }
     .theme-accent-soft-bg { background-color: var(--theme-accent-soft); }
 
@@ -129,27 +149,27 @@
       animation: viewFadeSlide 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    /* Flip Clock Ultra-Réaliste */
+    /* Flip Clock Haute Définition */
     .flip-card {
-      background: linear-gradient(180deg, #16161a 0%, #0d0d10 49.5%, #09090b 50.5%, #121215 100%);
+      background: linear-gradient(180deg, #17171c 0%, #0e0e12 49.5%, #09090c 50.5%, #131317 100%);
       border-radius: 24px;
       position: relative;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 16px 36px rgba(0,0,0,0.75);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.09), 0 18px 40px rgba(0,0,0,0.8);
     }
     .flip-digits {
       font-weight: 800;
-      background: linear-gradient(180deg, #f4f4f5 0%, #d4d4d8 50%, #a1a1aa 100%);
+      background: linear-gradient(180deg, #ffffff 0%, #e4e4e7 50%, #a1a1aa 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       letter-spacing: -0.04em;
       line-height: 1;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.55));
     }
     .flip-split-line {
       position: absolute; left: 0; right: 0; top: 50%; height: 3px;
       background-color: #000000;
-      box-shadow: 0 1px 0 rgba(255,255,255,0.05);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.06);
       z-index: 10; transform: translateY(-50%); pointer-events: none;
     }
     .flip-wheel {
@@ -164,15 +184,15 @@
     .wheel-interactive { cursor: ns-resize; opacity: 0.88; }
     .wheel-interactive:hover, .wheel-interactive:active {
       opacity: 1; width: 18px;
-      box-shadow: 0 0 14px rgba(255,255,255,0.22), inset 0 8px 10px rgba(0,0,0,0.85), inset 0 -8px 10px rgba(0,0,0,0.85);
+      box-shadow: 0 0 14px rgba(255,255,255,0.24), inset 0 8px 10px rgba(0,0,0,0.85), inset 0 -8px 10px rgba(0,0,0,0.85);
     }
 
     @keyframes pulseRunningBtn {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.25); }
-      50% { box-shadow: 0 0 22px 4px rgba(255, 255, 255, 0.14); }
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.28); }
+      50% { box-shadow: 0 0 24px 5px rgba(255, 255, 255, 0.16); }
     }
     .btn-commencer {
-      background: linear-gradient(180deg, #525256 0%, #3a3a3d 100%);
+      background: linear-gradient(180deg, #525258 0%, #3a3a40 100%);
       border: 1.5px solid #8e8e93;
       color: #ffffff;
       border-radius: 16px;
@@ -182,7 +202,7 @@
       letter-spacing: 0.01em;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .btn-commencer:hover { background: linear-gradient(180deg, #606066 0%, #454549 100%); transform: translateY(-1px); }
+    .btn-commencer:hover { background: linear-gradient(180deg, #626268 0%, #46464c 100%); transform: translateY(-1px); }
     .btn-commencer:active { transform: scale(0.96); }
     .btn-commencer.is-running {
       background: #ffffff;
@@ -191,9 +211,9 @@
       animation: pulseRunningBtn 2.4s infinite ease-in-out;
     }
 
-    .ios-segmented { background-color: #242428; padding: 3.5px; border-radius: 12px; display: inline-flex; border: 1px solid rgba(255,255,255,0.06); }
+    .ios-segmented { background-color: #202024; padding: 3.5px; border-radius: 12px; display: inline-flex; border: 1px solid rgba(255,255,255,0.07); }
     .ios-seg-btn { padding: 6px 16px; border-radius: 9px; font-size: 0.8rem; font-weight: 500; color: #a1a1aa; transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
-    .ios-seg-btn.active { background-color: #52525b; color: #ffffff; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+    .ios-seg-btn.active { background-color: #52525b; color: #ffffff; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.45); }
 
     .noise-pill {
       background-color: #141417; border: 1px solid #27272a; color: #a1a1aa;
@@ -203,7 +223,6 @@
     .noise-pill:hover { background-color: #232329; color: #f4f4f5; transform: translateY(-1px); }
     .noise-pill.active { background-color: #ffffff; border-color: #ffffff; color: #000000; box-shadow: 0 0 18px rgba(255,255,255,0.24); }
 
-    /* Mode Plein Écran Focus */
     #flipClockContainer:fullscreen,
     #flipClockContainer:-webkit-full-screen,
     #flipClockContainer.is-fullscreen {
@@ -225,7 +244,6 @@
       display: none !important;
     }
 
-    /* Animations de déblocage de badge */
     @keyframes badgeModalPop {
       0% { opacity: 0; transform: scale(0.65) translateY(30px); }
       65% { opacity: 1; transform: scale(1.04) translateY(-4px); }
@@ -246,7 +264,6 @@
       animation: badgeIconFloat 2.2s ease-in-out infinite;
     }
 
-    /* Toast Notification */
     #appToast {
       transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -264,10 +281,10 @@
     <span id="appToastText">Action effectuée</span>
   </div>
 
-  <header class="sticky top-0 z-30 backdrop-blur-xl bg-opacity-85 border-b" style="background-color: color-mix(in srgb, var(--bg-card) 85%, transparent); border-color: var(--border-color);">
+  <header class="sticky top-0 z-30 backdrop-blur-xl bg-opacity-85 border-b" style="background-color: color-mix(in srgb, var(--bg-card) 86%, transparent); border-color: var(--border-color);">
     <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
-        <div class="w-10 h-10 rounded-xl bg-black border border-white/25 flex items-center justify-center shadow-lg flex-shrink-0 transition transform hover:scale-105">
+      <div class="flex items-center gap-3 cursor-pointer group" onclick="switchTab('dashboard')">
+        <div class="w-10 h-10 rounded-xl bg-black border border-white/25 flex items-center justify-center shadow-lg flex-shrink-0 transition transform group-hover:scale-105">
           <span class="text-white font-black text-xl tracking-tighter leading-none">F</span>
         </div>
         <div>
@@ -283,10 +300,16 @@
         <button onclick="switchTab('settings')" id="nav-desk-settings" class="px-4 py-2 rounded-lg text-sm font-semibold transition">Matières & Options</button>
       </nav>
 
-      <button onclick="switchTab('settings')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 border hover:opacity-85 transition" style="background-color: var(--bg-input); border-color: var(--border-color);">
-        <span>🎯 Obj:</span>
-        <span id="headerGoalBadge" class="font-bold font-mono-timer">7h/j</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <button onclick="switchTab('settings')" id="cloudHeaderBadge" title="Protection & Synchronisation multi-appareils active" class="px-2.5 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 border hover:opacity-85 transition" style="background-color: var(--bg-input); border-color: var(--border-color);">
+          <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span class="hidden sm:inline" id="cloudStatusLabel">Protégé & Synchro</span>
+        </button>
+        <button onclick="switchTab('settings')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 border hover:opacity-85 transition" style="background-color: var(--bg-input); border-color: var(--border-color);">
+          <span>🎯 Obj:</span>
+          <span id="headerGoalBadge" class="font-bold font-mono-timer">7h/j</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -330,14 +353,14 @@
             <div class="p-3 rounded-xl border" style="background-color: var(--bg-main); border-color: var(--border-color);">
               <span class="text-[10px] font-bold uppercase tracking-wider block" style="color: var(--text-muted);">Tâches du jour</span>
               <div class="flex items-baseline gap-1.5 mt-1">
-                <span id="tasksDoneCount" class="text-2xl font-extrabold font-mono-timer">0/0</span>
+                <span id="tasksDoneCount" class="text-2xl font-extrabold font-mono-timer">0/1</span>
                 <span class="text-[11px]" style="color: var(--text-muted);">faites</span>
               </div>
             </div>
             <div class="p-3 rounded-xl border" style="background-color: var(--bg-main); border-color: var(--border-color);">
               <span class="text-[10px] font-bold uppercase tracking-wider block" style="color: var(--text-muted);">Objectifs jour</span>
               <div class="flex items-baseline gap-1.5 mt-1">
-                <span id="goalsDoneCount" class="text-2xl font-extrabold font-mono-timer">0/0</span>
+                <span id="goalsDoneCount" class="text-2xl font-extrabold font-mono-timer">0/1</span>
                 <span class="text-[11px]" style="color: var(--text-muted);">atteints</span>
               </div>
             </div>
@@ -349,10 +372,10 @@
                 <span id="weekTotalMini" class="text-xl font-extrabold font-mono-timer">0h 00m</span>
               </div>
             </div>
-            <div class="text-right cursor-pointer" onclick="switchTab('stats')" title="Voir mes badges de régularité">
+            <div class="text-right cursor-pointer group" onclick="switchTab('stats')" title="Voir mes badges de régularité">
               <span class="text-[11px] font-semibold uppercase tracking-wider" style="color: var(--text-muted);">Série Objectifs</span>
               <div class="flex items-baseline justify-end mt-0.5">
-                <span id="streakMiniCount" class="text-xl font-extrabold text-amber-400">🔥 0j</span>
+                <span id="streakMiniCount" class="text-xl font-extrabold text-amber-400 group-hover:scale-105 transition inline-block">🔥 0j</span>
               </div>
             </div>
           </div>
@@ -368,7 +391,7 @@
           </div>
 
           <form onsubmit="addTask(event)" class="flex flex-col sm:flex-row gap-2 mb-3">
-            <input type="text" id="newTaskInput" maxlength="120" placeholder="Nouvelle tâche (ex: Fiche Médiastin, 40 QCM...)" required
+            <input type="text" id="newTaskInput" maxlength="120" autocomplete="off" placeholder="Nouvelle tâche (ex: Fiche Médiastin, 40 QCM...)" required
               class="input-field flex-1 px-4 py-2.5 rounded-xl text-sm focus:outline-none" />
             <div class="flex flex-wrap sm:flex-nowrap gap-2">
               <select id="newTaskPriority" class="input-field px-3 py-2.5 rounded-xl text-sm font-semibold focus:outline-none cursor-pointer">
@@ -419,7 +442,7 @@
             <div id="dailyGoalsList" class="space-y-2 mb-4"></div>
 
             <form onsubmit="addDailyGoal(event)" class="flex gap-2 mt-auto pt-2 border-t" style="border-color: var(--border-color);">
-              <input type="text" id="newGoalInput" maxlength="60" placeholder="Nouvel objectif (ex: 8h de sommeil...)" required
+              <input type="text" id="newGoalInput" maxlength="60" autocomplete="off" placeholder="Nouvel objectif (ex: Boire 1,5L d'eau...)" required
                 class="input-field flex-1 px-3 py-2 rounded-xl text-xs focus:outline-none" />
               <button type="submit" class="theme-btn-primary px-3.5 py-2 rounded-xl text-xs font-bold flex-shrink-0">+ Créer</button>
             </form>
@@ -448,9 +471,11 @@
     <!-- VUE 2 : CHRONO FLIP CLOCK & AUDIO                          -->
     <!-- ========================================================== -->
     <section id="view-timer" class="hidden space-y-6">
-      <div id="flipClockContainer" class="bg-black rounded-3xl p-4 sm:p-8 border border-zinc-800/80 flex flex-col justify-between min-h-[550px] relative shadow-2xl">
-        
-        <div class="flex items-center justify-between gap-2">
+      <div id="flipClockContainer" class="bg-black rounded-3xl p-4 sm:p-8 border border-zinc-800/80 flex flex-col justify-between min-h-[550px] relative shadow-2xl overflow-hidden">
+        <!-- Halo lumineux subtil dynamique aux couleurs de la matière active -->
+        <div id="timerSubjectAmbientGlow" class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 rounded-full blur-3xl opacity-20 transition-all duration-700" style="background-color: #3b82f6;"></div>
+
+        <div class="flex items-center justify-between gap-2 relative z-10">
           <button onclick="exitFullscreenOrBack()" class="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition" title="Retour">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
           </button>
@@ -465,7 +490,7 @@
           </button>
         </div>
 
-        <div class="my-auto py-6 flex flex-col items-center">
+        <div class="my-auto py-6 flex flex-col items-center relative z-10">
           <p id="liveClockTimestamp" class="text-zinc-400 text-xs sm:text-sm font-medium tracking-wide mb-3">Chargement...</p>
 
           <div class="relative mb-6 z-40">
@@ -507,7 +532,7 @@
         </div>
 
         <!-- PANNEAU AUDIO : MASQUÉ EN MODE PLEIN ÉCRAN FOCUS -->
-        <div id="timerAudioPanel" class="flex flex-col items-center gap-3 pt-3 pb-4 border-t border-zinc-900">
+        <div id="timerAudioPanel" class="flex flex-col items-center gap-3 pt-3 pb-4 border-t border-zinc-900 relative z-10">
           <div class="flex flex-wrap items-center justify-center gap-2">
             <button type="button" onclick="toggleAudioSource('brown')" id="noise-btn-brown" class="noise-pill">
               <span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Bruit Brun (Profond)</span>
@@ -533,7 +558,7 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-between pt-2">
+        <div class="flex items-center justify-between pt-2 relative z-10">
           <button id="timerHistoryScrollBtn" onclick="$('timerHistoryCard').scrollIntoView({behavior: 'smooth'})" class="p-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition" title="Historique">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           </button>
@@ -563,7 +588,7 @@
     <!-- ========================================================== -->
     <section id="view-stats" class="hidden space-y-6">
       
-      <!-- NAVIGATEUR DE SEMAINES (SEMAINES PRÉCÉDENTES / ACTUELLE) -->
+      <!-- NAVIGATEUR DE SEMAINES -->
       <div class="card rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-start">
           <button onclick="changeStatsWeek(-1)" class="px-3.5 py-2 rounded-xl text-xs font-bold border hover:opacity-80 transition flex items-center gap-1.5" style="background-color: var(--bg-main); border-color: var(--border-color);">
@@ -713,19 +738,19 @@
     </section>
 
     <!-- ========================================================== -->
-    <!-- VUE 4 : PARAMÈTRES & MATIÈRES                              -->
+    <!-- VUE 4 : PARAMÈTRES, MATIÈRES & SYNCHRO MULTI-APPAREILS     -->
     <!-- ========================================================== -->
     <section id="view-settings" class="hidden max-w-2xl mx-auto space-y-6">
       <div class="card rounded-2xl p-6 space-y-5">
         <div>
           <h3 class="font-extrabold text-lg tracking-tight">Paramétrer mes Matières & Couleurs</h3>
-          <p class="text-xs mt-0.5" style="color: var(--text-muted);">Associe une couleur à chaque matière pour visualiser ta progression.</p>
+          <p class="text-xs mt-0.5" style="color: var(--text-muted);">Associe une couleur à chaque matière ou renomme tes matières existantes.</p>
         </div>
 
         <form onsubmit="addSubject(event)" class="p-4 rounded-2xl border space-y-4" style="background-color: var(--bg-main); border-color: var(--border-color);">
           <div>
-            <label class="block text-xs font-semibold mb-1.5" style="color: var(--text-muted);">Nom de la matière</label>
-            <input type="text" id="newSubjectInput" maxlength="40" placeholder="Ex: Anatomie, Biochimie, Biophysique..." required class="input-field w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none" />
+            <label class="block text-xs font-semibold mb-1.5" style="color: var(--text-muted);">Nom de la nouvelle matière</label>
+            <input type="text" id="newSubjectInput" maxlength="40" autocomplete="off" placeholder="Ex: Biochimie, Biologie Cellulaire, Biophysique..." required class="input-field w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none" />
           </div>
 
           <div class="flex flex-wrap items-center justify-between gap-4 pt-1">
@@ -734,7 +759,7 @@
               <div id="subjectPresetPalette" class="flex items-center gap-2.5"></div>
               <div class="h-5 w-[1px]" style="background-color: var(--border-color);"></div>
               <label class="relative flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-xs font-semibold cursor-pointer hover:opacity-85 transition" style="border-color: var(--border-color); background-color: var(--bg-input);">
-                <input type="color" id="newSubjectColorInput" value="#3b82f6" onchange="renderSettings()" class="w-5 h-5 rounded cursor-pointer bg-transparent border-0" />
+                <input type="color" id="newSubjectColorInput" value="#10b981" onchange="renderSettings()" class="w-5 h-5 rounded cursor-pointer bg-transparent border-0" />
                 <span>Autre</span>
               </label>
             </div>
@@ -743,6 +768,35 @@
         </form>
 
         <div class="space-y-2" id="subjectsListEditor"></div>
+      </div>
+
+      <!-- SYNCHRONISATION MULTI-APPAREILS (TÉLÉPHONE & TABLETTE) -->
+      <div class="card rounded-2xl p-6 space-y-4">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h3 class="font-extrabold text-lg tracking-tight">Synchronisation Téléphone & Tablette</h3>
+            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Synchronisation chiffrée via ton compte App Store (iCloud) / Play Store, ou via ta clé Cloud multi-appareils.</p>
+          </div>
+          <span id="settingsSyncBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex-shrink-0">🛡️ Protégé</span>
+        </div>
+
+        <div class="p-4 rounded-2xl border space-y-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span class="text-xs font-bold block">Identifiant de synchronisation Cloud</span>
+              <span class="text-[11px]" style="color: var(--text-muted);">Entre ce même code sur ta tablette pour partager tes données en temps réel</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="text" id="syncKeyInput" maxlength="24" autocomplete="off" spellcheck="false" placeholder="Code Synchro" class="input-field px-3 py-1.5 rounded-xl text-xs font-mono-timer font-bold w-36 text-center uppercase" />
+              <button type="button" onclick="applyCustomSyncKey()" class="theme-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold">Lier</button>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t flex flex-wrap items-center justify-between gap-2 text-[11px]" style="border-color: var(--border-color); color: var(--text-muted);">
+            <span id="lastSyncTimestampText">Dernière sauvegarde : à l'instant</span>
+            <button type="button" onclick="CloudSyncEngine.forceSyncNow()" class="font-bold underline hover:opacity-80" style="color: var(--text-main);">↻ Synchroniser maintenant</button>
+          </div>
+        </div>
       </div>
 
       <div class="card rounded-2xl p-6 space-y-4">
@@ -792,8 +846,8 @@
       </div>
       <div class="space-y-1">
         <span id="celebrationBadgePill" class="text-[11px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full bg-amber-400 text-black inline-block">Nouveau Badge Débloqué !</span>
-        <h3 id="celebrationBadgeTitle" class="text-2xl font-black pt-1">Rang Initié</h3>
-        <p id="celebrationBadgePeriod" class="text-xs font-bold text-amber-400">3 jours d'objectifs à 100 % d'affilée</p>
+        <h3 id="celebrationBadgeTitle" class="text-2xl font-black pt-1">Rang Apprenti</h3>
+        <p id="celebrationBadgePeriod" class="text-xs font-bold text-amber-400">1 jour d'objectifs à 100 %</p>
       </div>
       <p id="celebrationBadgeMessage" class="text-sm italic leading-relaxed px-2 py-3 rounded-2xl border" style="background-color: var(--bg-main); border-color: var(--border-color); color: var(--text-main);"></p>
       <button type="button" onclick="closeBadgeCelebrationModal()" class="w-full py-3 rounded-2xl font-extrabold text-sm bg-amber-400 text-black hover:opacity-90 transition shadow-lg">
@@ -857,33 +911,81 @@
   </nav>
 
   <script>
+    'use strict';
+
+    const STORAGE_KEY = 'focuspass_v4';
     const $ = id => document.getElementById(id);
-    const esc = str => String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-    const DAYS_SHORT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-    const DAYS_FULL = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-    const MAIN_5_COLORS = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
+    const esc = str => String(str ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 
-    const PRIORITIES = {
-      urgent:    { label: 'Urgent',    bg: 'rgba(239,68,68,0.14)', border: 'rgba(239,68,68,0.35)', text: '#f87171', order: 1, next: 'important' },
-      important: { label: 'Important', bg: 'rgba(245,158,11,0.14)', border: 'rgba(245,158,11,0.35)', text: '#fbbf24', order: 2, next: 'todo' },
-      todo:      { label: 'À faire',   bg: 'rgba(59,130,246,0.14)', border: 'rgba(59,130,246,0.35)', text: '#60a5fa', order: 3, next: 'urgent' }
-    };
+    // =========================================================================
+    // BOUCLIER DE SÉCURITÉ (SECURITY GUARD) : ANTI-XSS, ANTI-INJECTION & SANITIZATION
+    // =========================================================================
+    const SecurityGuard = Object.freeze({
+      // Supprime les caractères de contrôle, balises suspectes et limite la taille
+      cleanText(val, maxLen = 120) {
+        if (typeof val !== 'string') return '';
+        return val
+          .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+          .replace(/<[^>]*>?/gm, '')
+          .trim()
+          .slice(0, maxLen);
+      },
+      isValidHexColor(hex) {
+        return typeof hex === 'string' && /^#[0-9a-fA-F]{6}$/.test(hex);
+      },
+      cleanHexColor(hex, fallback = '#3b82f6') {
+        return this.isValidHexColor(hex) ? hex.toLowerCase() : fallback;
+      },
+      isValidDateKey(key) {
+        return typeof key === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(key);
+      },
+      cleanSyncKey(key) {
+        if (typeof key !== 'string') return '';
+        return key.toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 24);
+      },
+      clampNumber(num, min, max, fallback) {
+        const n = Number(num);
+        if (!Number.isFinite(n)) return fallback;
+        return Math.min(max, Math.max(min, n));
+      },
+      // Parse JSON en bloquant toute attaque par Prototype Pollution (__proto__, constructor, prototype)
+      safeJsonParse(rawStr) {
+        if (typeof rawStr !== 'string' || rawStr.length > 500000) return null;
+        try {
+          return JSON.parse(rawStr, (key, value) => {
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') return undefined;
+            return value;
+          });
+        } catch {
+          return null;
+        }
+      }
+    });
 
-    const STREAK_BADGES = [
-      { days: 1,    period: '1 jour',     title: 'Apprenti',    icon: '🌱', message: "Le plus dur, c'est de s'y mettre. Tu as fait le premier pas, c'est top !" },
-      { days: 3,    period: '3 jours',    title: 'Initié',      icon: '🔥', message: "Trois jours de suite ! Tu as compris le principe, ne casse surtout pas la chaîne." },
-      { days: 7,    period: '1 semaine',  title: 'Pratiquant',  icon: '⚡', message: "Une semaine complète ! Ce n'est plus un simple essai, ça commence à devenir une vraie habitude." },
-      { days: 14,   period: '2 semaines', title: 'Challenger',  icon: '🚀', message: "14 jours sans flancher. T'es une vraie machine, le processus est bien enclenché !" },
-      { days: 30,   period: '1 mois',     title: 'Adepte',      icon: '🏅', message: "Un mois entier ! 30 jours de discipline. Prends deux secondes pour apprécier le chemin parcouru." },
-      { days: 90,   period: '3 mois',     title: 'Spécialiste', icon: '💎', message: "Un trimestre au top. La motivation c'est bien, mais là c'est ta détermination qui parle." },
-      { days: 180,  period: '6 mois',     title: 'Expert',      icon: '🛡️', message: "Une demi-année ! Tu as un mental d'acier. Plus grand-chose ne peut t'arrêter maintenant." },
-      { days: 365,  period: '1 an',       title: 'Maître',      icon: '👑', message: "365 jours ! C'est monumental. Tu maîtrises ton sujet à la perfection." },
-      { days: 730,  period: '2 ans',      title: 'Sage',        icon: '🧙‍♂️', message: "Deux ans de régularité. À ce stade, c'est toi qui devrais donner des conseils aux autres !" },
-      { days: 1825, period: '5 ans',      title: 'Oracle',      icon: '🌌', message: "Cinq ans... Tu n'as pas juste adopté une habitude, tu as carrément changé de vie. Une vraie masterclass." },
-      { days: 3650, period: '10 ans',     title: 'Légende',     icon: '🏛️', message: "Une décennie complète. On n'a même plus les mots. Bienvenue au Panthéon !" }
-    ];
+    const DAYS_SHORT = Object.freeze(['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']);
+    const DAYS_FULL = Object.freeze(['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']);
+    const MAIN_5_COLORS = Object.freeze(['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899']);
 
-    // Notification Toast fluide
+    const PRIORITIES = Object.freeze({
+      urgent:    Object.freeze({ label: 'Urgent',    bg: 'rgba(239,68,68,0.14)', border: 'rgba(239,68,68,0.35)', text: '#f87171', order: 1, next: 'important' }),
+      important: Object.freeze({ label: 'Important', bg: 'rgba(245,158,11,0.14)', border: 'rgba(245,158,11,0.35)', text: '#fbbf24', order: 2, next: 'todo' }),
+      todo:      Object.freeze({ label: 'À faire',   bg: 'rgba(59,130,246,0.14)', border: 'rgba(59,130,246,0.35)', text: '#60a5fa', order: 3, next: 'urgent' })
+    });
+
+    const STREAK_BADGES = Object.freeze([
+      Object.freeze({ days: 1,    period: '1 jour',     title: 'Apprenti',    icon: '🌱', message: "Le plus dur, c'est de s'y mettre. Tu as fait le premier pas, c'est top !" }),
+      Object.freeze({ days: 3,    period: '3 jours',    title: 'Initié',      icon: '🔥', message: "Trois jours de suite ! Tu as compris le principe, ne casse surtout pas la chaîne." }),
+      Object.freeze({ days: 7,    period: '1 semaine',  title: 'Pratiquant',  icon: '⚡', message: "Une semaine complète ! Ce n'est plus un simple essai, ça commence à devenir une vraie habitude." }),
+      Object.freeze({ days: 14,   period: '2 semaines', title: 'Challenger',  icon: '🚀', message: "14 jours sans flancher. T'es une vraie machine, le processus est bien enclenché !" }),
+      Object.freeze({ days: 30,   period: '1 mois',     title: 'Adepte',      icon: '🏅', message: "Un mois entier ! 30 jours de discipline. Prends deux secondes pour apprécier le chemin parcouru." }),
+      Object.freeze({ days: 90,   period: '3 mois',     title: 'Spécialiste', icon: '💎', message: "Un trimestre au top. La motivation c'est bien, mais là c'est ta détermination qui parle." }),
+      Object.freeze({ days: 180,  period: '6 mois',     title: 'Expert',      icon: '🛡️', message: "Une demi-année ! Tu as un mental d'acier. Plus grand-chose ne peut t'arrêter maintenant." }),
+      Object.freeze({ days: 365,  period: '1 an',       title: 'Maître',      icon: '👑', message: "365 jours ! C'est monumental. Tu maîtrises ton sujet à la perfection." }),
+      Object.freeze({ days: 730,  period: '2 ans',      title: 'Sage',        icon: '🧙‍♂️', message: "Deux ans de régularité. À ce stade, c'est toi qui devrais donner des conseils aux autres !" }),
+      Object.freeze({ days: 1825, period: '5 ans',      title: 'Oracle',      icon: '🌌', message: "Cinq ans... Tu n'as pas juste adopté une habitude, tu as carrément changé de vie. Une vraie masterclass." }),
+      Object.freeze({ days: 3650, period: '10 ans',     title: 'Légende',     icon: '🏛️', message: "Une décennie complète. On n'a même plus les mots. Bienvenue au Panthéon !" })
+    ]);
+
     let toastTimer = null;
     function showToast(text, icon = '✨') {
       const t = $('appToast');
@@ -910,6 +1012,7 @@
     }
 
     function parseDateKey(key) {
+      if (!SecurityGuard.isValidDateKey(key)) return new Date();
       const [y, m, d] = key.split('-').map(Number);
       return new Date(y, m - 1, d, 12, 0, 0);
     }
@@ -974,116 +1077,294 @@
     }
 
     // =========================================================================
-    // ÉTAT PAR DÉFAUT & MIGRATION
+    // ÉTAT PAR DÉFAUT À LA PREMIÈRE OUVERTURE :
+    // 1 seule matière, 1 seule tâche non faite, 1 seul objectif non réalisé, 0h
     // =========================================================================
+    function generateDefaultSyncKey() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      const arr = new Uint8Array(6);
+      if (window.crypto?.getRandomValues) window.crypto.getRandomValues(arr);
+      else for (let i = 0; i < 6; i++) arr[i] = Math.floor(Math.random() * 256);
+      let code = 'FP-';
+      for (let i = 0; i < 6; i++) code += chars[arr[i] % chars.length];
+      return code;
+    }
+
     function createDefaultState() {
-      const curWeek = getWeekDateKeys(0);
-      const prevWeek = getWeekDateKeys(-1);
       const todayKey = getTodayKey();
-      const yesterdayKey = toDateKey(addDays(new Date(), -1));
-      const twoDaysAgoKey = toDateKey(addDays(new Date(), -2));
-
-      const pastCompletedDays = [prevWeek[0], prevWeek[2], prevWeek[4], twoDaysAgoKey, yesterdayKey];
-
       return {
+        updatedAt: Date.now(),
+        syncKey: generateDefaultSyncKey(),
         theme: 'oled',
         dailyGoalHours: 7,
         subjects: [
-          { name: 'Anatomie', color: '#3b82f6' },
-          { name: 'Biochimie', color: '#10b981' },
-          { name: 'Biologie Cellulaire', color: '#8b5cf6' },
-          { name: 'Biophysique', color: '#f59e0b' },
-          { name: 'Colles & Annales', color: '#ec4899' }
+          { name: 'Anatomie', color: '#3b82f6' }
         ],
         tasks: [
-          { id: 10, date: prevWeek[0], title: 'Ostéologie du membre supérieur', subject: 'Anatomie', priority: 'important', done: true },
-          { id: 11, date: prevWeek[1], title: 'Structure des glucides & lipides', subject: 'Biochimie', priority: 'todo', done: true },
-          { id: 12, date: prevWeek[3], title: 'Annales biophysique des solutions', subject: 'Biophysique', priority: 'urgent', done: true },
-          { id: 13, date: prevWeek[4], title: 'Colle blanche n°2', subject: 'Colles & Annales', priority: 'urgent', done: true },
-          { id: 1, date: curWeek[0], title: 'Cours ostéologie & colonne vertébrale', subject: 'Anatomie', priority: 'important', done: true },
-          { id: 2, date: curWeek[0], title: 'QCM Acides aminés et protéines', subject: 'Biochimie', priority: 'todo', done: true },
-          { id: 3, date: curWeek[1], title: 'Réticulum endoplasmique et appareil de Golgi', subject: 'Biologie Cellulaire', priority: 'urgent', done: true },
-          { id: 4, date: curWeek[1], title: 'Annales thermodynamique', subject: 'Biophysique', priority: 'important', done: false },
-          { id: 5, date: curWeek[2], title: 'Schémas coupe sagittale du médiastin', subject: 'Anatomie', priority: 'urgent', done: true },
-          { id: 6, date: curWeek[2], title: 'Préparation colle de la semaine', subject: 'Colles & Annales', priority: 'urgent', done: false },
-          { id: 7, date: todayKey, title: 'Revoir le diaphragme et ses différents hiatus', subject: 'Anatomie', priority: 'urgent', done: false },
-          { id: 8, date: todayKey, title: 'Série de QCM sur les protéines motrices', subject: 'Biologie Cellulaire', priority: 'important', done: false },
-          { id: 9, date: todayKey, title: 'Fiche de synthèse enzymologie', subject: 'Biochimie', priority: 'todo', done: true }
+          { id: 1, date: todayKey, title: 'Réviser mon premier cours', subject: 'Anatomie', priority: 'important', done: false }
         ],
         goals: [
-          { id: 201, title: '8h de sommeil', completedDates: [...new Set([...pastCompletedDays, todayKey, prevWeek[1], prevWeek[5]])] },
-          { id: 202, title: 'Repas sans écran', completedDates: [...new Set([...pastCompletedDays, todayKey, prevWeek[3]])] },
-          { id: 203, title: 'Boire 1,5L d’eau', completedDates: [...new Set([...pastCompletedDays, todayKey, prevWeek[1], prevWeek[6]])] },
-          { id: 204, title: 'Pause 20 min sans téléphone', completedDates: [...new Set([...pastCompletedDays])] }
+          { id: 201, title: '8h de sommeil', completedDates: [] }
         ],
-        sessions: [
-          { id: 90, date: prevWeek[0], subject: 'Anatomie', minutes: 190, time: '08:30' },
-          { id: 91, date: prevWeek[0], subject: 'Biochimie', minutes: 140, time: '14:00' },
-          { id: 92, date: prevWeek[1], subject: 'Biologie Cellulaire', minutes: 180, time: '09:00' },
-          { id: 93, date: prevWeek[1], subject: 'Biophysique', minutes: 160, time: '14:30' },
-          { id: 94, date: prevWeek[2], subject: 'Anatomie', minutes: 210, time: '08:15' },
-          { id: 95, date: prevWeek[3], subject: 'Biochimie', minutes: 175, time: '09:00' },
-          { id: 96, date: prevWeek[3], subject: 'Colles & Annales', minutes: 120, time: '15:00' },
-          { id: 97, date: prevWeek[4], subject: 'Biologie Cellulaire', minutes: 200, time: '08:30' },
-          { id: 98, date: prevWeek[4], subject: 'Biophysique', minutes: 130, time: '14:00' },
-          { id: 99, date: prevWeek[5], subject: 'Colles & Annales', minutes: 180, time: '09:30' },
-          { id: 101, date: curWeek[0], subject: 'Anatomie', minutes: 180, time: '08:30' },
-          { id: 102, date: curWeek[0], subject: 'Biochimie', minutes: 150, time: '14:00' },
-          { id: 103, date: curWeek[0], subject: 'Colles & Annales', minutes: 90, time: '17:30' },
-          { id: 104, date: curWeek[1], subject: 'Biologie Cellulaire', minutes: 210, time: '08:00' },
-          { id: 105, date: curWeek[1], subject: 'Biophysique', minutes: 150, time: '13:30' },
-          { id: 106, date: curWeek[1], subject: 'Anatomie', minutes: 90, time: '17:00' },
-          { id: 107, date: curWeek[2], subject: 'Anatomie', minutes: 160, time: '09:00' },
-          { id: 108, date: curWeek[2], subject: 'Biochimie', minutes: 120, time: '14:00' },
-          { id: 109, date: curWeek[2], subject: 'Colles & Annales', minutes: 110, time: '16:30' },
-          { id: 110, date: todayKey, subject: 'Anatomie', minutes: 120, time: '09:00' },
-          { id: 111, date: todayKey, subject: 'Biologie Cellulaire', minutes: 95, time: '14:15' },
-          { id: 112, date: todayKey, subject: 'Biochimie', minutes: 60, time: '16:10' }
-        ]
+        sessions: []
       };
     }
 
+    // Validation & nettoyage complet d'un état chargé (depuis localStorage ou Cloud)
     function migrateLoadedState(s) {
-      if (!s || !Array.isArray(s.subjects)) return createDefaultState();
-      const curWeek = getWeekDateKeys(0);
-
-      if (Array.isArray(s.sessions)) {
-        s.sessions.forEach(sess => {
-          if (!sess.date) sess.date = curWeek[sess.dayIndex ?? 0] || getTodayKey();
-        });
-      } else s.sessions = [];
-
-      if (Array.isArray(s.tasks)) {
-        s.tasks.forEach(t => {
-          if (!t.date) t.date = curWeek[t.dayIndex ?? 0] || getTodayKey();
-          if (!PRIORITIES[t.priority]) t.priority = 'todo';
-        });
-      } else s.tasks = [];
-
-      if (Array.isArray(s.goals)) {
-        s.goals.forEach(g => {
-          if (!Array.isArray(g.completedDates)) {
-            g.completedDates = Array.isArray(g.completedDays)
-              ? g.completedDays.map(idx => curWeek[idx]).filter(Boolean)
-              : [];
-            delete g.completedDays;
-          }
-        });
-      } else {
-        s.goals = createDefaultState().goals;
+      if (!s || typeof s !== 'object' || !Array.isArray(s.subjects) || s.subjects.length === 0) {
+        return createDefaultState();
       }
-      return s;
+      const curWeek = getWeekDateKeys(0);
+      const todayKey = getTodayKey();
+
+      const cleanSubjects = s.subjects
+        .slice(0, 30)
+        .map(sub => ({
+          name: SecurityGuard.cleanText(sub?.name, 40) || 'Anatomie',
+          color: SecurityGuard.cleanHexColor(sub?.color, '#3b82f6')
+        }));
+      if (cleanSubjects.length === 0) cleanSubjects.push({ name: 'Anatomie', color: '#3b82f6' });
+      const defaultSubj = cleanSubjects[0].name;
+
+      const cleanTasks = Array.isArray(s.tasks)
+        ? s.tasks.slice(0, 500).map((t, idx) => {
+            const dKey = SecurityGuard.isValidDateKey(t?.date) ? t.date : (curWeek[t?.dayIndex ?? 0] || todayKey);
+            const title = SecurityGuard.cleanText(t?.title, 120);
+            if (!title) return null;
+            return {
+              id: Number(t?.id) || (Date.now() + idx),
+              date: dKey,
+              title,
+              subject: SecurityGuard.cleanText(t?.subject, 40) || defaultSubj,
+              priority: PRIORITIES[t?.priority] ? t.priority : 'todo',
+              done: Boolean(t?.done)
+            };
+          }).filter(Boolean)
+        : [];
+
+      const cleanGoals = Array.isArray(s.goals)
+        ? s.goals.slice(0, 60).map((g, idx) => {
+            const title = SecurityGuard.cleanText(g?.title, 60);
+            if (!title) return null;
+            const rawDates = Array.isArray(g?.completedDates)
+              ? g.completedDates
+              : (Array.isArray(g?.completedDays) ? g.completedDays.map(i => curWeek[i]) : []);
+            const validDates = [...new Set(rawDates.filter(d => SecurityGuard.isValidDateKey(d)))];
+            return {
+              id: Number(g?.id) || (Date.now() + idx),
+              title,
+              completedDates: validDates
+            };
+          }).filter(Boolean)
+        : createDefaultState().goals;
+
+      const cleanSessions = Array.isArray(s.sessions)
+        ? s.sessions.slice(0, 1000).map((sess, idx) => {
+            const dKey = SecurityGuard.isValidDateKey(sess?.date) ? sess.date : (curWeek[sess?.dayIndex ?? 0] || todayKey);
+            return {
+              id: Number(sess?.id) || (Date.now() + idx),
+              date: dKey,
+              subject: SecurityGuard.cleanText(sess?.subject, 40) || defaultSubj,
+              minutes: SecurityGuard.clampNumber(sess?.minutes, 1, 1440, 30),
+              time: SecurityGuard.cleanText(sess?.time, 10) || '12:00'
+            };
+          })
+        : [];
+
+      return {
+        updatedAt: SecurityGuard.clampNumber(s.updatedAt, 0, Date.now() + 86400000, Date.now()),
+        syncKey: SecurityGuard.cleanSyncKey(s.syncKey) || generateDefaultSyncKey(),
+        theme: ['oled', 'dark', 'light'].includes(s.theme) ? s.theme : 'oled',
+        dailyGoalHours: SecurityGuard.clampNumber(s.dailyGoalHours, 1, 14, 7),
+        subjects: cleanSubjects,
+        tasks: cleanTasks,
+        goals: cleanGoals,
+        sessions: cleanSessions
+      };
     }
 
     let state = (() => {
       try {
-        const raw = JSON.parse(localStorage.getItem('focuspass_v3'));
+        const raw = SecurityGuard.safeJsonParse(localStorage.getItem(STORAGE_KEY));
         return raw ? migrateLoadedState(raw) : createDefaultState();
       } catch { return createDefaultState(); }
     })();
     if (state.subjects.length) currentTimerSubject = state.subjects[0].name;
 
-    const saveState = () => localStorage.setItem('focuspass_v3', JSON.stringify(state));
+    // =========================================================================
+    // MOTEUR DE SYNCHRONISATION SÉCURISÉ (APP STORE iCloud / PLAY STORE / CLOUD)
+    // =========================================================================
+    const CloudSyncEngine = {
+      cloudEndpoint: null,
+      broadcastChannel: ('BroadcastChannel' in window) ? new BroadcastChannel('focuspass_sync_channel') : null,
+      lastPushTime: 0,
+
+      init() {
+        if (this.broadcastChannel) {
+          this.broadcastChannel.onmessage = ev => {
+            if (ev.data && typeof ev.data === 'object' && ev.data.updatedAt > (state.updatedAt || 0)) {
+              this.applyRemoteState(ev.data, false);
+            }
+          };
+        }
+
+        window.addEventListener('storage', ev => {
+          if (ev.key === STORAGE_KEY && ev.newValue) {
+            const incoming = SecurityGuard.safeJsonParse(ev.newValue);
+            if (incoming && incoming.updatedAt > (state.updatedAt || 0)) {
+              this.applyRemoteState(incoming, false);
+            }
+          }
+        });
+
+        window.addEventListener('focuspassNativeCloudUpdate', ev => {
+          const incoming = ev.detail;
+          if (incoming && incoming.updatedAt > (state.updatedAt || 0)) {
+            this.applyRemoteState(incoming, true);
+          }
+        });
+
+        window.onNativeCloudStateReceived = jsonPayload => {
+          const incoming = typeof jsonPayload === 'string' ? SecurityGuard.safeJsonParse(jsonPayload) : jsonPayload;
+          if (incoming && incoming.updatedAt > (state.updatedAt || 0)) {
+            this.applyRemoteState(incoming, true);
+          }
+        };
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            this.pullFromCloud(false);
+          }
+        });
+
+        this.pullFromCloud(false);
+      },
+
+      setStatusUI(statusText, isSyncing = false) {
+        const dot = $('cloudStatusDot');
+        const label = $('cloudStatusLabel');
+        const badge = $('settingsSyncBadge');
+        const tsText = $('lastSyncTimestampText');
+        if (dot) {
+          dot.className = `w-2 h-2 rounded-full ${isSyncing ? 'bg-amber-400 animate-ping' : 'bg-emerald-400'}`;
+        }
+        if (label) label.textContent = statusText;
+        if (badge) badge.textContent = isSyncing ? '↻ Synchro...' : '🛡️ Protégé & Synchro';
+        if (tsText) {
+          const timeStr = new Date(state.updatedAt || Date.now()).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+          tsText.textContent = `Dernière sauvegarde vérifiée : ${timeStr}`;
+        }
+      },
+
+      applyRemoteState(incomingRaw, notifyUser = false) {
+        state = migrateLoadedState(incomingRaw);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        applyTheme();
+        renderAll();
+        this.setStatusUI('Protégé & Synchro', false);
+        if (notifyUser) showToast('Données synchronisées depuis ton autre appareil', '☁️');
+      },
+
+      async pushToCloud() {
+        const now = Date.now();
+        if (now - this.lastPushTime < 150) return; // Anti-spam / Rate-limiting
+        this.lastPushTime = now;
+
+        this.setStatusUI('Synchro...', true);
+        const payloadStr = JSON.stringify(state);
+
+        try { this.broadcastChannel?.postMessage(state); } catch {}
+
+        try {
+          if (window.webkit?.messageHandlers?.icloudSync) {
+            window.webkit.messageHandlers.icloudSync.postMessage({ action: 'save', key: STORAGE_KEY, data: payloadStr });
+          }
+        } catch {}
+
+        try {
+          if (window.AndroidCloudSync?.saveState) {
+            window.AndroidCloudSync.saveState(STORAGE_KEY, payloadStr);
+          }
+          if (window.Capacitor?.Plugins?.CloudSettings) {
+            await window.Capacitor.Plugins.CloudSettings.set({ key: STORAGE_KEY, value: payloadStr });
+          }
+        } catch {}
+
+        const safeKey = SecurityGuard.cleanSyncKey(state.syncKey);
+        if (this.cloudEndpoint && safeKey.length >= 4) {
+          try {
+            await fetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(safeKey)}.json`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: payloadStr
+            });
+          } catch {}
+        }
+
+        setTimeout(() => this.setStatusUI('Protégé & Synchro', false), 280);
+      },
+
+      async pullFromCloud(notify = false) {
+        try {
+          if (window.webkit?.messageHandlers?.icloudSync) {
+            window.webkit.messageHandlers.icloudSync.postMessage({ action: 'load', key: STORAGE_KEY });
+          }
+          if (window.AndroidCloudSync?.loadState) {
+            const nativeData = window.AndroidCloudSync.loadState(STORAGE_KEY);
+            if (nativeData) window.onNativeCloudStateReceived(nativeData);
+          }
+          if (window.Capacitor?.Plugins?.CloudSettings) {
+            const res = await window.Capacitor.Plugins.CloudSettings.get({ key: STORAGE_KEY });
+            if (res?.value) window.onNativeCloudStateReceived(res.value);
+          }
+        } catch {}
+
+        const safeKey = SecurityGuard.cleanSyncKey(state.syncKey);
+        if (this.cloudEndpoint && safeKey.length >= 4) {
+          try {
+            const resp = await fetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(safeKey)}.json`);
+            if (resp.ok) {
+              const rawText = await resp.text();
+              const remote = SecurityGuard.safeJsonParse(rawText);
+              if (remote && remote.updatedAt > (state.updatedAt || 0)) {
+                this.applyRemoteState(remote, true);
+                return;
+              }
+            }
+          } catch {}
+        }
+
+        this.setStatusUI('Protégé & Synchro', false);
+        if (notify) showToast('Appareils synchronisés et vérifiés', '🛡️');
+      },
+
+      forceSyncNow() {
+        this.pushToCloud();
+        this.pullFromCloud(true);
+      }
+    };
+
+    function saveState() {
+      state.updatedAt = Date.now();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      CloudSyncEngine.pushToCloud();
+    }
+
+    function applyCustomSyncKey() {
+      const input = $('syncKeyInput');
+      const val = SecurityGuard.cleanSyncKey(input?.value || '');
+      if (!val || val.length < 4) {
+        showToast('Entre un code alphanumérique d\'au moins 4 caractères', '⚠️');
+        return;
+      }
+      state.syncKey = val;
+      if (input) input.value = val;
+      saveState();
+      CloudSyncEngine.forceSyncNow();
+      showToast(`Code Cloud "${val}" sécurisé et lié`, '🔗');
+    }
+
     const getSubjectColor = name => state.subjects.find(s => s.name === name)?.color || '#3b82f6';
     const getDateTotalMinutes = dateKey => state.sessions.filter(s => s.date === dateKey).reduce((a, s) => a + s.minutes, 0);
     const formatMinutes = m => `${Math.floor(m / 60)}h ${String(Math.round(m % 60)).padStart(2, '0')}m`;
@@ -1312,8 +1593,9 @@
     }
 
     function updateNoiseVolume(val) {
-      noiseVolume = Math.max(0, Math.min(1, parseInt(val, 10) / 100));
-      $('noiseVolumeLabel').textContent = `${val}%`;
+      const cleanVal = SecurityGuard.clampNumber(val, 0, 100, 35);
+      noiseVolume = cleanVal / 100;
+      $('noiseVolumeLabel').textContent = `${cleanVal}%`;
       if (activeGainNode && audioCtx) activeGainNode.gain.setTargetAtTime(noiseVolume, audioCtx.currentTime, 0.05);
     }
 
@@ -1332,6 +1614,7 @@
     }
 
     function setTheme(themeName) {
+      if (!['oled', 'dark', 'light'].includes(themeName)) return;
       state.theme = themeName;
       saveState();
       applyTheme();
@@ -1339,8 +1622,12 @@
       showToast('Thème mis à jour', '🎨');
     }
 
-    function updateDailyGoal(val) { state.dailyGoalHours = parseFloat(val); saveState(); renderAll(); }
-    function selectDay(dayIdx) { selectedDayIndex = dayIdx; renderAll(); }
+    function updateDailyGoal(val) {
+      state.dailyGoalHours = SecurityGuard.clampNumber(val, 1, 14, 7);
+      saveState();
+      renderAll();
+    }
+    function selectDay(dayIdx) { selectedDayIndex = SecurityGuard.clampNumber(dayIdx, 0, 6, 0); renderAll(); }
     function setPriorityFilter(filter) { currentPriorityFilter = filter; renderDashboardTasks(); }
 
     function changeStatsWeek(delta) {
@@ -1392,8 +1679,12 @@
       if (!state.subjects.some(s => s.name === currentTimerSubject) && state.subjects.length) {
         currentTimerSubject = state.subjects[0].name;
       }
+      const activeColor = getSubjectColor(currentTimerSubject);
       $('timerSubjectLabel').textContent = currentTimerSubject;
-      $('timerSubjectDot').style.backgroundColor = getSubjectColor(currentTimerSubject);
+      $('timerSubjectDot').style.backgroundColor = activeColor;
+      if ($('timerSubjectAmbientGlow')) {
+        $('timerSubjectAmbientGlow').style.backgroundColor = activeColor;
+      }
 
       $('customSubjectDropdownMenu').innerHTML = state.subjects.map((s, idx) => {
         const sel = s.name === currentTimerSubject;
@@ -1473,7 +1764,8 @@
     // =========================================================================
     function renderPriorityBadge(task, clickable = true) {
       const p = PRIORITIES[task.priority] || PRIORITIES.todo;
-      return `<button type="button" ${clickable ? `onclick="event.preventDefault(); cycleTaskPriority(${task.id})" title="Cliquer pour changer la priorité"` : ''}
+      const safeId = Number(task.id) || 0;
+      return `<button type="button" ${clickable ? `onclick="event.preventDefault(); cycleTaskPriority(${safeId})" title="Cliquer pour changer la priorité"` : ''}
         class="text-[11px] px-2.5 py-0.5 rounded-full font-bold w-fit transition hover:opacity-80"
         style="background-color:${p.bg};color:${p.text};border:1px solid ${p.border};">
         ${p.label}
@@ -1482,9 +1774,10 @@
 
     function renderOverdueTaskItem(t) {
       const c = esc(getSubjectColor(t.subject));
+      const safeId = Number(t.id) || 0;
       return `<div class="task-row flex items-center justify-between p-3 rounded-xl gap-2" style="border-color:rgba(239,68,68,0.28);">
         <label class="flex items-center gap-3 cursor-pointer flex-1">
-          <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${t.id})" class="w-5 h-5 rounded cursor-pointer accent-red-500 flex-shrink-0" />
+          <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${safeId})" class="w-5 h-5 rounded cursor-pointer accent-red-500 flex-shrink-0" />
           <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 flex-wrap">
             <span class="text-sm font-medium ${t.done ? 'line-through opacity-45' : ''}">${esc(t.title)}</span>
             <div class="flex items-center gap-1.5 flex-wrap">
@@ -1499,10 +1792,10 @@
           </div>
         </label>
         <div class="flex items-center gap-1.5 flex-shrink-0">
-          <button type="button" onclick="moveTaskToToday(${t.id})" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition" title="Déplacer cette tâche à aujourd'hui">
+          <button type="button" onclick="moveTaskToToday(${safeId})" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition" title="Déplacer cette tâche à aujourd'hui">
             ↪ Aujourd'hui
           </button>
-          <button type="button" onclick="deleteTask(${t.id})" class="text-xs opacity-50 hover:opacity-100 hover:text-red-400 p-1" title="Supprimer">✕</button>
+          <button type="button" onclick="deleteTask(${safeId})" class="text-xs opacity-50 hover:opacity-100 hover:text-red-400 p-1" title="Supprimer">✕</button>
         </div>
       </div>`;
     }
@@ -1573,9 +1866,10 @@
         ? `<div class="text-center py-8 text-sm" style="color:var(--text-muted);">Aucune tâche dans cette catégorie pour ${DAYS_FULL[selectedDayIndex]} (${formatShortDate(curWeekDates[selectedDayIndex])}).</div>`
         : sortedTasks.map(t => {
             const c = esc(getSubjectColor(t.subject));
+            const safeId = Number(t.id) || 0;
             return `<div class="task-row flex items-center justify-between p-3.5 rounded-xl gap-2">
               <label class="flex items-center gap-3 cursor-pointer flex-1">
-                <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${t.id})" class="w-5 h-5 rounded cursor-pointer accent-current flex-shrink-0" />
+                <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${safeId})" class="w-5 h-5 rounded cursor-pointer accent-current flex-shrink-0" />
                 <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 flex-wrap">
                   <span class="text-sm font-medium ${t.done ? 'line-through opacity-45' : ''}">${esc(t.title)}</span>
                   <div class="flex items-center gap-1.5 flex-wrap">
@@ -1586,7 +1880,7 @@
                   </div>
                 </div>
               </label>
-              <button onclick="deleteTask(${t.id})" class="text-xs opacity-50 hover:opacity-100 hover:text-red-400 p-1">✕</button>
+              <button onclick="deleteTask(${safeId})" class="text-xs opacity-50 hover:opacity-100 hover:text-red-400 p-1">✕</button>
             </div>`;
           }).join('');
     }
@@ -1623,14 +1917,16 @@
 
     function addTask(e) {
       e.preventDefault();
-      const input = $('newTaskInput'), title = input.value.trim();
+      const input = $('newTaskInput');
+      const title = SecurityGuard.cleanText(input.value, 120);
       if (!title) return;
+      const prio = $('newTaskPriority').value;
       state.tasks.push({
         id: Date.now(),
         date: getDashboardDateKey(),
         title,
-        subject: $('newTaskSubject').value,
-        priority: $('newTaskPriority').value || 'todo',
+        subject: SecurityGuard.cleanText($('newTaskSubject').value, 40) || state.subjects[0].name,
+        priority: PRIORITIES[prio] ? prio : 'todo',
         done: false
       });
       input.value = '';
@@ -1682,19 +1978,21 @@
         ? `<p class="text-xs py-4 text-center" style="color:var(--text-muted);">Aucun objectif quotidien défini. Ajoutes-en un ci-dessous !</p>`
         : state.goals.map(g => {
             const isChecked = Array.isArray(g.completedDates) && g.completedDates.includes(activeDateKey);
+            const safeId = Number(g.id) || 0;
             return `<div class="task-row flex items-center justify-between p-3 rounded-xl transition ${isEditable ? '' : 'opacity-50'}">
               <label class="flex items-center gap-3 ${isEditable ? 'cursor-pointer' : 'cursor-not-allowed'} flex-1">
-                <input type="checkbox" ${isChecked ? 'checked' : ''} ${isEditable ? '' : 'disabled'} onchange="toggleDailyGoalByDate(${g.id}, '${activeDateKey}')" class="w-4 h-4 rounded ${isEditable ? 'cursor-pointer' : 'cursor-not-allowed'} accent-emerald-500 flex-shrink-0" />
+                <input type="checkbox" ${isChecked ? 'checked' : ''} ${isEditable ? '' : 'disabled'} onchange="toggleDailyGoalByDate(${safeId}, '${esc(activeDateKey)}')" class="w-4 h-4 rounded ${isEditable ? 'cursor-pointer' : 'cursor-not-allowed'} accent-emerald-500 flex-shrink-0" />
                 <span class="text-xs font-semibold ${isChecked ? 'line-through opacity-50' : ''}">${esc(g.title)}</span>
               </label>
-              <button onclick="deleteDailyGoal(${g.id})" class="text-xs opacity-40 hover:opacity-100 hover:text-red-400 px-1" title="Supprimer cet objectif">✕</button>
+              <button onclick="deleteDailyGoal(${safeId})" class="text-xs opacity-40 hover:opacity-100 hover:text-red-400 px-1" title="Supprimer cet objectif">✕</button>
             </div>`;
           }).join('');
     }
 
     function addDailyGoal(e) {
       e.preventDefault();
-      const input = $('newGoalInput'), title = input.value.trim();
+      const input = $('newGoalInput');
+      const title = SecurityGuard.cleanText(input.value, 60);
       if (!title) return;
       state.goals.push({ id: Date.now(), title, completedDates: [] });
       input.value = '';
@@ -1704,7 +2002,7 @@
     }
 
     function toggleDailyGoalByDate(goalId, dateKey) {
-      if (!isGoalDateEditable(dateKey)) return;
+      if (!SecurityGuard.isValidDateKey(dateKey) || !isGoalDateEditable(dateKey)) return;
 
       const g = state.goals.find(x => x.id === goalId);
       if (!g) return;
@@ -1808,10 +2106,13 @@
       const daySessions = state.sessions.filter(s => s.date === selectedDateKey);
       $('inspectorSessionsList').innerHTML = daySessions.length === 0
         ? `<p class="text-xs" style="color:var(--text-muted);">Aucune session enregistrée ce jour.</p>`
-        : daySessions.map(s => `<div class="flex items-center justify-between px-3 py-2 rounded-xl border text-xs" style="background-color:var(--bg-main);border-color:var(--border-color);">
-            <div class="flex items-center gap-2"><span class="font-mono-timer opacity-60">${esc(s.time)}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color:${esc(getSubjectColor(s.subject))};"></span><span class="font-semibold">${esc(s.subject)}</span></div>
-            <div class="flex items-center gap-3"><span class="font-mono-timer font-bold">+ ${formatMinutes(s.minutes)}</span><button onclick="deleteSession(${s.id})" class="opacity-40 hover:opacity-100 hover:text-red-400">✕</button></div>
-          </div>`).join('');
+        : daySessions.map(s => {
+            const safeId = Number(s.id) || 0;
+            return `<div class="flex items-center justify-between px-3 py-2 rounded-xl border text-xs" style="background-color:var(--bg-main);border-color:var(--border-color);">
+              <div class="flex items-center gap-2"><span class="font-mono-timer opacity-60">${esc(s.time)}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color:${esc(getSubjectColor(s.subject))};"></span><span class="font-semibold">${esc(s.subject)}</span></div>
+              <div class="flex items-center gap-3"><span class="font-mono-timer font-bold">+ ${formatMinutes(s.minutes)}</span><button onclick="deleteSession(${safeId})" class="opacity-40 hover:opacity-100 hover:text-red-400">✕</button></div>
+            </div>`;
+          }).join('');
 
       const dayTasks = sortTasksByPriority(state.tasks.filter(t => t.date === selectedDateKey));
       $('inspectorTasksBadge').textContent = `${dayTasks.filter(t => t.done).length}/${dayTasks.length} faites`;
@@ -1819,8 +2120,9 @@
         ? `<p class="text-xs py-3" style="color:var(--text-muted);">Aucune tâche notée pour ce jour.</p>`
         : dayTasks.map(t => {
             const c = esc(getSubjectColor(t.subject));
+            const safeId = Number(t.id) || 0;
             return `<div class="flex items-center justify-between p-3 rounded-xl border gap-2" style="background-color:var(--bg-main);border-color:var(--border-color);">
-              <label class="flex items-center gap-2.5 cursor-pointer flex-1"><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${t.id})" class="w-4 h-4 rounded cursor-pointer" /><span class="text-xs font-medium ${t.done ? 'line-through opacity-50' : ''}">${esc(t.title)}</span></label>
+              <label class="flex items-center gap-2.5 cursor-pointer flex-1"><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${safeId})" class="w-4 h-4 rounded cursor-pointer" /><span class="text-xs font-medium ${t.done ? 'line-through opacity-50' : ''}">${esc(t.title)}</span></label>
               <div class="flex items-center gap-1.5 flex-shrink-0">
                 ${renderPriorityBadge(t, true)}
                 <span class="text-[10px] px-2 py-0.5 rounded-full font-bold" style="background-color:${c}22;color:${c};">${esc(t.subject)}</span>
@@ -1834,9 +2136,10 @@
         ? `<p class="text-xs py-2" style="color:var(--text-muted);">Aucun objectif quotidien configuré.</p>`
         : state.goals.map(g => {
             const isChecked = g.completedDates?.includes(selectedDateKey);
+            const safeId = Number(g.id) || 0;
             return `<div class="flex items-center justify-between p-2.5 rounded-xl border ${isSelectedEditable ? '' : 'opacity-55'}" style="background-color:var(--bg-main);border-color:var(--border-color);">
               <label class="flex items-center gap-2.5 ${isSelectedEditable ? 'cursor-pointer' : 'cursor-not-allowed'} flex-1">
-                <input type="checkbox" ${isChecked ? 'checked' : ''} ${isSelectedEditable ? '' : 'disabled'} onchange="toggleDailyGoalByDate(${g.id}, '${selectedDateKey}')" class="w-4 h-4 rounded ${isSelectedEditable ? 'cursor-pointer' : 'cursor-not-allowed'} accent-emerald-500" />
+                <input type="checkbox" ${isChecked ? 'checked' : ''} ${isSelectedEditable ? '' : 'disabled'} onchange="toggleDailyGoalByDate(${safeId}, '${esc(selectedDateKey)}')" class="w-4 h-4 rounded ${isSelectedEditable ? 'cursor-pointer' : 'cursor-not-allowed'} accent-emerald-500" />
                 <span class="text-xs font-medium ${isChecked ? 'line-through opacity-50' : ''}">${esc(g.title)}</span>
               </label>
               <span class="text-[10px] font-bold ${isChecked ? 'text-emerald-400' : 'opacity-40'}">${isChecked ? '✓ Atteint' : (isSelectedEditable ? 'Non coché' : '🔒 Verrouillé')}</span>
@@ -1887,13 +2190,14 @@
 
       $('weeklyGoalsTableBody').innerHTML = state.goals.map(g => {
         let rowCount = 0;
+        const safeId = Number(g.id) || 0;
         const cells = weekDateKeys.map(k => {
           const done = Array.isArray(g.completedDates) && g.completedDates.includes(k);
           const editable = isGoalDateEditable(k);
           if (done) rowCount++;
 
           return `<td class="py-2.5 px-2 text-center">
-            <button type="button" ${editable ? `onclick="toggleDailyGoalByDate(${g.id}, '${k}')"` : 'disabled title="Verrouillé : seuls le jour J et les 2 jours précédents sont modifiables"'}
+            <button type="button" ${editable ? `onclick="toggleDailyGoalByDate(${safeId}, '${esc(k)}')"` : 'disabled title="Verrouillé : seuls le jour J et les 2 jours précédents sont modifiables"'}
               class="w-6 h-6 rounded-lg inline-flex items-center justify-center font-bold transition ${
                 done
                   ? (editable ? 'bg-emerald-500 text-black shadow-sm hover:scale-105' : 'bg-emerald-500/40 text-black/80 cursor-not-allowed')
@@ -1999,10 +2303,11 @@
 
     function setTimerMode(mode) {
       if (timerRunning) toggleTimer();
-      timerMode = mode; elapsedSeconds = 0; timerBaseElapsed = 0;
-      $('seg-countdown').classList.toggle('active', mode === 'countdown');
-      $('seg-countup').classList.toggle('active', mode === 'countup');
-      ['h', 'm', 's'].forEach(u => $(`wheel-${u}`)?.classList.toggle('wheel-interactive', mode === 'countdown'));
+      timerMode = mode === 'countdown' ? 'countdown' : 'countup';
+      elapsedSeconds = 0; timerBaseElapsed = 0;
+      $('seg-countdown').classList.toggle('active', timerMode === 'countdown');
+      $('seg-countup').classList.toggle('active', timerMode === 'countup');
+      ['h', 'm', 's'].forEach(u => $(`wheel-${u}`)?.classList.toggle('wheel-interactive', timerMode === 'countdown'));
       updateFlipClockDisplay();
     }
 
@@ -2111,7 +2416,7 @@
         showToast("Session trop courte (< 10s). Utilise l'ajout manuel !", '⏱️');
         return;
       }
-      const addedMin = Math.max(1, Math.round(elapsedSeconds / 60));
+      const addedMin = SecurityGuard.clampNumber(Math.round(elapsedSeconds / 60), 1, 1440, 1);
       state.sessions.unshift({
         id: Date.now(),
         date: getTodayKey(),
@@ -2168,16 +2473,19 @@
     }
 
     function openManualTimeModal(dateKey) {
-      $('manualDateInput').value = dateKey || getTodayKey();
+      $('manualDateInput').value = SecurityGuard.isValidDateKey(dateKey) ? dateKey : getTodayKey();
       $('manualTimeModal').classList.remove('hidden');
     }
 
     function submitManualTime(e) {
       e.preventDefault();
-      const dateKey = $('manualDateInput').value || getTodayKey();
-      const totalMin = (parseInt($('manualHoursInput').value, 10) || 0) * 60 + (parseInt($('manualMinutesInput').value, 10) || 0);
+      const rawDate = $('manualDateInput').value;
+      const dateKey = SecurityGuard.isValidDateKey(rawDate) ? rawDate : getTodayKey();
+      const h = SecurityGuard.clampNumber($('manualHoursInput').value, 0, 15, 0);
+      const m = SecurityGuard.clampNumber($('manualMinutesInput').value, 0, 59, 0);
+      const totalMin = h * 60 + m;
       if (totalMin <= 0) return;
-      const subj = $('manualSubjectSelect').value;
+      const subj = SecurityGuard.cleanText($('manualSubjectSelect').value, 40) || state.subjects[0].name;
       state.sessions.unshift({
         id: Date.now(), date: dateKey, subject: subj,
         minutes: totalMin, time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
@@ -2189,33 +2497,58 @@
     }
 
     // =========================================================================
-    // PARAMÈTRES & MATIÈRES
+    // PARAMÈTRES, ÉDITION DE MATIÈRES & SYNCHRO
     // =========================================================================
     function renderSettings() {
       $('goalSliderValue').textContent = `${state.dailyGoalHours}h / jour`;
       $('goalRangeInput').value = state.dailyGoalHours;
-      const curColor = $('newSubjectColorInput').value.toLowerCase();
+      if ($('syncKeyInput') && document.activeElement !== $('syncKeyInput')) {
+        $('syncKeyInput').value = state.syncKey || '';
+      }
 
+      const curColor = SecurityGuard.cleanHexColor($('newSubjectColorInput').value, '#10b981');
       $('subjectPresetPalette').innerHTML = MAIN_5_COLORS.map(hex => `<button type="button" onclick="$('newSubjectColorInput').value='${hex}';renderSettings();" class="w-7 h-7 rounded-full transition transform hover:scale-110 ${curColor === hex ? 'scale-110 ring-2 ring-offset-2 ring-offset-black ring-white' : 'opacity-80 hover:opacity-100'}" style="background-color:${hex};"></button>`).join('');
 
-      $('subjectsListEditor').innerHTML = state.subjects.map((s, idx) => `<div class="task-row flex items-center justify-between p-3 rounded-xl">
-        <div class="flex items-center gap-3">
-          <input type="color" value="${esc(s.color)}" onchange="updateSubjectColor(${idx}, this.value)" class="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0" />
-          <span class="text-sm font-bold">${esc(s.name)}</span>
+      $('subjectsListEditor').innerHTML = state.subjects.map((s, idx) => `<div class="task-row flex items-center justify-between p-3 rounded-xl gap-2">
+        <div class="flex items-center gap-3 flex-1">
+          <input type="color" value="${esc(s.color)}" onchange="updateSubjectColor(${idx}, this.value)" class="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0 flex-shrink-0" />
+          <input type="text" value="${esc(s.name)}" maxlength="40" onchange="renameSubject(${idx}, this.value)" class="bg-transparent text-sm font-bold focus:outline-none border-b border-transparent focus:border-zinc-500 px-1 py-0.5 w-full" title="Cliquer pour renommer la matière" />
         </div>
-        ${state.subjects.length > 1 ? `<button onclick="removeSubjectByIndex(${idx})" class="text-xs px-2.5 py-1 rounded-lg opacity-60 hover:opacity-100 hover:bg-red-500/20 hover:text-red-400 transition">Supprimer</button>` : ''}
+        ${state.subjects.length > 1 ? `<button onclick="removeSubjectByIndex(${idx})" class="text-xs px-2.5 py-1 rounded-lg opacity-60 hover:opacity-100 hover:bg-red-500/20 hover:text-red-400 transition flex-shrink-0">Supprimer</button>` : ''}
       </div>`).join('');
     }
 
+    function renameSubject(idx, newName) {
+      const trimmed = SecurityGuard.cleanText(newName, 40);
+      if (!trimmed || !state.subjects[idx]) {
+        renderSettings();
+        return;
+      }
+      const oldName = state.subjects[idx].name;
+      if (oldName === trimmed) return;
+      state.subjects[idx].name = trimmed;
+      state.tasks.forEach(t => { if (t.subject === oldName) t.subject = trimmed; });
+      state.sessions.forEach(s => { if (s.subject === oldName) s.subject = trimmed; });
+      if (currentTimerSubject === oldName) currentTimerSubject = trimmed;
+      saveState();
+      renderAll();
+      showToast(`Matière renommée en "${trimmed}"`, '✏️');
+    }
+
     function updateSubjectColor(idx, hex) {
-      if (state.subjects[idx]) { state.subjects[idx].color = hex; saveState(); renderAll(); }
+      if (state.subjects[idx]) {
+        state.subjects[idx].color = SecurityGuard.cleanHexColor(hex, state.subjects[idx].color);
+        saveState();
+        renderAll();
+      }
     }
 
     function addSubject(e) {
       e.preventDefault();
-      const input = $('newSubjectInput'), colorInput = $('newSubjectColorInput'), val = input.value.trim();
+      const input = $('newSubjectInput'), colorInput = $('newSubjectColorInput');
+      const val = SecurityGuard.cleanText(input.value, 40);
       if (val && !state.subjects.some(s => s.name.toLowerCase() === val.toLowerCase())) {
-        state.subjects.push({ name: val, color: colorInput.value });
+        state.subjects.push({ name: val, color: SecurityGuard.cleanHexColor(colorInput.value, '#10b981') });
         input.value = '';
         colorInput.value = MAIN_5_COLORS[state.subjects.length % MAIN_5_COLORS.length];
         saveState();
@@ -2236,6 +2569,7 @@
     initFlipWheels();
     applyTheme();
     setTimerMode('countup');
+    CloudSyncEngine.init();
     switchTab('dashboard');
   </script>
 </body>
