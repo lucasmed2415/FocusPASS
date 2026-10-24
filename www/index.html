@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <!-- BOUCLIER CSP STRICT : Bloque les plugins, les iframes externes, les injections d'URL et les exfiltrations -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; object-src 'none'; base-uri 'none'; form-action 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com https://*.firebaseio.com https://*.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com wss://*.firebaseio.com; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com 'unsafe-eval' https://*.gstatic.com; object-src 'none'; base-uri 'none'; form-action 'none';" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="referrer" content="no-referrer" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -14,7 +13,6 @@
   <title>FocusPASS — Suivi & Organisation</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23000000'/%3E%3Crect x='4' y='4' width='92' height='92' rx='20' fill='none' stroke='%23ffffff' stroke-width='4' stroke-opacity='0.25'/%3E%3Ctext x='50' y='71' font-family='Inter, system-ui, sans-serif' font-size='62' font-weight='900' fill='%23ffffff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
   <script>
-    // Protection Anti-Clickjacking (empêche l'inclusion dans un site malveillant)
     if (window.top !== window.self) {
       try { window.top.location = window.self.location; } catch (e) {}
     }
@@ -302,8 +300,8 @@
 
       <div class="flex items-center gap-2">
         <button onclick="switchTab('settings')" id="cloudHeaderBadge" title="Protection & Synchronisation multi-appareils active" class="px-2.5 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 border hover:opacity-85 transition" style="background-color: var(--bg-input); border-color: var(--border-color);">
-          <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span class="hidden sm:inline" id="cloudStatusLabel">Protégé & Synchro</span>
+          <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="hidden sm:inline" id="cloudStatusLabel">Connexion Cloud...</span>
         </button>
         <button onclick="switchTab('settings')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 border hover:opacity-85 transition" style="background-color: var(--bg-input); border-color: var(--border-color);">
           <span>🎯 Obj:</span>
@@ -770,12 +768,12 @@
         <div class="space-y-2" id="subjectsListEditor"></div>
       </div>
 
-      <!-- SYNCHRONISATION MULTI-APPAREILS (TÉLÉPHONE & TABLETTE) -->
+      <!-- SYNCHRONISATION MULTI-APPAREILS (FIREBASE CLOUD) -->
       <div class="card rounded-2xl p-6 space-y-4">
         <div class="flex items-start justify-between gap-3">
           <div>
-            <h3 class="font-extrabold text-lg tracking-tight">Synchronisation Téléphone & Tablette</h3>
-            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Synchronisation chiffrée via ton compte App Store (iCloud) / Play Store, ou via ta clé Cloud multi-appareils.</p>
+            <h3 class="font-extrabold text-lg tracking-tight">Synchronisation Cloud Sécurisée</h3>
+            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Synchronisation instantanée Firebase entre ton téléphone et ta tablette. Entre le même code sur tes appareils.</p>
           </div>
           <span id="settingsSyncBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex-shrink-0">🛡️ Protégé</span>
         </div>
@@ -783,8 +781,8 @@
         <div class="p-4 rounded-2xl border space-y-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
-              <span class="text-xs font-bold block">Identifiant de synchronisation Cloud</span>
-              <span class="text-[11px]" style="color: var(--text-muted);">Entre ce même code sur ta tablette pour partager tes données en temps réel</span>
+              <span class="text-xs font-bold block">Code de synchronisation Cloud</span>
+              <span class="text-[11px]" style="color: var(--text-muted);">Attention: les personnes possédant ce code peuvent voir et modifier tes tâches.</span>
             </div>
             <div class="flex items-center gap-2">
               <input type="text" id="syncKeyInput" maxlength="24" autocomplete="off" spellcheck="false" placeholder="Code Synchro" class="input-field px-3 py-1.5 rounded-xl text-xs font-mono-timer font-bold w-36 text-center uppercase" />
@@ -794,7 +792,7 @@
 
           <div class="pt-2 border-t flex flex-wrap items-center justify-between gap-2 text-[11px]" style="border-color: var(--border-color); color: var(--text-muted);">
             <span id="lastSyncTimestampText">Dernière sauvegarde : à l'instant</span>
-            <button type="button" onclick="CloudSyncEngine.forceSyncNow()" class="font-bold underline hover:opacity-80" style="color: var(--text-main);">↻ Synchroniser maintenant</button>
+            <button type="button" onclick="CloudSyncEngine.forceSyncNow()" class="font-bold underline hover:opacity-80" style="color: var(--text-main);">↻ Forcer la synchronisation</button>
           </div>
         </div>
       </div>
@@ -921,7 +919,6 @@
     // BOUCLIER DE SÉCURITÉ (SECURITY GUARD) : ANTI-XSS, ANTI-INJECTION & SANITIZATION
     // =========================================================================
     const SecurityGuard = Object.freeze({
-      // Supprime les caractères de contrôle, balises suspectes et limite la taille
       cleanText(val, maxLen = 120) {
         if (typeof val !== 'string') return '';
         return val
@@ -948,7 +945,6 @@
         if (!Number.isFinite(n)) return fallback;
         return Math.min(max, Math.max(min, n));
       },
-      // Parse JSON en bloquant toute attaque par Prototype Pollution (__proto__, constructor, prototype)
       safeJsonParse(rawStr) {
         if (typeof rawStr !== 'string' || rawStr.length > 500000) return null;
         try {
@@ -1076,10 +1072,6 @@
       return sortTasksByPriority(state.tasks.filter(t => !t.done && t.date < todayKey));
     }
 
-    // =========================================================================
-    // ÉTAT PAR DÉFAUT À LA PREMIÈRE OUVERTURE :
-    // 1 seule matière, 1 seule tâche non faite, 1 seul objectif non réalisé, 0h
-    // =========================================================================
     function generateDefaultSyncKey() {
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       const arr = new Uint8Array(6);
@@ -1192,23 +1184,22 @@
     })();
     if (state.subjects.length) currentTimerSubject = state.subjects[0].name;
 
+
     // =========================================================================
-    // MOTEUR DE SYNCHRONISATION SÉCURISÉ (APP STORE iCloud / PLAY STORE / CLOUD)
+    // MOTEUR DE SYNCHRONISATION EN TEMPS RÉEL VIA FIREBASE FIRESTORE
     // =========================================================================
+    let firebasePush = null;
+    let setupFirebaseSync = null;
+
     const CloudSyncEngine = {
-      cloudEndpoint: null,
-      broadcastChannel: ('BroadcastChannel' in window) ? new BroadcastChannel('focuspass_sync_channel') : null,
       lastPushTime: 0,
-
+      
       init() {
-        if (this.broadcastChannel) {
-          this.broadcastChannel.onmessage = ev => {
-            if (ev.data && typeof ev.data === 'object' && ev.data.updatedAt > (state.updatedAt || 0)) {
-              this.applyRemoteState(ev.data, false);
-            }
-          };
-        }
-
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            this.pullFromCloud(false);
+          }
+        });
         window.addEventListener('storage', ev => {
           if (ev.key === STORAGE_KEY && ev.newValue) {
             const incoming = SecurityGuard.safeJsonParse(ev.newValue);
@@ -1217,28 +1208,6 @@
             }
           }
         });
-
-        window.addEventListener('focuspassNativeCloudUpdate', ev => {
-          const incoming = ev.detail;
-          if (incoming && incoming.updatedAt > (state.updatedAt || 0)) {
-            this.applyRemoteState(incoming, true);
-          }
-        });
-
-        window.onNativeCloudStateReceived = jsonPayload => {
-          const incoming = typeof jsonPayload === 'string' ? SecurityGuard.safeJsonParse(jsonPayload) : jsonPayload;
-          if (incoming && incoming.updatedAt > (state.updatedAt || 0)) {
-            this.applyRemoteState(incoming, true);
-          }
-        };
-
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') {
-            this.pullFromCloud(false);
-          }
-        });
-
-        this.pullFromCloud(false);
       },
 
       setStatusUI(statusText, isSyncing = false) {
@@ -1253,7 +1222,7 @@
         if (badge) badge.textContent = isSyncing ? '↻ Synchro...' : '🛡️ Protégé & Synchro';
         if (tsText) {
           const timeStr = new Date(state.updatedAt || Date.now()).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-          tsText.textContent = `Dernière sauvegarde vérifiée : ${timeStr}`;
+          tsText.textContent = `Dernière sauvegarde validée : ${timeStr}`;
         }
       },
 
@@ -1263,78 +1232,34 @@
         applyTheme();
         renderAll();
         this.setStatusUI('Protégé & Synchro', false);
-        if (notifyUser) showToast('Données synchronisées depuis ton autre appareil', '☁️');
+        if (notifyUser) showToast('Données synchronisées en direct', '☁️');
       },
 
       async pushToCloud() {
         const now = Date.now();
-        if (now - this.lastPushTime < 150) return; // Anti-spam / Rate-limiting
+        if (now - this.lastPushTime < 150) return; // Anti-spam
         this.lastPushTime = now;
 
         this.setStatusUI('Synchro...', true);
-        const payloadStr = JSON.stringify(state);
-
-        try { this.broadcastChannel?.postMessage(state); } catch {}
-
-        try {
-          if (window.webkit?.messageHandlers?.icloudSync) {
-            window.webkit.messageHandlers.icloudSync.postMessage({ action: 'save', key: STORAGE_KEY, data: payloadStr });
-          }
-        } catch {}
-
-        try {
-          if (window.AndroidCloudSync?.saveState) {
-            window.AndroidCloudSync.saveState(STORAGE_KEY, payloadStr);
-          }
-          if (window.Capacitor?.Plugins?.CloudSettings) {
-            await window.Capacitor.Plugins.CloudSettings.set({ key: STORAGE_KEY, value: payloadStr });
-          }
-        } catch {}
 
         const safeKey = SecurityGuard.cleanSyncKey(state.syncKey);
-        if (this.cloudEndpoint && safeKey.length >= 4) {
-          try {
-            await fetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(safeKey)}.json`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: payloadStr
-            });
-          } catch {}
+        if (typeof firebasePush === 'function') {
+            await firebasePush(safeKey, state);
         }
 
         setTimeout(() => this.setStatusUI('Protégé & Synchro', false), 280);
       },
 
-      async pullFromCloud(notify = false) {
-        try {
-          if (window.webkit?.messageHandlers?.icloudSync) {
-            window.webkit.messageHandlers.icloudSync.postMessage({ action: 'load', key: STORAGE_KEY });
-          }
-          if (window.AndroidCloudSync?.loadState) {
-            const nativeData = window.AndroidCloudSync.loadState(STORAGE_KEY);
-            if (nativeData) window.onNativeCloudStateReceived(nativeData);
-          }
-          if (window.Capacitor?.Plugins?.CloudSettings) {
-            const res = await window.Capacitor.Plugins.CloudSettings.get({ key: STORAGE_KEY });
-            if (res?.value) window.onNativeCloudStateReceived(res.value);
-          }
-        } catch {}
-
-        const safeKey = SecurityGuard.cleanSyncKey(state.syncKey);
-        if (this.cloudEndpoint && safeKey.length >= 4) {
-          try {
-            const resp = await fetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(safeKey)}.json`);
-            if (resp.ok) {
-              const rawText = await resp.text();
-              const remote = SecurityGuard.safeJsonParse(rawText);
-              if (remote && remote.updatedAt > (state.updatedAt || 0)) {
-                this.applyRemoteState(remote, true);
-                return;
-              }
-            }
-          } catch {}
+      pullFromCloud(notify = false) {
+        // La réception est gérée de manière automatique par Firebase (onSnapshot).
+        // On vérifie quand même si l'abonnement doit être relancé.
+        if (typeof setupFirebaseSync === 'function' && state.syncKey) {
+           setupFirebaseSync(SecurityGuard.cleanSyncKey(state.syncKey), (incoming) => {
+               if (incoming && incoming.updatedAt > (state.updatedAt || 0)) {
+                   this.applyRemoteState(incoming, true);
+               }
+           });
         }
-
         this.setStatusUI('Protégé & Synchro', false);
         if (notify) showToast('Appareils synchronisés et vérifiés', '🛡️');
       },
@@ -1344,6 +1269,86 @@
         this.pullFromCloud(true);
       }
     };
+
+    // Chargement dynamique du module Firebase et connexion à l'environnement.
+    async function initFirebase() {
+        try {
+            const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js");
+            const { getAuth, signInAnonymously, signInWithCustomToken } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js");
+            const { getFirestore, doc, setDoc, onSnapshot } = await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js");
+
+            // On récupère la configuration Firebase depuis l'environnement ou on échoue silencieusement.
+            let firebaseConfig = null;
+            try {
+                if (typeof __firebase_config !== 'undefined') firebaseConfig = JSON.parse(__firebase_config);
+            } catch(e) {}
+            
+            if (!firebaseConfig || !firebaseConfig.apiKey) {
+                console.warn("Pas de configuration Firebase détectée. La synchro restera locale en attendant.");
+                CloudSyncEngine.setStatusUI('Synchro Locale Uniquement', false);
+                return;
+            }
+
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'focuspass-default';
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+
+            // Règle 3 stricte: Toujours s'authentifier de façon bloquante avant toute requête
+            if (typeof __initial_auth_token !== 'undefined') {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+
+            let unsub = null;
+
+            setupFirebaseSync = (syncKey, onData) => {
+                if (unsub) unsub();
+                if (!auth.currentUser || !syncKey) return;
+                
+                // Règle 1 stricte: Chemin requis -> /artifacts/{appId}/public/data/focuspass_users/{syncKey}
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'focuspass_users', syncKey);
+                
+                unsub = onSnapshot(docRef, (snap) => {
+                    if (snap.exists()) onData(snap.data());
+                }, err => {
+                    console.error("Erreur de synchronisation Firestore (Lecture):", err);
+                    CloudSyncEngine.setStatusUI('Erreur Synchro', false);
+                });
+            };
+
+            firebasePush = async (syncKey, data) => {
+                if (!auth.currentUser || !syncKey) return;
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'focuspass_users', syncKey);
+                    await setDoc(docRef, data);
+                } catch(err) {
+                    console.error("Erreur de synchronisation Firestore (Écriture):", err);
+                }
+            };
+
+            // Abonnement initial avec la clé actuelle
+            if (state && state.syncKey) {
+                setupFirebaseSync(SecurityGuard.cleanSyncKey(state.syncKey), (incoming) => {
+                   if (incoming && incoming.updatedAt > (state.updatedAt || 0)) {
+                       CloudSyncEngine.applyRemoteState(incoming, true);
+                   }
+                });
+            }
+
+            // Déclenche une première sauvegarde Cloud pour valider la création du Document.
+            CloudSyncEngine.pushToCloud();
+
+        } catch (e) {
+            console.warn("Échec du chargement du module Firebase SDK.", e);
+            CloudSyncEngine.setStatusUI('Mode Hors-Ligne', false);
+        }
+    }
+    
+    // Initialisation
+    initFirebase();
+
 
     function saveState() {
       state.updatedAt = Date.now();
@@ -1361,8 +1366,18 @@
       state.syncKey = val;
       if (input) input.value = val;
       saveState();
+      
+      // Relance la souscription Firebase pour écouter la nouvelle salle (nouveau SyncKey)
+      if (typeof setupFirebaseSync === 'function') {
+         setupFirebaseSync(val, (incoming) => {
+             if (incoming && incoming.updatedAt > (state.updatedAt || 0)) {
+                 CloudSyncEngine.applyRemoteState(incoming, true);
+             }
+         });
+      }
+      
       CloudSyncEngine.forceSyncNow();
-      showToast(`Code Cloud "${val}" sécurisé et lié`, '🔗');
+      showToast(`Salle de synchro "${val}" rejointe`, '🔗');
     }
 
     const getSubjectColor = name => state.subjects.find(s => s.name === name)?.color || '#3b82f6';
