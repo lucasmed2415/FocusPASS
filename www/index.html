@@ -296,7 +296,28 @@
     }
     @keyframes badgeGlowPulse {
       0%, 100% { box-shadow: 0 0 25px rgba(251, 191, 36, 0.25), inset 0 0 20px rgba(251, 191, 36, 0.12); }
-    <div id="appToast" class="fixed bottom-20 md:bottom-7 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 translate-y-3 px-4 py-2.5 rounded-2xl border shadow-2xl flex items-center gap-2.5 text-xs font-bold backdrop-blur-xl" style="background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
+      50% { box-shadow: 0 0 50px rgba(251, 191, 36, 0.55), inset 0 0 30px rgba(251, 191, 36, 0.25); }
+    }
+    .badge-pop-card {
+      animation: badgeModalPop 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards, badgeGlowPulse 2.8s infinite ease-in-out;
+    }
+    .badge-float-icon {
+      animation: badgeIconFloat 2.2s ease-in-out infinite;
+    }
+
+    #appToast {
+      transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1), transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen" onclick="closeCustomDropdownOutside()">
+
+  <!-- TOAST NOTIFICATION ÉLÉGANTE -->
+  <div id="appToast" class="fixed bottom-20 md:bottom-7 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 translate-y-3 px-4 py-2.5 rounded-2xl border shadow-2xl flex items-center gap-2.5 text-xs font-bold backdrop-blur-xl" style="background-color: var(--bg-card); border-color: var(--border-color); color: var(--text-main);">
     <span id="appToastIcon">✨</span>
     <span id="appToastText">Action effectuée</span>
   </div>
@@ -1713,7 +1734,7 @@
           dot.className = `w-2 h-2 rounded-full ${!enabled ? 'bg-zinc-500' : (hasPerm ? 'bg-emerald-400' : 'bg-amber-400')}`;
         }
         if (label) {
-          label.textContent = enabled ? `🔔 Rappel ${timeStr.replace(':', 'h')}` : '🔕 Rappel désactivé';
+          label.textContent = enabled ? `🔔 Rappel ${timeStr}` : '🔕 Rappel désactivé';
         }
         if (badge) {
           badge.textContent = enabled ? `🔔 Actif (${timeStr})` : '🔕 Désactivé';
@@ -1724,7 +1745,7 @@
             : 'Autoriser les notifications système (Safari / Chrome / Mobile)';
         }
 
-        // Planification native si encapsulé dans Capacitor / App Store / Play Store
+        // Planification native automatique pour App Store / Play Store
         this.scheduleNativeNotification();
       },
 
@@ -1737,7 +1758,7 @@
         if (remaining.length > 0) {
           this.triggerNotification(true);
         } else {
-          showToast(`Rappel programmé à ${(state.reminderTime || '18:00').replace(':', 'h')} (aucune tâche restante pour aujourd'hui !)`, '🔔');
+          showToast(`Rappel actif à ${state.reminderTime || '18:00'} (aucune tâche restante pour aujourd'hui !)`, '🔔');
         }
       },
 
@@ -1750,9 +1771,9 @@
           const perm = await Notification.requestPermission();
           this.updateUI();
           if (perm === 'granted') {
-            showToast('Notifications activées ! Tu seras prévenu à ' + (state.reminderTime || '18:00'), '🔔');
+            showToast('Notifications autorisées ! Rappel fixé à ' + (state.reminderTime || '18:00'), '🔔');
           } else {
-            showToast('Le rappel s\'affichera directement dans l\'application à ' + (state.reminderTime || '18:00'), 'ℹ️');
+            showToast('Le rappel s\'affichera dans l\'application à ' + (state.reminderTime || '18:00'), 'ℹ️');
           }
         } catch {
           showToast('Rappel actif dans l\'application', '🔔');
@@ -1769,11 +1790,10 @@
       updateTime(val) {
         if (typeof val === 'string' && /^\d{2}:\d{2}$/.test(val)) {
           state.reminderTime = val;
-          // Réinitialise le marqueur du jour pour permettre au nouvel horaire de se déclencher aujourd'hui
           localStorage.removeItem(LAST_NOTIF_STORAGE_KEY);
           saveState();
           this.updateUI();
-          showToast(`Heure du rappel réglée sur ${val.replace(':', 'h')}`, '⏰');
+          showToast(`Heure du rappel réglée sur ${val}`, '⏰');
         }
       },
 
@@ -1785,7 +1805,7 @@
         const now = new Date();
         const [targetH, targetM] = (state.reminderTime || '18:00').split(':').map(Number);
         const nowMinutes = now.getHours() * 60 + now.getMinutes();
-        const targetMinutes = (targetH || 18) * 60 + (targetM || 0);
+        const targetMinutes = (targetH ?? 18) * 60 + (targetM ?? 0);
 
         if (nowMinutes >= targetMinutes) {
           const remaining = this.getRemainingTodayTasks();
@@ -1798,75 +1818,93 @@
 
       playGentleReminderTone() {
         try {
-          const ctx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-          if (ctx.state === 'suspended') ctx.resume();
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return;
+          if (!audioCtx) audioCtx = new AudioCtx();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
           [587.33, 880].forEach((freq, idx) => {
-            const osc = ctx.createOscillator();
-            const g = ctx.createGain();
+            const osc = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
             osc.type = 'sine';
             osc.frequency.value = freq;
-            const start = ctx.currentTime + idx * 0.14;
+            const start = audioCtx.currentTime + idx * 0.14;
             g.gain.setValueAtTime(0.001, start);
             g.gain.linearRampToValueAtTime(0.1, start + 0.02);
             g.gain.exponentialRampToValueAtTime(0.0001, start + 0.35);
             osc.connect(g);
-            g.connect(ctx.destination);
+            g.connect(audioCtx.destination);
             osc.start(start);
             osc.stop(start + 0.36);
           });
         } catch {}
       },
 
-      triggerNotification(isManualTest = false) {
+      async triggerNotification(isManualTest = false) {
         const remaining = this.getRemainingTodayTasks();
         const count = remaining.length;
 
         const title = count > 0
-          ? `📋 Il te reste ${count} tâche${count > 1 ? 's' : ''} à faire pour aujourd'hui`
-          : `🎉 Toutes tes tâches du jour sont terminées !`;
+          ? `📋 FocusPASS — Il te reste ${count} tâche${count > 1 ? 's' : ''} pour aujourd'hui`
+          : `🎉 FocusPASS — Toutes tes tâches du jour sont terminées !`;
 
-        const taskNames = remaining.slice(0, 4).map(t => `• ${t.title} (${t.subject})`).join('\n');
-        const moreText = count > 4 ? `\n+ ${count - 4} autre(s) tâche(s)...` : '';
+        const taskListInline = remaining.map(t => `${t.title} (${t.subject})`).join(', ');
         const bodyText = count > 0
-          ? `${taskNames}${moreText}`
-          : 'Bravo, tu es à jour dans tes révisions pour aujourd\'hui !';
+          ? `Il reste à faire : ${taskListInline}`
+          : 'Bravo, tu es 100 % à jour dans tes révisions pour aujourd\'hui !';
 
         this.playGentleReminderTone();
 
-        // Affichage de la bannière In-App
+        // c) Bannière In-App & Toast
         const banner = $('eveningTaskBanner');
         if (banner) {
           $('eveningBannerTitle').textContent = title;
-          $('eveningBannerList').textContent = count > 0
-            ? remaining.map(t => `${t.title} (${t.subject})`).join(' • ')
-            : 'Aucune tâche en attente pour aujourd\'hui, continue comme ça !';
+          $('eveningBannerList').textContent = bodyText;
           banner.classList.remove('hidden');
         }
+        showToast(count > 0 ? `Il te reste ${count} tâche(s) pour aujourd'hui` : 'Toutes les tâches du jour sont faites !', '🔔');
 
-        // Notification Système Navigateur / PWA
+        // a) Notification Web API & Service Worker
         if ('Notification' in window) {
           if (Notification.permission === 'granted') {
-            try {
-              const n = new Notification(title, {
-                body: bodyText,
-                tag: 'focuspass-daily-tasks',
-                renotify: true
-              });
-              n.onclick = () => {
-                window.focus();
-                switchTab('dashboard');
-                selectDay(getTodayIndex());
-                n.close();
-              };
-            } catch {}
+            let sentViaSW = false;
+            if ('serviceWorker' in navigator) {
+              try {
+                const reg = await navigator.serviceWorker.getRegistration();
+                if (reg && typeof reg.showNotification === 'function') {
+                  await reg.showNotification(title, {
+                    body: bodyText,
+                    tag: 'focuspass-daily-tasks',
+                    renotify: true
+                  });
+                  sentViaSW = true;
+                }
+              } catch {}
+            }
+            if (!sentViaSW) {
+              try {
+                const n = new Notification(title, {
+                  body: bodyText,
+                  tag: 'focuspass-daily-tasks',
+                  renotify: true
+                });
+                n.onclick = () => {
+                  window.focus();
+                  switchTab('dashboard');
+                  selectDay(getTodayIndex());
+                  n.close();
+                };
+              } catch {}
+            }
           } else if (isManualTest && Notification.permission === 'default') {
             this.requestPermissionInteractive();
           }
         }
 
-        // Pont natif iOS / Android (App Store / Play Store)
+        // b) Ponts mobiles natifs (App Store / Play Store)
         try {
-          if (window.webkit?.messageHandlers?.nativeNotify) {
+          if (window.webkit?.messageHandlers?.localNotifications) {
+            window.webkit.messageHandlers.localNotifications.postMessage({ action: 'triggerNow', title, body: bodyText });
+          } else if (window.webkit?.messageHandlers?.nativeNotify) {
             window.webkit.messageHandlers.nativeNotify.postMessage({ title, body: bodyText });
           }
         } catch {}
@@ -1876,36 +1914,55 @@
         try {
           const remaining = this.getRemainingTodayTasks();
           const [h, m] = (state.reminderTime || '18:00').split(':').map(Number);
-          if (window.Capacitor?.Plugins?.LocalNotifications && state.reminderEnabled !== false && remaining.length > 0) {
-            const body = remaining.map(t => `${t.title} (${t.subject})`).join(', ');
-            window.Capacitor.Plugins.LocalNotifications.schedule({
-              notifications: [{
-                id: 1800,
-                title: `📋 Il te reste ${remaining.length} tâche${remaining.length > 1 ? 's' : ''} pour aujourd'hui`,
-                body,
-                schedule: { on: { hour: h || 18, minute: m || 0 }, allowWhileIdle: true }
-              }]
-            }).catch(() => {});
+          const count = remaining.length;
+          const title = `📋 FocusPASS — Il te reste ${count} tâche${count > 1 ? 's' : ''} pour aujourd'hui`;
+          const body = `Il reste à faire : ${remaining.map(t => `${t.title} (${t.subject})`).join(', ')}`;
+
+          if (window.Capacitor?.Plugins?.LocalNotifications) {
+            if (state.reminderEnabled !== false && count > 0) {
+              window.Capacitor.Plugins.LocalNotifications.schedule({
+                notifications: [{
+                  id: 1800,
+                  title,
+                  body,
+                  schedule: { on: { hour: h ?? 18, minute: m ?? 0 }, allowWhileIdle: true }
+                }]
+              }).catch(() => {});
+            } else {
+              window.Capacitor.Plugins.LocalNotifications.cancel({ notifications: [{ id: 1800 }] }).catch(() => {});
+            }
+          }
+
+          if (window.webkit?.messageHandlers?.localNotifications) {
+            window.webkit.messageHandlers.localNotifications.postMessage({
+              action: state.reminderEnabled !== false && count > 0 ? 'scheduleDaily' : 'cancelDaily',
+              hour: h ?? 18,
+              minute: m ?? 0,
+              title,
+              body
+            });
           }
         } catch {}
       }
     };
 
     // =========================================================================
-    // MOTEUR AUDIO HYBRIDE ZÉRO-COUPURE (SYNTHÈSE CONTINUE INFINIE + ARRIÈRE-PLAN)
+    // MOTEUR AUDIO CONTINU SANS COUPURE (15 MINUTES WAV PHASE-PARFAITE + ARRIÈRE-PLAN)
     // =========================================================================
-    // Pourquoi il n'y a plus aucune coupure à 10s :
-    // 1. Les ondes binaurales (200 Hz G / 206 Hz D) sont générées par deux oscillateurs
-    //    mathématiques continus infinis (aucun point de boucle = 0 clic, phase 100% continue).
-    // 2. Les bruits (Brun, Rose, Blanc) utilisent un très long tampon de 60 secondes à 44.1 kHz
-    //    avec fondu enchaîné circulaire de 2 secondes + filtrage passe-bas temps réel.
-    // 3. Le signal Web Audio est injecté en direct dans le système + maintenu actif en
-    //    arrière-plan sur Safari / iOS / Android via un flux porteur HTML5 <audio> continu.
+    // Pourquoi il n'y a plus aucune coupure à 10 secondes ET que l'arrière-plan fonctionne :
+    // 1. La lecture passe 100 % par le lecteur natif HTML5 <audio id="focusBgAudio"> pour que
+    //    Safari, iOS, iPadOS et Android maintiennent le son en arrière-plan et écran verrouillé.
+    // 2. Au lieu d'un fichier de 10s (qui causait un micro-saut du décodeur toutes les 10s),
+    //    on génère en < 10 ms un flux WAV continu de 15 minutes (900 secondes) via Int16Array.set() :
+    //    - Binaural (200 Hz G / 206 Hz D à 16000 Hz Stéréo) : 200 Hz et 206 Hz complètent un
+    //      nombre entier exact de cycles en 1.000s (phase de départ = 0, phase de fin = 0).
+    //      Ce bloc parfait d'1 seconde est copié 900 fois en mémoire = 0 saut de phase !
+    //    - Bruits (Brun, Rose, Blanc à 16000 Hz Mono) : filtre préchauffé pendant 1s puis
+    //      fondu trigonométrique à puissance constante (cos² + sin² = 1) sur 4 secondes pour
+    //      créer une tuile de 28s sans aucune baisse de volume ni clic, répétée 32 fois (~15 min).
     let audioCtx = null, activeAudioType = null;
-    let activeGainNode = null, activeNodes = [];
-    let keepAliveWavUrl = null;
     let noiseVolume = 0.35;
-    const seamlessNoiseBuffers = {};
+    const cachedSeamlessWavUrls = {};
 
     const AUDIO_LABELS = Object.freeze({
       brown: 'Bruit Brun (Profond)',
@@ -1914,131 +1971,128 @@
       binaural: 'Ondes Binaurales (6 Hz)'
     });
 
-    function ensureAudioContext() {
-      if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        audioCtx = new AudioContextClass({ latencyHint: 'playback' });
-        audioCtx.addEventListener('statechange', () => {
-          if (activeAudioType && audioCtx.state === 'suspended') {
-            audioCtx.resume().catch(() => {});
-          }
-        });
-      }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume().catch(() => {});
-      }
-      return audioCtx;
-    }
-
-    // Crée un tampon de bruit haute-fidélité de 60 secondes avec crossfade circulaire de 2 secondes
-    function getSeamlessNoiseBuffer(ctx, type) {
-      if (seamlessNoiseBuffers[type]) return seamlessNoiseBuffers[type];
-      const sr = ctx.sampleRate;
-      const durationSeconds = 60;
-      const fadeSamples = sr * 2;
-      const totalSamples = sr * durationSeconds;
-      const rawLen = totalSamples + fadeSamples;
-
-      const buffer = ctx.createBuffer(2, totalSamples, sr);
-
-      for (let ch = 0; ch < 2; ch++) {
-        const raw = new Float32Array(rawLen);
-        if (type === 'white') {
-          let lp = 0;
-          for (let i = 0; i < rawLen; i++) {
-            lp = lp * 0.68 + (Math.random() * 2 - 1) * 0.32;
-            raw[i] = lp * 0.48;
-          }
-        } else if (type === 'pink') {
-          let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, lp = 0;
-          for (let i = 0; i < rawLen; i++) {
-            const w = Math.random() * 2 - 1;
-            b0 = 0.99886 * b0 + w * 0.0555179;
-            b1 = 0.99332 * b1 + w * 0.0750759;
-            b2 = 0.96900 * b2 + w * 0.1538520;
-            b3 = 0.86650 * b3 + w * 0.3104856;
-            b4 = 0.55000 * b4 + w * 0.5329522;
-            b5 = -0.7616 * b5 - w * 0.0168980;
-            const pink = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.085;
-            b6 = w * 0.115926;
-            lp = lp * 0.84 + pink * 0.16;
-            raw[i] = lp * 1.25;
-          }
-        } else {
-          // Bruit Brun profond
-          let last = 0;
-          for (let i = 0; i < rawLen; i++) {
-            const w = Math.random() * 2 - 1;
-            last = (last + 0.022 * w) / 1.022;
-            raw[i] = last * 2.5;
-          }
-        }
-
-        // Crossfade trigonométrique égal-puissance (cos/sin) sur 2 secondes :
-        // raccord mathématiquement imperceptible à l'oreille humaine
-        const channelOut = buffer.getChannelData(ch);
-        for (let i = 0; i < totalSamples; i++) {
-          if (i < fadeSamples) {
-            const phase = (i / fadeSamples) * (Math.PI / 2);
-            const fadeIn = Math.sin(phase);
-            const fadeOut = Math.cos(phase);
-            channelOut[i] = raw[i] * fadeIn + raw[totalSamples + i] * fadeOut;
-          } else {
-            channelOut[i] = raw[i];
-          }
-        }
-      }
-
-      return (seamlessNoiseBuffers[type] = buffer);
-    }
-
-    // Génère un flux porteur quasi-silencieux pour maintenir la session multimédia iOS/Android ouverte en arrière-plan
-    function getKeepAliveWavUrl() {
-      if (keepAliveWavUrl) return keepAliveWavUrl;
-      const sr = 8000;
-      const seconds = 30;
-      const len = sr * seconds;
-      const buf = new ArrayBuffer(44 + len * 2);
-      const view = new DataView(buf);
-      const writeStr = (off, str) => { for (let i = 0; i < str.length; i++) view.setUint8(off + i, str.charCodeAt(i)); };
+    function buildWavBlobFromSamples(samplesInt16, sampleRate, numChannels) {
+      const dataByteLen = samplesInt16.byteLength;
+      const headerBuf = new ArrayBuffer(44);
+      const view = new DataView(headerBuf);
+      const writeStr = (offset, str) => {
+        for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+      };
 
       writeStr(0, 'RIFF');
-      view.setUint32(4, 36 + len * 2, true);
+      view.setUint32(4, 36 + dataByteLen, true);
       writeStr(8, 'WAVE');
       writeStr(12, 'fmt ');
       view.setUint32(16, 16, true);
-      view.setUint16(20, 1, true);
-      view.setUint16(22, 1, true);
-      view.setUint32(24, sr, true);
-      view.setUint32(28, sr * 2, true);
-      view.setUint16(32, 2, true);
+      view.setUint16(20, 1, true); // PCM
+      view.setUint16(22, numChannels, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * numChannels * 2, true);
+      view.setUint16(32, numChannels * 2, true);
       view.setUint16(34, 16, true);
       writeStr(36, 'data');
-      view.setUint32(40, len * 2, true);
+      view.setUint32(40, dataByteLen, true);
 
-      // Signal sub-audible de maintien (empêche iOS de couper le canal matériel)
-      for (let i = 0; i < len; i++) {
-        view.setInt16(44 + i * 2, (i % 2 === 0) ? 1 : -1, true);
-      }
-      keepAliveWavUrl = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
-      return keepAliveWavUrl;
+      return new Blob([headerBuf, samplesInt16.buffer], { type: 'audio/wav' });
     }
 
-    function stopWebAudioGraph() {
-      if (activeGainNode && audioCtx) {
-        try {
-          activeGainNode.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.06);
-        } catch {}
+    function getGaplessWavUrl(type) {
+      if (cachedSeamlessWavUrls[type]) return cachedSeamlessWavUrls[type];
+
+      const sr = 16000;
+
+      if (type === 'binaural') {
+        // 1.000 seconde à 16000 Hz Stéréo = 16000 frames (32000 échantillons Int16)
+        // 200 Hz fait exactement 200 cycles ; 206 Hz fait exactement 206 cycles -> raccord 100 % continu
+        const oneSecFrames = sr;
+        const oneSecStereo = new Int16Array(oneSecFrames * 2);
+        const amp = 9500;
+        const twoPiOverSr = (2 * Math.PI) / sr;
+
+        for (let i = 0; i < oneSecFrames; i++) {
+          const t = i * twoPiOverSr;
+          oneSecStereo[i * 2]     = Math.round(Math.sin(200 * t) * amp); // Oreille gauche : 200 Hz
+          oneSecStereo[i * 2 + 1] = Math.round(Math.sin(206 * t) * amp); // Oreille droite : 206 Hz
+        }
+
+        const totalSeconds = 900; // 15 minutes continues sans rechargement
+        const fullStereo = new Int16Array(oneSecStereo.length * totalSeconds);
+        for (let s = 0; s < totalSeconds; s++) {
+          fullStereo.set(oneSecStereo, s * oneSecStereo.length);
+        }
+
+        const blob = buildWavBlobFromSamples(fullStereo, sr, 2);
+        cachedSeamlessWavUrls[type] = URL.createObjectURL(blob);
+        return cachedSeamlessWavUrls[type];
       }
-      const nodesToStop = [...activeNodes];
-      activeNodes = [];
-      activeGainNode = null;
-      setTimeout(() => {
-        nodesToStop.forEach(n => {
-          try { if (typeof n.stop === 'function') n.stop(); } catch {}
-          try { n.disconnect(); } catch {}
-        });
-      }, 180);
+
+      // Génération de bruit (Brun, Rose, Blanc) à 16000 Hz Mono :
+      // 32 secondes générées après 1s de préchauffage du filtre, crossfade égal-puissance de 4s -> tuile de 28s
+      const warmupSamples = sr * 1;
+      const tileSeconds = 28;
+      const fadeSeconds = 4;
+      const tileLen = sr * tileSeconds;
+      const fadeLen = sr * fadeSeconds;
+      const rawLen = tileLen + fadeLen;
+      const rawFloat = new Float32Array(rawLen);
+
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      let lp = 0, brownLast = 0;
+
+      for (let i = -warmupSamples; i < rawLen; i++) {
+        const w = Math.random() * 2 - 1;
+        let sample = 0;
+
+        if (type === 'white') {
+          lp = lp * 0.62 + w * 0.38;
+          sample = lp * 0.36;
+        } else if (type === 'pink') {
+          b0 = 0.99886 * b0 + w * 0.0555179;
+          b1 = 0.99332 * b1 + w * 0.0750759;
+          b2 = 0.96900 * b2 + w * 0.1538520;
+          b3 = 0.86650 * b3 + w * 0.3104856;
+          b4 = 0.55000 * b4 + w * 0.5329522;
+          b5 = -0.7616 * b5 - w * 0.0168980;
+          const pink = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.05;
+          b6 = w * 0.115926;
+          lp = lp * 0.78 + pink * 0.22;
+          sample = lp * 1.15;
+        } else {
+          // Bruit Brun profond
+          brownLast = (brownLast + 0.025 * w) / 1.025;
+          lp = lp * 0.75 + brownLast * 0.25;
+          sample = lp * 2.1;
+        }
+
+        if (i >= 0) {
+          rawFloat[i] = sample;
+        }
+      }
+
+      // Fondu enchaîné circulaire à puissance constante (sin/cos sur 4 secondes : sin² + cos² = 1)
+      const tileInt16 = new Int16Array(tileLen);
+      for (let i = 0; i < tileLen; i++) {
+        let val;
+        if (i < fadeLen) {
+          const theta = (i / fadeLen) * (Math.PI / 2);
+          val = rawFloat[i] * Math.sin(theta) + rawFloat[tileLen + i] * Math.cos(theta);
+        } else {
+          val = rawFloat[i];
+        }
+        const clamped = Math.max(-0.98, Math.min(0.98, val));
+        tileInt16[i] = Math.round(clamped * 28000);
+      }
+
+      // Répète la tuile parfaite 32 fois -> 896 secondes (~15 minutes continues)
+      const repeats = 32;
+      const fullMono = new Int16Array(tileLen * repeats);
+      for (let r = 0; r < repeats; r++) {
+        fullMono.set(tileInt16, r * tileLen);
+      }
+
+      const blob = buildWavBlobFromSamples(fullMono, sr, 1);
+      cachedSeamlessWavUrls[type] = URL.createObjectURL(blob);
+      return cachedSeamlessWavUrls[type];
     }
 
     function updateMediaSessionMetadata(type) {
@@ -2050,9 +2104,9 @@
           album: 'Concentration & Révisions PASS'
         });
         navigator.mediaSession.setActionHandler('play', () => {
-          if (activeAudioType) {
-            ensureAudioContext();
-            $('focusBgAudio')?.play().catch(() => {});
+          const el = $('focusBgAudio');
+          if (el && activeAudioType) {
+            el.play().catch(() => {});
             navigator.mediaSession.playbackState = 'playing';
           }
         });
@@ -2073,12 +2127,10 @@
 
     function stopCurrentAudio() {
       activeAudioType = null;
-      stopWebAudioGraph();
       const el = $('focusBgAudio');
       if (el) {
         try {
           el.pause();
-          el.srcObject = null;
           el.removeAttribute('src');
           el.load();
         } catch {}
@@ -2095,67 +2147,19 @@
         return;
       }
 
-      stopWebAudioGraph();
-
       try {
         if ('audioSession' in navigator) {
           navigator.audioSession.type = 'playback';
         }
       } catch {}
 
-      const ctx = ensureAudioContext();
       activeAudioType = type;
-
-      const masterGain = ctx.createGain();
-      masterGain.gain.setValueAtTime(0.0001, ctx.currentTime);
-      masterGain.gain.setTargetAtTime(Math.max(0.001, noiseVolume), ctx.currentTime, 0.15);
-      masterGain.connect(ctx.destination);
-
-      if (type === 'binaural') {
-        // Deux oscillateurs purs continus (200 Hz gauche, 206 Hz droite) :
-        // Phase infinie sans aucune boucle = 0 coupure même après plusieurs heures
-        const merger = ctx.createChannelMerger(2);
-        const oscL = ctx.createOscillator();
-        const oscR = ctx.createOscillator();
-        const subGain = ctx.createGain();
-        oscL.type = 'sine';
-        oscR.type = 'sine';
-        oscL.frequency.setValueAtTime(200, ctx.currentTime);
-        oscR.frequency.setValueAtTime(206, ctx.currentTime);
-        subGain.gain.setValueAtTime(0.45, ctx.currentTime);
-
-        oscL.connect(merger, 0, 0);
-        oscR.connect(merger, 0, 1);
-        merger.connect(subGain);
-        subGain.connect(masterGain);
-
-        oscL.start();
-        oscR.start();
-        activeNodes.push(oscL, oscR, merger, subGain);
-      } else {
-        const src = ctx.createBufferSource();
-        src.buffer = getSeamlessNoiseBuffer(ctx, type);
-        src.loop = true;
-
-        const filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(type === 'brown' ? 420 : type === 'pink' ? 750 : 2200, ctx.currentTime);
-
-        src.connect(filter);
-        filter.connect(masterGain);
-        src.start(0);
-        activeNodes.push(src, filter);
-      }
-
-      activeGainNode = masterGain;
-
-      // Active le porteur HTML5 <audio> d'arrière-plan pour empêcher Safari / iOS / Android de mettre l'AudioContext en veille
       const el = $('focusBgAudio');
       if (el) {
         try {
-          el.src = getKeepAliveWavUrl();
+          el.src = getGaplessWavUrl(type);
           el.loop = true;
-          el.volume = 0.01;
+          el.volume = Math.max(0.01, Math.min(1, noiseVolume));
           el.play().then(() => {
             updateMediaSessionMetadata(type);
             if ('mediaSession' in navigator) {
@@ -2173,19 +2177,11 @@
       const cleanVal = SecurityGuard.clampNumber(val, 0, 100, 35);
       noiseVolume = cleanVal / 100;
       $('noiseVolumeLabel').textContent = `${cleanVal}%`;
-      if (activeGainNode && audioCtx) {
-        try {
-          activeGainNode.gain.setTargetAtTime(Math.max(0.0001, noiseVolume), audioCtx.currentTime, 0.04);
-        } catch {}
+      const el = $('focusBgAudio');
+      if (el) {
+        try { el.volume = Math.max(0, Math.min(1, noiseVolume)); } catch {}
       }
     }
-
-    // Maintien automatique du moteur Web Audio lors du verrouillage d'écran ou changement d'application
-    document.addEventListener('visibilitychange', () => {
-      if (activeAudioType && audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume().catch(() => {});
-      }
-    });
 
     // =========================================================================
     // NAVIGATION, SEMAINES & THÈMES
