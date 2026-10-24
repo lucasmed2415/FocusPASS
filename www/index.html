@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <!-- BOUCLIER CSP STRICT : Bloque les plugins, les iframes externes, les injections d'URL et les exfiltrations -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://*.firebaseio.com https://*.firebasedatabase.app https://*.googleapis.com; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; object-src 'none'; base-uri 'none'; form-action 'none';" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://*.firebaseio.com https://*.firebasedatabase.app https://*.googleapis.com; img-src 'self' data:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; object-src 'none'; base-uri 'none'; form-action 'none';" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="referrer" content="no-referrer" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -143,7 +143,7 @@
     /* Animation fluide entre les vues */
     @keyframes viewFadeSlide {
       0% { opacity: 0; transform: translateY(8px); }
-      100% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 1; transform: none; }
     }
     .view-animate {
       animation: viewFadeSlide 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -223,25 +223,66 @@
     .noise-pill:hover { background-color: #232329; color: #f4f4f5; transform: translateY(-1px); }
     .noise-pill.active { background-color: #ffffff; border-color: #ffffff; color: #000000; box-shadow: 0 0 18px rgba(255,255,255,0.24); }
 
+    /* Mode Plein Écran Focus : Centrage absolu sur Tablette/Mobile & Masquage de l'interface supérieure */
+    body.timer-is-fullscreen {
+      overflow: hidden !important;
+      padding: 0 !important;
+    }
+    body.timer-is-fullscreen > header,
+    body.timer-is-fullscreen > nav {
+      display: none !important;
+    }
+    body.timer-is-fullscreen main,
+    body.timer-is-fullscreen #view-timer {
+      max-width: none !important;
+      width: 100vw !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transform: none !important;
+      animation: none !important;
+    }
     #flipClockContainer:fullscreen,
     #flipClockContainer:-webkit-full-screen,
     #flipClockContainer.is-fullscreen {
       position: fixed !important;
       inset: 0 !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      margin: 0 !important;
       z-index: 9999 !important;
       width: 100vw !important;
+      max-width: 100vw !important;
       height: 100vh !important;
+      height: 100dvh !important;
       border-radius: 0 !important;
       border: none !important;
-      padding: calc(1.5rem + env(safe-area-inset-top)) 1.5rem calc(1.5rem + env(safe-area-inset-bottom)) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      align-items: stretch !important;
+      padding: calc(1.25rem + env(safe-area-inset-top)) 1.5rem calc(1.5rem + env(safe-area-inset-bottom)) !important;
     }
+    #flipClockContainer:fullscreen #timerModeSegmented,
+    #flipClockContainer:-webkit-full-screen #timerModeSegmented,
+    #flipClockContainer.is-fullscreen #timerModeSegmented,
+    #flipClockContainer:fullscreen #liveClockTimestamp,
+    #flipClockContainer:-webkit-full-screen #liveClockTimestamp,
+    #flipClockContainer.is-fullscreen #liveClockTimestamp,
+    #flipClockContainer:fullscreen #timerSubjectDropdownWrapper,
+    #flipClockContainer:-webkit-full-screen #timerSubjectDropdownWrapper,
+    #flipClockContainer.is-fullscreen #timerSubjectDropdownWrapper,
     #flipClockContainer:fullscreen #timerAudioPanel,
     #flipClockContainer:-webkit-full-screen #timerAudioPanel,
-    #flipClockContainer.is-fullscreen #timerAudioPanel,
+    #flipClockContainer.is-fullscreen #timerAudioPanel {
+      display: none !important;
+    }
     #flipClockContainer:fullscreen #timerHistoryScrollBtn,
     #flipClockContainer:-webkit-full-screen #timerHistoryScrollBtn,
     #flipClockContainer.is-fullscreen #timerHistoryScrollBtn {
-      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
     }
 
     @keyframes badgeModalPop {
@@ -475,25 +516,26 @@
         <!-- Halo lumineux subtil dynamique aux couleurs de la matière active -->
         <div id="timerSubjectAmbientGlow" class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 rounded-full blur-3xl opacity-20 transition-all duration-700" style="background-color: #3b82f6;"></div>
 
-        <div class="flex items-center justify-between gap-2 relative z-10">
+        <div class="w-full flex items-center justify-between gap-2 relative z-10">
           <button onclick="exitFullscreenOrBack()" class="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition" title="Retour">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
           </button>
 
-          <div class="ios-segmented">
+          <div id="timerModeSegmented" class="ios-segmented">
             <button onclick="setTimerMode('countdown')" id="seg-countdown" class="ios-seg-btn">Compte à rebours</button>
             <button onclick="setTimerMode('countup')" id="seg-countup" class="ios-seg-btn active">Compter jusqu'à</button>
           </div>
 
           <button onclick="toggleFullScreenTimer()" id="fullscreenToggleBtn" class="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition" title="Mode Grand Écran Focus">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+            <svg id="fullscreenIconExpand" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+            <svg id="fullscreenIconShrink" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"/></svg>
           </button>
         </div>
 
-        <div class="my-auto py-6 flex flex-col items-center relative z-10">
+        <div class="my-auto py-6 w-full flex flex-col items-center justify-center relative z-10 mx-auto">
           <p id="liveClockTimestamp" class="text-zinc-400 text-xs sm:text-sm font-medium tracking-wide mb-3">Chargement...</p>
 
-          <div class="relative mb-6 z-40">
+          <div id="timerSubjectDropdownWrapper" class="relative mb-6 z-40">
             <button type="button" onclick="toggleCustomSubjectDropdown(event)"
               class="flex items-center gap-2.5 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 px-4 py-2 rounded-full text-white text-xs font-semibold transition shadow-lg">
               <span id="timerSubjectDot" class="w-3 h-3 rounded-full inline-block shadow-sm"></span>
@@ -503,8 +545,8 @@
             <div id="customSubjectDropdownMenu" class="hidden absolute left-1/2 -translate-x-1/2 mt-2 w-56 bg-zinc-950/95 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl py-1.5 overflow-hidden"></div>
           </div>
 
-          <div class="grid grid-cols-3 gap-3 sm:gap-6 w-full max-w-4xl px-1 sm:px-4">
-            <div class="flex flex-col items-center">
+          <div class="grid grid-cols-3 gap-3 sm:gap-6 w-full max-w-4xl mx-auto justify-items-center px-1 sm:px-4">
+            <div class="flex flex-col items-center w-full">
               <div class="flip-card w-full aspect-[1/1.05] flex items-center justify-center relative overflow-hidden">
                 <div class="flip-split-line"></div>
                 <div id="wheel-h" class="flip-wheel" title="Glisser pour régler les heures"></div>
@@ -512,7 +554,7 @@
               </div>
               <span class="text-zinc-500 font-extrabold text-[11px] sm:text-sm tracking-[0.2em] mt-3 uppercase">HOUR</span>
             </div>
-            <div class="flex flex-col items-center">
+            <div class="flex flex-col items-center w-full">
               <div class="flip-card w-full aspect-[1/1.05] flex items-center justify-center relative overflow-hidden">
                 <div class="flip-split-line"></div>
                 <div id="wheel-m" class="flip-wheel" title="Glisser pour régler les minutes"></div>
@@ -520,7 +562,7 @@
               </div>
               <span class="text-zinc-500 font-extrabold text-[11px] sm:text-sm tracking-[0.2em] mt-3 uppercase">MIN</span>
             </div>
-            <div class="flex flex-col items-center">
+            <div class="flex flex-col items-center w-full">
               <div class="flip-card w-full aspect-[1/1.05] flex items-center justify-center relative overflow-hidden">
                 <div class="flip-split-line"></div>
                 <div id="wheel-s" class="flip-wheel" title="Glisser pour régler les secondes"></div>
@@ -533,6 +575,8 @@
 
         <!-- PANNEAU AUDIO : MASQUÉ EN MODE PLEIN ÉCRAN FOCUS -->
         <div id="timerAudioPanel" class="flex flex-col items-center gap-3 pt-3 pb-4 border-t border-zinc-900 relative z-10">
+          <!-- Lecteur HTML5 natif pour continuer la lecture en arrière-plan sur Safari / iOS / iPadOS / Android -->
+          <audio id="focusBgAudio" loop playsinline preload="auto" class="hidden"></audio>
           <div class="flex flex-wrap items-center justify-center gap-2">
             <button type="button" onclick="toggleAudioSource('brown')" id="noise-btn-brown" class="noise-pill">
               <span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Bruit Brun (Profond)</span>
@@ -552,13 +596,13 @@
             <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M12 6l-4 4H4v4h4l4 4V6z" />
             </svg>
-            <input type="range" id="noiseVolumeSlider" min="0" max="100" value="35" oninput="updateNoiseVolume(this.value)"
+            <input type="range" id="noiseVolumeSlider" min="0" max="100" value="35" oninput="updateNoiseVolume(this.value, false)" onchange="updateNoiseVolume(this.value, true)"
               class="w-24 sm:w-32 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-white" />
             <span id="noiseVolumeLabel" class="text-[10px] font-mono-timer text-zinc-400 w-7 text-right">35%</span>
           </div>
         </div>
 
-        <div class="flex items-center justify-between pt-2 relative z-10">
+        <div class="w-full flex items-center justify-between pt-2 relative z-10">
           <button id="timerHistoryScrollBtn" onclick="$('timerHistoryCard').scrollIntoView({behavior: 'smooth'})" class="p-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition" title="Historique">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           </button>
@@ -1580,92 +1624,229 @@
     }
 
     // =========================================================================
-    // MOTEUR AUDIO UNIFIÉ (BRUITS COLORÉS + ONDES BINAURALES 6 Hz)
+    // MOTEUR AUDIO ARRIÈRE-PLAN (WAV PCM + HTML5 AUDIO + MEDIA SESSION SAFARI/iOS)
     // =========================================================================
-    let audioCtx = null, activeAudioType = null, activeSourceNode = null, activeSecondSource = null, activeGainNode = null;
+    let audioCtx = null, activeAudioType = null;
     let noiseVolume = 0.35;
-    const cachedNoiseBuffers = {};
+    let currentWavBlobUrl = null;
+    const rawStereoCache = {};
 
-    function createNoiseBuffer(type) {
-      if (cachedNoiseBuffers[type]) return cachedNoiseBuffers[type];
-      const sr = audioCtx.sampleRate, len = sr * 10, buffer = audioCtx.createBuffer(1, len, sr), data = buffer.getChannelData(0);
+    const AUDIO_LABELS = Object.freeze({
+      brown: 'Bruit Brun (Profond)',
+      pink: 'Bruit Rose Doux (Pluie)',
+      white: 'Bruit Blanc (Isolation)',
+      binaural: 'Ondes Binaurales (6 Hz)'
+    });
 
-      if (type === 'white') {
-        for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * 0.45;
+    // Génère 10 secondes de signal stéréo bouclé sans coupure (seamless loop)
+    function getRawStereoSamples(type) {
+      if (rawStereoCache[type]) return rawStereoCache[type];
+      const sr = 22050;
+      const seconds = 10;
+      const len = sr * seconds;
+      const left = new Float32Array(len);
+      const right = new Float32Array(len);
+
+      if (type === 'binaural') {
+        // 200 Hz (gauche) et 206 Hz (droite) : nombre entier de cycles sur 10s = boucle parfaite sans clic
+        const twoPi = Math.PI * 2;
+        for (let i = 0; i < len; i++) {
+          const t = i / sr;
+          left[i] = Math.sin(twoPi * 200 * t) * 0.45;
+          right[i] = Math.sin(twoPi * 206 * t) * 0.45;
+        }
+      } else if (type === 'white') {
+        let lpL = 0, lpR = 0;
+        for (let i = 0; i < len; i++) {
+          lpL = lpL * 0.65 + (Math.random() * 2 - 1) * 0.35;
+          lpR = lpR * 0.65 + (Math.random() * 2 - 1) * 0.35;
+          left[i] = lpL * 0.55;
+          right[i] = lpR * 0.55;
+        }
       } else if (type === 'pink') {
-        let b0=0, b1=0, b2=0, b3=0, b4=0, b5=0, b6=0;
-        for (let i = 0; i < len; i++) {
-          const w = Math.random() * 2 - 1;
-          b0 = 0.99886*b0 + w*0.0555179; b1 = 0.99332*b1 + w*0.0750759; b2 = 0.96900*b2 + w*0.1538520;
-          b3 = 0.86650*b3 + w*0.3104856; b4 = 0.55000*b4 + w*0.5329522; b5 = -0.7616*b5 - w*0.0168980;
-          data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w*0.5362) * 0.08; b6 = w * 0.115926;
+        for (let ch = 0; ch < 2; ch++) {
+          const out = ch === 0 ? left : right;
+          let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, lp = 0;
+          for (let i = 0; i < len; i++) {
+            const w = Math.random() * 2 - 1;
+            b0 = 0.99886 * b0 + w * 0.0555179;
+            b1 = 0.99332 * b1 + w * 0.0750759;
+            b2 = 0.96900 * b2 + w * 0.1538520;
+            b3 = 0.86650 * b3 + w * 0.3104856;
+            b4 = 0.55000 * b4 + w * 0.5329522;
+            b5 = -0.7616 * b5 - w * 0.0168980;
+            const rawPink = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.09;
+            b6 = w * 0.115926;
+            lp = lp * 0.82 + rawPink * 0.18;
+            out[i] = lp * 1.35;
+          }
         }
       } else {
-        let last = 0;
+        // Bruit brun profond
+        let lastL = 0, lastR = 0;
         for (let i = 0; i < len; i++) {
-          last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02;
-          data[i] = last * 2.8;
+          lastL = (lastL + 0.025 * (Math.random() * 2 - 1)) / 1.025;
+          lastR = (lastR + 0.025 * (Math.random() * 2 - 1)) / 1.025;
+          left[i] = lastL * 2.6;
+          right[i] = lastR * 2.6;
         }
       }
-      const fade = Math.floor(sr * 0.05);
-      for (let i = 0; i < fade; i++) {
-        const f = i / fade;
-        data[i] = data[i] * f + data[len - fade + i] * (1 - f);
-      }
-      return (cachedNoiseBuffers[type] = buffer);
-    }
 
-    function stopCurrentAudio() {
-      if (activeGainNode && audioCtx) {
-        const g = activeGainNode, s1 = activeSourceNode, s2 = activeSecondSource;
-        try {
-          g.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.08);
-          setTimeout(() => { try { s1?.stop(); s1?.disconnect(); s2?.stop(); s2?.disconnect(); } catch {} }, 220);
-        } catch {}
-      }
-      activeSourceNode = activeSecondSource = activeGainNode = null;
-    }
-
-    function toggleAudioSource(type) {
-      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-
-      if (activeAudioType === type) {
-        activeAudioType = null;
-        stopCurrentAudio();
-      } else {
-        stopCurrentAudio();
-        activeAudioType = type;
-        const gain = audioCtx.createGain();
-        gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-        gain.gain.setTargetAtTime(noiseVolume, audioCtx.currentTime, 0.15);
-
-        if (type === 'binaural') {
-          const merger = audioCtx.createChannelMerger(2), oscL = audioCtx.createOscillator(), oscR = audioCtx.createOscillator();
-          oscL.frequency.value = 200; oscR.frequency.value = 206;
-          oscL.connect(merger, 0, 0); oscR.connect(merger, 0, 1);
-          merger.connect(gain); gain.connect(audioCtx.destination);
-          oscL.start(); oscR.start();
-          activeSourceNode = oscL; activeSecondSource = oscR;
-        } else {
-          const source = audioCtx.createBufferSource(), filter = audioCtx.createBiquadFilter();
-          source.buffer = createNoiseBuffer(type); source.loop = true;
-          filter.type = 'lowpass';
-          filter.frequency.value = type === 'brown' ? 400 : type === 'pink' ? 600 : 2000;
-          source.connect(filter); filter.connect(gain); gain.connect(audioCtx.destination);
-          source.start();
-          activeSourceNode = source;
+      // Crossfade circulaire sur les derniers 80 ms pour éliminer toute transition de boucle
+      if (type !== 'binaural') {
+        const fade = Math.floor(sr * 0.08);
+        for (let i = 0; i < fade; i++) {
+          const f = i / fade;
+          left[i] = left[i] * f + left[len - fade + i] * (1 - f);
+          right[i] = right[i] * f + right[len - fade + i] * (1 - f);
         }
-        activeGainNode = gain;
       }
+
+      return (rawStereoCache[type] = { sr, len, left, right });
+    }
+
+    // Encode le flux stéréo en fichier WAV 16-bit PCM en mémoire pour le lecteur natif <audio>
+    function buildWavBlobUrl(type, gainScalar) {
+      const { sr, len, left, right } = getRawStereoSamples(type);
+      const numChannels = 2;
+      const bytesPerSample = 2;
+      const blockAlign = numChannels * bytesPerSample;
+      const dataSize = len * blockAlign;
+      const arrayBuffer = new ArrayBuffer(44 + dataSize);
+      const view = new DataView(arrayBuffer);
+
+      const writeStr = (offset, str) => {
+        for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+      };
+
+      writeStr(0, 'RIFF');
+      view.setUint32(4, 36 + dataSize, true);
+      writeStr(8, 'WAVE');
+      writeStr(12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, numChannels, true);
+      view.setUint32(24, sr, true);
+      view.setUint32(28, sr * blockAlign, true);
+      view.setUint16(32, blockAlign, true);
+      view.setUint16(34, 16, true);
+      writeStr(36, 'data');
+      view.setUint32(40, dataSize, true);
+
+      let offset = 44;
+      const vol = Math.max(0, Math.min(1, gainScalar));
+      for (let i = 0; i < len; i++) {
+        const sL = Math.max(-1, Math.min(1, left[i] * vol));
+        const sR = Math.max(-1, Math.min(1, right[i] * vol));
+        view.setInt16(offset, sL < 0 ? sL * 0x8000 : sL * 0x7FFF, true);
+        view.setInt16(offset + 2, sR < 0 ? sR * 0x8000 : sR * 0x7FFF, true);
+        offset += 4;
+      }
+
+      if (currentWavBlobUrl) {
+        try { URL.revokeObjectURL(currentWavBlobUrl); } catch {}
+      }
+      const blob = new Blob([arrayBuffer], { type: 'audio/wav' });
+      currentWavBlobUrl = URL.createObjectURL(blob);
+      return currentWavBlobUrl;
+    }
+
+    function updateMediaSessionMetadata(type) {
+      if (!('mediaSession' in navigator)) return;
+      try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: AUDIO_LABELS[type] || 'Audio Focus',
+          artist: 'FocusPASS',
+          album: 'Concentration & Révisions PASS'
+        });
+        navigator.mediaSession.setActionHandler('play', () => {
+          const el = $('focusBgAudio');
+          if (el && activeAudioType) {
+            el.play().catch(() => {});
+            navigator.mediaSession.playbackState = 'playing';
+          }
+        });
+        navigator.mediaSession.setActionHandler('pause', () => {
+          stopCurrentAudio();
+          updateAudioPillsUI();
+        });
+        navigator.mediaSession.setActionHandler('stop', () => {
+          stopCurrentAudio();
+          updateAudioPillsUI();
+        });
+      } catch {}
+    }
+
+    function updateAudioPillsUI() {
       ['brown', 'pink', 'white', 'binaural'].forEach(t => $(`noise-btn-${t}`)?.classList.toggle('active', activeAudioType === t));
     }
 
-    function updateNoiseVolume(val) {
+    function stopCurrentAudio() {
+      activeAudioType = null;
+      const el = $('focusBgAudio');
+      if (el) {
+        try {
+          el.pause();
+          el.removeAttribute('src');
+          el.load();
+        } catch {}
+      }
+      if ('mediaSession' in navigator) {
+        try { navigator.mediaSession.playbackState = 'none'; } catch {}
+      }
+    }
+
+    function toggleAudioSource(type) {
+      const el = $('focusBgAudio');
+      if (!el) return;
+
+      if (activeAudioType === type) {
+        stopCurrentAudio();
+        updateAudioPillsUI();
+        return;
+      }
+
+      // Active le mode audio d'arrière-plan sur iOS / iPadOS Safari (continue même hors de l'application)
+      try {
+        if ('audioSession' in navigator) {
+          navigator.audioSession.type = 'playback';
+        }
+      } catch {}
+
+      activeAudioType = type;
+      const wavUrl = buildWavBlobUrl(type, noiseVolume);
+      el.src = wavUrl;
+      el.loop = true;
+      el.volume = noiseVolume;
+
+      el.play().then(() => {
+        updateMediaSessionMetadata(type);
+        if ('mediaSession' in navigator) {
+          try { navigator.mediaSession.playbackState = 'playing'; } catch {}
+        }
+      }).catch(() => {
+        showToast('Appuie à nouveau pour autoriser l\'audio', '🔊');
+      });
+
+      updateAudioPillsUI();
+    }
+
+    function updateNoiseVolume(val, rebuildWavForIos = false) {
       const cleanVal = SecurityGuard.clampNumber(val, 0, 100, 35);
       noiseVolume = cleanVal / 100;
       $('noiseVolumeLabel').textContent = `${cleanVal}%`;
-      if (activeGainNode && audioCtx) activeGainNode.gain.setTargetAtTime(noiseVolume, audioCtx.currentTime, 0.05);
+      const el = $('focusBgAudio');
+      if (el) {
+        el.volume = noiseVolume;
+        // Sur iPadOS / iOS, le volume logiciel d'une balise <audio> est parfois verrouillé par le système :
+        // on ré-encode l'amplitude directement dans le flux WAV au relâchement du curseur.
+        if (rebuildWavForIos && activeAudioType && !el.paused) {
+          const wavUrl = buildWavBlobUrl(activeAudioType, noiseVolume);
+          el.src = wavUrl;
+          el.loop = true;
+          el.play().catch(() => {});
+        }
+      }
     }
 
     // =========================================================================
@@ -2499,30 +2680,52 @@
       showToast(`Session de ${formatMinutes(addedMin)} (${currentTimerSubject}) enregistrée !`, '🔥');
     }
 
+    function syncFullscreenUIState() {
+      const c = $('flipClockContainer');
+      if (!c) return;
+      const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      const isCustomFs = c.classList.contains('is-fullscreen');
+      const isActive = isNativeFs || isCustomFs;
+
+      document.body.classList.toggle('timer-is-fullscreen', isActive);
+      $('fullscreenIconExpand')?.classList.toggle('hidden', isActive);
+      $('fullscreenIconShrink')?.classList.toggle('hidden', !isActive);
+    }
+
+    document.addEventListener('fullscreenchange', syncFullscreenUIState);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenUIState);
+
     function toggleFullScreenTimer() {
       const c = $('flipClockContainer');
-      const isNativeFs = document.fullscreenElement || document.webkitFullscreenElement;
-      if (isNativeFs) {
-        (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+      const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      const isCustomFs = c.classList.contains('is-fullscreen');
+
+      if (isNativeFs || isCustomFs) {
+        if (isNativeFs) {
+          (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+        }
         c.classList.remove('is-fullscreen');
-      } else if (c.classList.contains('is-fullscreen')) {
-        c.classList.remove('is-fullscreen');
+        syncFullscreenUIState();
       } else {
+        c.classList.add('is-fullscreen');
+        syncFullscreenUIState();
         const req = c.requestFullscreen || c.webkitRequestFullscreen;
         if (req) {
-          req.call(c).catch(() => c.classList.add('is-fullscreen'));
-        } else {
-          c.classList.add('is-fullscreen');
+          req.call(c).then(syncFullscreenUIState).catch(() => {
+            c.classList.add('is-fullscreen');
+            syncFullscreenUIState();
+          });
         }
       }
     }
 
     function exitFullscreenOrBack() {
       const c = $('flipClockContainer');
-      const isNativeFs = document.fullscreenElement || document.webkitFullscreenElement;
+      const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
       if (isNativeFs || c.classList.contains('is-fullscreen')) {
         if (isNativeFs) (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
         c.classList.remove('is-fullscreen');
+        syncFullscreenUIState();
       } else {
         switchTab('dashboard');
       }
