@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <!-- BOUCLIER CSP STRICT : Bloque les plugins, les iframes externes, les injections d'URL et les exfiltrations -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://*.firebaseio.com https://*.firebasedatabase.app https://*.googleapis.com; img-src 'self' data:; media-src 'self' blob: data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; object-src 'none'; base-uri 'none'; form-action 'none';" />
+  <!-- BOUCLIER CSP STRICT : Autorise Firebase, les flux audio Blob en arrière-plan et bloque toute exfiltration -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://focuspass-default-rtdb.firebaseio.com https://*.firebaseio.com https://*.googleapis.com; media-src 'self' blob: data:; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; object-src 'none'; base-uri 'none'; form-action 'none';" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="referrer" content="no-referrer" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -14,7 +14,6 @@
   <title>FocusPASS — Suivi & Organisation</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23000000'/%3E%3Crect x='4' y='4' width='92' height='92' rx='20' fill='none' stroke='%23ffffff' stroke-width='4' stroke-opacity='0.25'/%3E%3Ctext x='50' y='71' font-family='Inter, system-ui, sans-serif' font-size='62' font-weight='900' fill='%23ffffff' text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E" />
   <script>
-    // Protection Anti-Clickjacking (empêche l'inclusion dans un site malveillant)
     if (window.top !== window.self) {
       try { window.top.location = window.self.location; } catch (e) {}
     }
@@ -26,17 +25,17 @@
   <style>
     :root, [data-theme="oled"] {
       --bg-main: #000000;
-      --bg-card: #0a0a0d;
-      --bg-input: #131318;
+      --bg-card: #0a0a0e;
+      --bg-input: #13131a;
       --text-main: #ffffff;
-      --text-muted: #8e8e95;
-      --border-color: #22222a;
+      --text-muted: #8e8e99;
+      --border-color: #22222e;
       --btn-bg: #ffffff;
       --btn-text: #000000;
       --theme-accent: #ffffff;
       --theme-accent-soft: rgba(255, 255, 255, 0.12);
       --card-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
-      --ambient-glow: radial-gradient(circle at 50% -10%, rgba(59, 130, 246, 0.12), transparent 60%);
+      --ambient-glow: radial-gradient(circle at 50% -10%, rgba(59, 130, 246, 0.14), transparent 60%);
     }
     [data-theme="dark"] {
       --bg-main: #090e1a;
@@ -50,7 +49,7 @@
       --theme-accent: #f8fafc;
       --theme-accent-soft: rgba(248, 250, 252, 0.12);
       --card-shadow: 0 14px 34px -12px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
-      --ambient-glow: radial-gradient(circle at 50% -10%, rgba(99, 102, 241, 0.15), transparent 60%);
+      --ambient-glow: radial-gradient(circle at 50% -10%, rgba(99, 102, 241, 0.16), transparent 60%);
     }
     [data-theme="light"] {
       --bg-main: #f1f5f9;
@@ -64,7 +63,7 @@
       --theme-accent: #0f172a;
       --theme-accent-soft: rgba(15, 23, 42, 0.08);
       --card-shadow: 0 12px 28px -10px rgba(15, 23, 42, 0.07), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
-      --ambient-glow: radial-gradient(circle at 50% -10%, rgba(59, 130, 246, 0.08), transparent 60%);
+      --ambient-glow: radial-gradient(circle at 50% -10%, rgba(59, 130, 246, 0.09), transparent 60%);
     }
 
     * { box-sizing: border-box; }
@@ -88,7 +87,6 @@
     .safe-bottom-nav { padding-bottom: calc(0.5rem + env(safe-area-inset-bottom)); }
     .font-mono-timer { font-family: 'JetBrains Mono', monospace; }
 
-    /* Cartes & Surfaces Premium */
     .card {
       background-color: var(--bg-card);
       border: 1px solid var(--border-color);
@@ -99,15 +97,20 @@
     .task-row {
       background-color: var(--bg-main);
       border: 1px solid var(--border-color);
-      transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease;
     }
     .task-row:hover {
-      border-color: rgba(142, 142, 147, 0.45);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+      border-color: rgba(142, 142, 147, 0.5);
+      transform: translateY(-1.5px);
+      box-shadow: 0 6px 16px -4px rgba(0, 0, 0, 0.28);
     }
 
-    /* Cases à cocher raffinées */
+    .bar-segment {
+      background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(0, 0, 0, 0.1) 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 0 12px rgba(255, 255, 255, 0.08);
+      transition: height 0.45s cubic-bezier(0.16, 1, 0.3, 1), width 0.45s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+    }
+
     input[type="checkbox"] {
       transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
@@ -128,7 +131,6 @@
     }
     select option { background-color: var(--bg-card); color: var(--text-main); padding: 8px; }
 
-    /* Boutons & Accents */
     .theme-btn-primary {
       background-color: var(--btn-bg);
       color: var(--btn-text);
@@ -140,13 +142,13 @@
     .theme-accent-text { color: var(--theme-accent); }
     .theme-accent-soft-bg { background-color: var(--theme-accent-soft); }
 
-    /* Animation fluide entre les vues */
+    /* Sans transform à 100% pour ne pas décaler les éléments position:fixed sur tablette */
     @keyframes viewFadeSlide {
-      0% { opacity: 0; transform: translateY(8px); }
-      100% { opacity: 1; transform: none; }
+      0% { opacity: 0; }
+      100% { opacity: 1; }
     }
     .view-animate {
-      animation: viewFadeSlide 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: viewFadeSlide 0.25s ease-out;
     }
 
     /* Flip Clock Haute Définition */
@@ -154,8 +156,8 @@
       background: linear-gradient(180deg, #17171c 0%, #0e0e12 49.5%, #09090c 50.5%, #131317 100%);
       border-radius: 24px;
       position: relative;
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.09), 0 18px 40px rgba(0,0,0,0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 18px 40px rgba(0,0,0,0.85);
     }
     .flip-digits {
       font-weight: 800;
@@ -223,46 +225,43 @@
     .noise-pill:hover { background-color: #232329; color: #f4f4f5; transform: translateY(-1px); }
     .noise-pill.active { background-color: #ffffff; border-color: #ffffff; color: #000000; box-shadow: 0 0 18px rgba(255,255,255,0.24); }
 
-    /* Mode Plein Écran Focus : Centrage absolu sur Tablette/Mobile & Masquage de l'interface supérieure */
+    /* MODE GRAND ÉCRAN FOCUS : Centrage parfait sur tablette & masquage des éléments superflus */
     body.timer-is-fullscreen {
       overflow: hidden !important;
-      padding: 0 !important;
     }
     body.timer-is-fullscreen > header,
     body.timer-is-fullscreen > nav {
       display: none !important;
     }
-    body.timer-is-fullscreen main,
-    body.timer-is-fullscreen #view-timer {
-      max-width: none !important;
-      width: 100vw !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      transform: none !important;
-      animation: none !important;
-    }
     #flipClockContainer:fullscreen,
     #flipClockContainer:-webkit-full-screen,
     #flipClockContainer.is-fullscreen {
       position: fixed !important;
-      inset: 0 !important;
       top: 0 !important;
       left: 0 !important;
       right: 0 !important;
       bottom: 0 !important;
-      margin: 0 !important;
       z-index: 9999 !important;
       width: 100vw !important;
       max-width: 100vw !important;
-      height: 100vh !important;
       height: 100dvh !important;
+      margin: 0 !important;
       border-radius: 0 !important;
       border: none !important;
+      background-color: #000000 !important;
       display: flex !important;
       flex-direction: column !important;
       justify-content: space-between !important;
-      align-items: stretch !important;
-      padding: calc(1.25rem + env(safe-area-inset-top)) 1.5rem calc(1.5rem + env(safe-area-inset-bottom)) !important;
+      align-items: center !important;
+      padding: calc(1.5rem + env(safe-area-inset-top)) 2rem calc(1.5rem + env(safe-area-inset-bottom)) !important;
+    }
+    #flipClockContainer:fullscreen > div,
+    #flipClockContainer:-webkit-full-screen > div,
+    #flipClockContainer.is-fullscreen > div {
+      width: 100% !important;
+      max-width: 1100px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
     }
     #flipClockContainer:fullscreen #timerModeSegmented,
     #flipClockContainer:-webkit-full-screen #timerModeSegmented,
@@ -270,19 +269,16 @@
     #flipClockContainer:fullscreen #liveClockTimestamp,
     #flipClockContainer:-webkit-full-screen #liveClockTimestamp,
     #flipClockContainer.is-fullscreen #liveClockTimestamp,
-    #flipClockContainer:fullscreen #timerSubjectDropdownWrapper,
-    #flipClockContainer:-webkit-full-screen #timerSubjectDropdownWrapper,
-    #flipClockContainer.is-fullscreen #timerSubjectDropdownWrapper,
+    #flipClockContainer:fullscreen #timerSubjectPickerWrap,
+    #flipClockContainer:-webkit-full-screen #timerSubjectPickerWrap,
+    #flipClockContainer.is-fullscreen #timerSubjectPickerWrap,
     #flipClockContainer:fullscreen #timerAudioPanel,
     #flipClockContainer:-webkit-full-screen #timerAudioPanel,
-    #flipClockContainer.is-fullscreen #timerAudioPanel {
-      display: none !important;
-    }
+    #flipClockContainer.is-fullscreen #timerAudioPanel,
     #flipClockContainer:fullscreen #timerHistoryScrollBtn,
     #flipClockContainer:-webkit-full-screen #timerHistoryScrollBtn,
     #flipClockContainer.is-fullscreen #timerHistoryScrollBtn {
-      visibility: hidden !important;
-      pointer-events: none !important;
+      display: none !important;
     }
 
     @keyframes badgeModalPop {
@@ -322,24 +318,17 @@
     <span id="appToastText">Action effectuée</span>
   </div>
 
-  <!-- BANNIÈRE DE RAPPEL DES TÂCHES DE 18H00 (IN-APP + SYSTÈME) -->
-  <div id="eveningTaskBanner" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 hidden w-[92%] max-w-lg p-4 rounded-2xl border shadow-2xl backdrop-blur-xl view-animate" style="background-color: color-mix(in srgb, var(--bg-card) 95%, transparent); border-color: #f59e0b;">
+  <!-- BANNIÈRE DE RAPPEL DES TÂCHES À 18H00 -->
+  <div id="reminderBannerModal" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md card rounded-2xl p-4 border-2 border-amber-400/80 shadow-2xl">
     <div class="flex items-start justify-between gap-3">
       <div class="flex items-start gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center flex-shrink-0 text-xl">
-          🔔
-        </div>
+        <span class="text-2xl">⏰</span>
         <div>
-          <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-400">Rappel de fin de journée</span>
-          <h4 id="eveningBannerTitle" class="text-sm font-extrabold mt-0.5">Il te reste des tâches pour aujourd'hui</h4>
-          <p id="eveningBannerList" class="text-xs mt-1 leading-relaxed" style="color: var(--text-muted);"></p>
+          <h4 id="reminderBannerTitle" class="text-sm font-extrabold text-amber-400">Rappel de 18h00 — Tâches du jour</h4>
+          <p id="reminderBannerBody" class="text-xs mt-1 leading-relaxed" style="color: var(--text-main);"></p>
         </div>
       </div>
-      <button type="button" onclick="closeEveningBanner()" class="text-xs opacity-60 hover:opacity-100 p-1">✕</button>
-    </div>
-    <div class="flex justify-end gap-2 mt-3 pt-2.5 border-t" style="border-color: var(--border-color);">
-      <button type="button" onclick="closeEveningBanner()" class="px-3 py-1.5 rounded-xl text-xs font-semibold" style="color: var(--text-muted);">Plus tard</button>
-      <button type="button" onclick="closeEveningBanner(); switchTab('dashboard'); selectDay(getTodayIndex());" class="theme-btn-primary px-4 py-1.5 rounded-xl text-xs font-bold">Voir mes tâches →</button>
+      <button type="button" onclick="$('reminderBannerModal').classList.add('hidden')" class="text-xs opacity-60 hover:opacity-100 p-1">✕</button>
     </div>
   </div>
 
@@ -363,13 +352,9 @@
       </nav>
 
       <div class="flex items-center gap-2">
-        <button onclick="switchTab('settings')" id="cloudHeaderBadge" title="Protection & Synchronisation multi-appareils active" class="px-2.5 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 border hover:opacity-85 transition" style="background-color: var(--bg-input); border-color: var(--border-color);">
-          <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span class="hidden sm:inline" id="cloudStatusLabel">Protégé & Synchro</span>
-        </button>
-        <button onclick="switchTab('settings')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 border hover:opacity-85 transition" style="background-color: var(--bg-input); border-color: var(--border-color);">
-          <span>🎯 Obj:</span>
-          <span id="headerGoalBadge" class="font-bold font-mono-timer">7h/j</span>
+        <button onclick="switchTab('settings')" id="cloudHeaderBadge" title="Protection & Synchronisation multi-appareils active" class="px-3 py-1.5 rounded-full text-[11px] font-bold flex items-center gap-2 border hover:opacity-85 transition shadow-sm" style="background-color: var(--bg-input); border-color: var(--border-color);">
+          <span id="cloudStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]"></span>
+          <span id="cloudStatusLabel">Protégé & Synchro</span>
         </button>
       </div>
     </div>
@@ -403,6 +388,7 @@
               <span id="todayPercentBadge" class="text-xs font-extrabold px-2.5 py-1 rounded-full theme-accent-soft-bg theme-accent-text">0%</span>
             </div>
             <div id="todaySegmentedProgress" class="w-full h-3.5 rounded-full overflow-hidden flex p-0.5 gap-0.5" style="background-color: var(--bg-input);"></div>
+            <div id="todaySubjectsChips" class="flex flex-wrap gap-1.5 mt-2.5 empty:hidden"></div>
             <div class="flex flex-wrap justify-between items-center text-xs mt-3 gap-2" style="color: var(--text-muted);">
               <span id="remainingTimeText">Objectif quotidien : 7h00</span>
               <button onclick="openManualTimeModal(getTodayKey())" class="font-semibold underline hover:opacity-80 transition" style="color: var(--text-main);">+ Ajouter une session manuellement</button>
@@ -448,13 +434,7 @@
         <!-- COLONNE GAUCHE (2/3) : TÂCHES AVEC CASE SPÉCIALE RETARD / PAS FAIT -->
         <div class="card rounded-2xl p-5 lg:col-span-2 flex flex-col">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-            <div class="flex items-center gap-2.5 flex-wrap">
-              <h3 class="font-extrabold text-lg tracking-tight">Tâches</h3>
-              <button type="button" id="dashboardNotifPill" onclick="TaskReminderEngine.handlePillClick()" class="px-2.5 py-1 rounded-full text-[11px] font-bold border flex items-center gap-1.5 transition hover:opacity-85" style="background-color: var(--bg-input); border-color: var(--border-color);" title="Configurer ou tester le rappel quotidien des tâches">
-                <span id="dashboardNotifDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
-                <span id="dashboardNotifLabel">🔔 Rappel 18h00</span>
-              </button>
-            </div>
+            <h3 class="font-extrabold text-lg tracking-tight">Tâches</h3>
             <div id="dashboardDayPills" class="flex gap-1 p-1 rounded-xl border" style="background-color: var(--bg-main); border-color: var(--border-color);"></div>
           </div>
 
@@ -536,14 +516,14 @@
     </section>
 
     <!-- ========================================================== -->
-    <!-- VUE 2 : CHRONO FLIP CLOCK & AUDIO                          -->
+    <!-- VUE 2 : CHRONO FLIP CLOCK & AUDIO CONTINU EN ARRIÈRE-PLAN   -->
     <!-- ========================================================== -->
     <section id="view-timer" class="hidden space-y-6">
       <div id="flipClockContainer" class="bg-black rounded-3xl p-4 sm:p-8 border border-zinc-800/80 flex flex-col justify-between min-h-[550px] relative shadow-2xl overflow-hidden">
         <!-- Halo lumineux subtil dynamique aux couleurs de la matière active -->
         <div id="timerSubjectAmbientGlow" class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-48 rounded-full blur-3xl opacity-20 transition-all duration-700" style="background-color: #3b82f6;"></div>
 
-        <div class="w-full flex items-center justify-between gap-2 relative z-10">
+        <div class="flex items-center justify-between gap-2 relative z-10 w-full">
           <button onclick="exitFullscreenOrBack()" class="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition" title="Retour">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
           </button>
@@ -554,15 +534,14 @@
           </div>
 
           <button onclick="toggleFullScreenTimer()" id="fullscreenToggleBtn" class="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition" title="Mode Grand Écran Focus">
-            <svg id="fullscreenIconExpand" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
-            <svg id="fullscreenIconShrink" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"/></svg>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
           </button>
         </div>
 
-        <div class="my-auto py-6 w-full flex flex-col items-center justify-center relative z-10 mx-auto">
+        <div class="my-auto py-6 flex flex-col items-center justify-center relative z-10 w-full">
           <p id="liveClockTimestamp" class="text-zinc-400 text-xs sm:text-sm font-medium tracking-wide mb-3">Chargement...</p>
 
-          <div id="timerSubjectDropdownWrapper" class="relative mb-6 z-40">
+          <div id="timerSubjectPickerWrap" class="relative mb-6 z-40">
             <button type="button" onclick="toggleCustomSubjectDropdown(event)"
               class="flex items-center gap-2.5 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/80 px-4 py-2 rounded-full text-white text-xs font-semibold transition shadow-lg">
               <span id="timerSubjectDot" class="w-3 h-3 rounded-full inline-block shadow-sm"></span>
@@ -572,8 +551,8 @@
             <div id="customSubjectDropdownMenu" class="hidden absolute left-1/2 -translate-x-1/2 mt-2 w-56 bg-zinc-950/95 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl py-1.5 overflow-hidden"></div>
           </div>
 
-          <div class="grid grid-cols-3 gap-3 sm:gap-6 w-full max-w-4xl mx-auto justify-items-center px-1 sm:px-4">
-            <div class="flex flex-col items-center w-full">
+          <div class="grid grid-cols-3 gap-3 sm:gap-6 w-full max-w-4xl mx-auto px-1 sm:px-4">
+            <div class="flex flex-col items-center">
               <div class="flip-card w-full aspect-[1/1.05] flex items-center justify-center relative overflow-hidden">
                 <div class="flip-split-line"></div>
                 <div id="wheel-h" class="flip-wheel" title="Glisser pour régler les heures"></div>
@@ -581,7 +560,7 @@
               </div>
               <span class="text-zinc-500 font-extrabold text-[11px] sm:text-sm tracking-[0.2em] mt-3 uppercase">HOUR</span>
             </div>
-            <div class="flex flex-col items-center w-full">
+            <div class="flex flex-col items-center">
               <div class="flip-card w-full aspect-[1/1.05] flex items-center justify-center relative overflow-hidden">
                 <div class="flip-split-line"></div>
                 <div id="wheel-m" class="flip-wheel" title="Glisser pour régler les minutes"></div>
@@ -589,7 +568,7 @@
               </div>
               <span class="text-zinc-500 font-extrabold text-[11px] sm:text-sm tracking-[0.2em] mt-3 uppercase">MIN</span>
             </div>
-            <div class="flex flex-col items-center w-full">
+            <div class="flex flex-col items-center">
               <div class="flip-card w-full aspect-[1/1.05] flex items-center justify-center relative overflow-hidden">
                 <div class="flip-split-line"></div>
                 <div id="wheel-s" class="flip-wheel" title="Glisser pour régler les secondes"></div>
@@ -601,9 +580,9 @@
         </div>
 
         <!-- PANNEAU AUDIO : MASQUÉ EN MODE PLEIN ÉCRAN FOCUS -->
-        <div id="timerAudioPanel" class="flex flex-col items-center gap-3 pt-3 pb-4 border-t border-zinc-900 relative z-10">
+        <div id="timerAudioPanel" class="flex flex-col items-center gap-3 pt-3 pb-4 border-t border-zinc-900 relative z-10 w-full">
           <!-- Lecteur HTML5 natif pour continuer la lecture en arrière-plan sur Safari / iOS / iPadOS / Android -->
-          <audio id="focusBgAudio" loop playsinline preload="auto" class="hidden"></audio>
+          <audio id="bgAudioPlayer" loop playsinline preload="auto" class="hidden"></audio>
           <div class="flex flex-wrap items-center justify-center gap-2">
             <button type="button" onclick="toggleAudioSource('brown')" id="noise-btn-brown" class="noise-pill">
               <span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Bruit Brun (Profond)</span>
@@ -623,13 +602,13 @@
             <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M12 6l-4 4H4v4h4l4 4V6z" />
             </svg>
-            <input type="range" id="noiseVolumeSlider" min="0" max="100" value="35" oninput="updateNoiseVolume(this.value, false)" onchange="updateNoiseVolume(this.value, true)"
+            <input type="range" id="noiseVolumeSlider" min="0" max="100" value="35" oninput="updateNoiseVolume(this.value)"
               class="w-24 sm:w-32 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-white" />
             <span id="noiseVolumeLabel" class="text-[10px] font-mono-timer text-zinc-400 w-7 text-right">35%</span>
           </div>
         </div>
 
-        <div class="w-full flex items-center justify-between pt-2 relative z-10">
+        <div class="flex items-center justify-between pt-2 relative z-10 w-full">
           <button id="timerHistoryScrollBtn" onclick="$('timerHistoryCard').scrollIntoView({behavior: 'smooth'})" class="p-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition" title="Historique">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           </button>
@@ -809,13 +788,13 @@
     </section>
 
     <!-- ========================================================== -->
-    <!-- VUE 4 : PARAMÈTRES, MATIÈRES & SYNCHRO MULTI-APPAREILS     -->
+    <!-- VUE 4 : PARAMÈTRES, MATIÈRES, RAPPEL 18H & SYNCHRO CLOUD   -->
     <!-- ========================================================== -->
     <section id="view-settings" class="hidden max-w-2xl mx-auto space-y-6">
       <div class="card rounded-2xl p-6 space-y-5">
         <div>
           <h3 class="font-extrabold text-lg tracking-tight">Paramétrer mes Matières & Couleurs</h3>
-          <p class="text-xs mt-0.5" style="color: var(--text-muted);">Associe une couleur à chaque matière ou renomme tes matières existantes.</p>
+          <p class="text-xs mt-0.5" style="color: var(--text-muted);">Associe une couleur vive à chaque matière ou renomme tes matières existantes.</p>
         </div>
 
         <form onsubmit="addSubject(event)" class="p-4 rounded-2xl border space-y-4" style="background-color: var(--bg-main); border-color: var(--border-color);">
@@ -825,7 +804,7 @@
           </div>
 
           <div class="flex flex-wrap items-center justify-between gap-4 pt-1">
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 flex-wrap">
               <span class="text-xs font-semibold" style="color: var(--text-muted);">Couleur :</span>
               <div id="subjectPresetPalette" class="flex items-center gap-2.5"></div>
               <div class="h-5 w-[1px]" style="background-color: var(--border-color);"></div>
@@ -841,21 +820,49 @@
         <div class="space-y-2" id="subjectsListEditor"></div>
       </div>
 
+      <!-- NOTIFICATION QUOTIDIENNE DES TÂCHES RESTANTES (18H00 PAR DÉFAUT) -->
+      <div class="card rounded-2xl p-6 space-y-4">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h3 class="font-extrabold text-lg tracking-tight">Rappel quotidien des tâches (18h00)</h3>
+            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Reçois une notification s'il te reste des tâches non cochées pour aujourd'hui.</p>
+          </div>
+          <button type="button" onclick="TaskReminderEngine.toggleEnabled()" id="reminderToggleBtn" class="px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition">
+            🔔 Activé
+          </button>
+        </div>
+
+        <div class="p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
+          <div class="flex items-center gap-3">
+            <label for="reminderTimeInput" class="text-xs font-bold">Heure du rappel :</label>
+            <input type="time" id="reminderTimeInput" value="18:00" onchange="TaskReminderEngine.updateTime(this.value)" class="input-field px-3 py-1.5 rounded-xl text-xs font-mono-timer font-bold" />
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="TaskReminderEngine.requestPermission(true)" id="notifPermBtn" class="px-3 py-1.5 rounded-xl text-xs font-bold border hover:opacity-85 transition" style="border-color: var(--border-color); background-color: var(--bg-input);">
+              Autoriser les notifications
+            </button>
+            <button type="button" onclick="TaskReminderEngine.testNotificationNow()" class="theme-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold">
+              Tester l'alerte
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- SYNCHRONISATION MULTI-APPAREILS (TÉLÉPHONE & TABLETTE) -->
       <div class="card rounded-2xl p-6 space-y-4">
         <div class="flex items-start justify-between gap-3">
           <div>
             <h3 class="font-extrabold text-lg tracking-tight">Synchronisation Téléphone & Tablette</h3>
-            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Synchronisation chiffrée via ton compte App Store (iCloud) / Play Store, ou via ta clé Cloud multi-appareils.</p>
+            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Synchronisation chiffrée via Firebase Cloud et ton compte App Store / Play Store.</p>
           </div>
-          <span id="settingsSyncBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex-shrink-0">🛡️ Protégé</span>
+          <span id="settingsSyncBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex-shrink-0">🛡️ Protégé & Synchro</span>
         </div>
 
         <div class="p-4 rounded-2xl border space-y-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <span class="text-xs font-bold block">Identifiant de synchronisation Cloud</span>
-              <span class="text-[11px]" style="color: var(--text-muted);">Entre ce même code sur ta tablette pour partager tes données en temps réel</span>
+              <span class="text-[11px]" style="color: var(--text-muted);">Entre ce même code sur ta tablette et ton téléphone puis clique sur « Lier »</span>
             </div>
             <div class="flex items-center gap-2">
               <input type="text" id="syncKeyInput" maxlength="24" autocomplete="off" spellcheck="false" placeholder="Code Synchro" class="input-field px-3 py-1.5 rounded-xl text-xs font-mono-timer font-bold w-36 text-center uppercase" />
@@ -902,35 +909,6 @@
         <input type="range" id="goalRangeInput" min="1" max="14" step="0.5" value="7" oninput="updateDailyGoal(this.value)" class="w-full accent-current cursor-pointer" />
         <div class="flex justify-between text-[11px]" style="color: var(--text-muted);">
           <span>1h (Léger)</span><span>6h (Régulier)</span><span>10h (Intensif)</span><span>14h (Concours)</span>
-        </div>
-      </div>
-
-      <!-- RAPPEL QUOTIDIEN DES TÂCHES RESTANTES (18H00 PAR DÉFAUT) -->
-      <div class="card rounded-2xl p-6 space-y-4">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <h3 class="font-extrabold text-lg tracking-tight">Rappel quotidien des tâches (18h00)</h3>
-            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Reçois une notification s'il te reste des tâches non terminées en fin de journée.</p>
-          </div>
-          <span id="settingsNotifStatusBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30 flex-shrink-0">🔔 18:00</span>
-        </div>
-
-        <div class="p-4 rounded-2xl border space-y-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <label class="flex items-center gap-2.5 cursor-pointer">
-              <input type="checkbox" id="reminderEnabledCheckbox" checked onchange="TaskReminderEngine.toggleEnabled(this.checked)" class="w-4 h-4 rounded cursor-pointer accent-emerald-500" />
-              <span class="text-xs font-bold">Activer la notification des tâches restantes</span>
-            </label>
-            <div class="flex items-center gap-2">
-              <span class="text-xs" style="color: var(--text-muted);">Heure :</span>
-              <input type="time" id="reminderTimeInput" value="18:00" onchange="TaskReminderEngine.updateTime(this.value)" class="input-field px-2.5 py-1 rounded-xl text-xs font-mono-timer font-bold" />
-            </div>
-          </div>
-
-          <div class="pt-2.5 border-t flex flex-wrap items-center justify-between gap-2 text-[11px]" style="border-color: var(--border-color);">
-            <button type="button" onclick="TaskReminderEngine.requestPermissionInteractive()" id="requestNotifPermBtn" class="font-bold underline hover:opacity-80" style="color: var(--text-main);">Autoriser les notifications système</button>
-            <button type="button" onclick="TaskReminderEngine.triggerNotification(true)" class="theme-btn-primary px-3 py-1.5 rounded-xl text-xs font-bold">🔔 Tester la notification</button>
-          </div>
         </div>
       </div>
     </section>
@@ -1014,8 +992,11 @@
     'use strict';
 
     const STORAGE_KEY = 'focuspass_v4';
+    const LAST_NOTIF_STORAGE_KEY = 'focuspass_last_notif_date';
     const $ = id => document.getElementById(id);
-    const esc = str => String(str ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    const esc = str => String(str ?? '').replace(/[&<>"'`]/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;'
+    }[m]));
 
     // =========================================================================
     // BOUCLIER DE SÉCURITÉ (SECURITY GUARD) : ANTI-XSS, ANTI-INJECTION & SANITIZATION
@@ -1024,6 +1005,7 @@
       cleanText(val, maxLen = 120) {
         if (typeof val !== 'string') return '';
         return val
+          .normalize('NFC')
           .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
           .replace(/<[^>]*>?/gm, '')
           .trim()
@@ -1037,6 +1019,9 @@
       },
       isValidDateKey(key) {
         return typeof key === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(key);
+      },
+      isValidTime(timeStr) {
+        return typeof timeStr === 'string' && /^([01]\d|2[0-3]):[0-5]\d$/.test(timeStr);
       },
       cleanSyncKey(key) {
         if (typeof key !== 'string') return '';
@@ -1062,12 +1047,12 @@
 
     const DAYS_SHORT = Object.freeze(['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']);
     const DAYS_FULL = Object.freeze(['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']);
-    const MAIN_5_COLORS = Object.freeze(['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899']);
+    const MAIN_5_COLORS = Object.freeze(['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#f43f5e']);
 
     const PRIORITIES = Object.freeze({
-      urgent:    Object.freeze({ label: 'Urgent',    bg: 'rgba(239,68,68,0.14)', border: 'rgba(239,68,68,0.35)', text: '#f87171', order: 1, next: 'important' }),
-      important: Object.freeze({ label: 'Important', bg: 'rgba(245,158,11,0.14)', border: 'rgba(245,158,11,0.35)', text: '#fbbf24', order: 2, next: 'todo' }),
-      todo:      Object.freeze({ label: 'À faire',   bg: 'rgba(59,130,246,0.14)', border: 'rgba(59,130,246,0.35)', text: '#60a5fa', order: 3, next: 'urgent' })
+      urgent:    Object.freeze({ label: 'Urgent',    bg: 'rgba(239,68,68,0.18)', border: 'rgba(239,68,68,0.48)', text: '#fca5a5', dot: '#ef4444', order: 1, next: 'important' }),
+      important: Object.freeze({ label: 'Important', bg: 'rgba(245,158,11,0.18)', border: 'rgba(245,158,11,0.48)', text: '#fcd34d', dot: '#f59e0b', order: 2, next: 'todo' }),
+      todo:      Object.freeze({ label: 'À faire',   bg: 'rgba(59,130,246,0.18)', border: 'rgba(59,130,246,0.48)', text: '#93c5fd', dot: '#3b82f6', order: 3, next: 'urgent' })
     });
 
     const STREAK_BADGES = Object.freeze([
@@ -1096,7 +1081,7 @@
       toastTimer = setTimeout(() => {
         t.classList.remove('opacity-100', 'translate-y-0');
         t.classList.add('opacity-0', 'translate-y-3');
-      }, 2400);
+      }, 2600);
     }
 
     // =========================================================================
@@ -1174,6 +1159,9 @@
       return sortTasksByPriority(state.tasks.filter(t => !t.done && t.date < todayKey));
     }
 
+    // =========================================================================
+    // ÉTAT PAR DÉFAUT & VALIDATION DES DONNÉES
+    // =========================================================================
     function generateDefaultSyncKey() {
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       const arr = new Uint8Array(6);
@@ -1206,7 +1194,6 @@
       };
     }
 
-    // Validation & nettoyage complet d'un état chargé (depuis localStorage ou Cloud)
     function migrateLoadedState(s) {
       if (!s || typeof s !== 'object' || !Array.isArray(s.subjects) || s.subjects.length === 0) {
         return createDefaultState();
@@ -1268,9 +1255,7 @@
           })
         : [];
 
-      const cleanReminderTime = (typeof s.reminderTime === 'string' && /^\d{2}:\d{2}$/.test(s.reminderTime))
-        ? s.reminderTime
-        : '18:00';
+      const cleanReminderTime = SecurityGuard.isValidTime(s.reminderTime) ? s.reminderTime : '18:00';
 
       return {
         updatedAt: SecurityGuard.clampNumber(s.updatedAt, 0, Date.now() + 86400000, Date.now()),
@@ -1295,13 +1280,33 @@
     if (state.subjects.length) currentTimerSubject = state.subjects[0].name;
 
     // =========================================================================
-    // MOTEUR DE SYNCHRONISATION SÉCURISÉ (APP STORE iCloud / PLAY STORE / CLOUD)
+    // MOTEUR DE SYNCHRONISATION SÉCURISÉ (FIREBASE CLOUD / iCloud / PLAY STORE)
     // =========================================================================
     const CloudSyncEngine = {
       cloudEndpoint: 'https://focuspass-default-rtdb.firebaseio.com',
       broadcastChannel: ('BroadcastChannel' in window) ? new BroadcastChannel('focuspass_sync_channel') : null,
       lastPushTime: 0,
       pollIntervalId: null,
+
+      async safeFetch(url, options = {}) {
+        const parsed = new URL(url);
+        if (parsed.protocol !== 'https:' || parsed.hostname !== 'focuspass-default-rtdb.firebaseio.com') {
+          throw new Error('Domaine non autorisé');
+        }
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 8000);
+        try {
+          return await fetch(parsed.toString(), {
+            ...options,
+            signal: ctrl.signal,
+            referrerPolicy: 'no-referrer',
+            credentials: 'omit',
+            mode: 'cors'
+          });
+        } finally {
+          clearTimeout(timer);
+        }
+      },
 
       init() {
         if (this.broadcastChannel) {
@@ -1341,14 +1346,6 @@
           }
         });
 
-        window.addEventListener('focus', () => {
-          this.pullFromCloud(false);
-        });
-
-        window.addEventListener('online', () => {
-          this.pullFromCloud(false);
-        });
-
         if (this.pollIntervalId) clearInterval(this.pollIntervalId);
         this.pollIntervalId = setInterval(() => {
           if (document.visibilityState === 'visible') {
@@ -1365,7 +1362,7 @@
         const badge = $('settingsSyncBadge');
         const tsText = $('lastSyncTimestampText');
         if (dot) {
-          dot.className = `w-2 h-2 rounded-full ${isSyncing ? 'bg-amber-400 animate-ping' : 'bg-emerald-400'}`;
+          dot.className = `w-2 h-2 rounded-full ${isSyncing ? 'bg-amber-400 animate-ping' : 'bg-emerald-400 shadow-[0_0_8px_#34d399]'}`;
         }
         if (label) label.textContent = statusText;
         if (badge) badge.textContent = isSyncing ? '↻ Synchro...' : '🛡️ Protégé & Synchro';
@@ -1388,7 +1385,7 @@
 
       async pushToCloud() {
         const now = Date.now();
-        if (now - this.lastPushTime < 150) return; // Anti-spam / Rate-limiting
+        if (now - this.lastPushTime < 150) return;
         this.lastPushTime = now;
 
         this.setStatusUI('Synchro...', true);
@@ -1414,7 +1411,7 @@
         const safeKey = SecurityGuard.cleanSyncKey(state.syncKey);
         if (this.cloudEndpoint && safeKey.length >= 4) {
           try {
-            await fetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(safeKey)}.json`, {
+            await this.safeFetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(safeKey)}.json`, {
               method: 'PUT',
               headers: { 'Content-Type': 'application/json' },
               body: payloadStr
@@ -1443,7 +1440,7 @@
         const safeKey = SecurityGuard.cleanSyncKey(state.syncKey);
         if (this.cloudEndpoint && safeKey.length >= 4) {
           try {
-            const resp = await fetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(safeKey)}.json`, {
+            const resp = await this.safeFetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(safeKey)}.json`, {
               cache: 'no-store'
             });
             if (resp.ok) {
@@ -1472,7 +1469,7 @@
 
         if (this.cloudEndpoint) {
           try {
-            const resp = await fetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(safeKey)}.json`, {
+            const resp = await this.safeFetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(safeKey)}.json`, {
               cache: 'no-store'
             });
             if (resp.ok) {
@@ -1503,7 +1500,7 @@
 
         if (this.cloudEndpoint && safeKey.length >= 4) {
           try {
-            const resp = await fetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(safeKey)}.json`, {
+            const resp = await this.safeFetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(safeKey)}.json`, {
               cache: 'no-store'
             });
             if (resp.ok) {
@@ -1541,6 +1538,148 @@
       if (input) input.value = val;
       CloudSyncEngine.linkSyncKey(val);
     }
+
+    // =========================================================================
+    // MOTEUR DE RAPPEL QUOTIDIEN À 18H00 POUR LES TÂCHES RESTANTES
+    // =========================================================================
+    const TaskReminderEngine = {
+      checkIntervalId: null,
+
+      init() {
+        this.updateUI();
+        if (this.checkIntervalId) clearInterval(this.checkIntervalId);
+        this.checkIntervalId = setInterval(() => this.checkSchedule(), 20000);
+        setTimeout(() => this.checkSchedule(), 2500);
+      },
+
+      async requestPermission(notifyFeedback = false) {
+        if (!('Notification' in window)) {
+          if (notifyFeedback) showToast('Rappel actif via bannière intégrée FocusPASS', '🔔');
+          return false;
+        }
+        try {
+          const perm = await Notification.requestPermission();
+          this.updateUI();
+          if (notifyFeedback) {
+            if (perm === 'granted') showToast('Notifications système autorisées !', '🔔');
+            else showToast('Rappel actif via bannière dans l\'application', 'ℹ️');
+          }
+          return perm === 'granted';
+        } catch {
+          return false;
+        }
+      },
+
+      toggleEnabled() {
+        state.reminderEnabled = !state.reminderEnabled;
+        saveState();
+        this.updateUI();
+        if (state.reminderEnabled) {
+          this.requestPermission(false);
+          showToast(`Rappel quotidien activé (${state.reminderTime || '18:00'})`, '🔔');
+        } else {
+          showToast('Rappel quotidien désactivé', '🔕');
+        }
+      },
+
+      updateTime(val) {
+        if (SecurityGuard.isValidTime(val)) {
+          state.reminderTime = val;
+          localStorage.removeItem(LAST_NOTIF_STORAGE_KEY);
+          saveState();
+          this.updateUI();
+          showToast(`Heure du rappel réglée sur ${val}`, '⏰');
+        }
+      },
+
+      checkSchedule() {
+        if (!state.reminderEnabled) return;
+        const todayKey = getTodayKey();
+        if (localStorage.getItem(LAST_NOTIF_STORAGE_KEY) === todayKey) return;
+
+        const now = new Date();
+        const [targetH, targetM] = (state.reminderTime || '18:00').split(':').map(Number);
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+        const targetMinutes = (targetH || 18) * 60 + (targetM || 0);
+
+        if (nowMinutes >= targetMinutes) {
+          const remainingToday = state.tasks.filter(t => t.date === todayKey && !t.done);
+          localStorage.setItem(LAST_NOTIF_STORAGE_KEY, todayKey);
+          if (remainingToday.length > 0) {
+            this.sendRemainingTasksNotification(remainingToday);
+          }
+        }
+      },
+
+      sendRemainingTasksNotification(remainingTasks) {
+        const count = remainingTasks.length;
+        const previewTitles = remainingTasks.slice(0, 3).map(t => `• ${t.title} (${t.subject})`).join('\n');
+        const extra = count > 3 ? `\n+ ${count - 3} autre(s) tâche(s)` : '';
+        const title = `📋 FocusPASS — Il te reste ${count} tâche${count > 1 ? 's' : ''} pour aujourd'hui`;
+        const body = `${previewTitles}${extra}`;
+
+        if ($('reminderBannerModal')) {
+          $('reminderBannerTitle').textContent = title;
+          $('reminderBannerBody').textContent = remainingTasks.map(t => `${t.title} (${t.subject})`).join(' • ');
+          $('reminderBannerModal').classList.remove('hidden');
+        }
+
+        playCelebrationChime();
+
+        if ('Notification' in window && Notification.permission === 'granted') {
+          try {
+            if (navigator.serviceWorker?.ready) {
+              navigator.serviceWorker.ready.then(reg => reg.showNotification(title, { body, tag: 'focuspass-daily-tasks' })).catch(() => {
+                new Notification(title, { body, tag: 'focuspass-daily-tasks' });
+              });
+            } else {
+              new Notification(title, { body, tag: 'focuspass-daily-tasks' });
+            }
+          } catch {}
+        }
+
+        try {
+          if (window.Capacitor?.Plugins?.LocalNotifications) {
+            window.Capacitor.Plugins.LocalNotifications.schedule({
+              notifications: [{ id: 1800, title, body, schedule: { at: new Date(Date.now() + 500) } }]
+            });
+          }
+          if (window.webkit?.messageHandlers?.localNotifications) {
+            window.webkit.messageHandlers.localNotifications.postMessage({ title, body });
+          }
+        } catch {}
+      },
+
+      async testNotificationNow() {
+        await this.requestPermission(false);
+        const todayKey = getTodayKey();
+        const remainingToday = state.tasks.filter(t => t.date === todayKey && !t.done);
+        if (remainingToday.length === 0) {
+          showToast('Bravo ! Toutes tes tâches d\'aujourd\'hui sont déjà cochées 🎉', '✅');
+        } else {
+          this.sendRemainingTasksNotification(remainingToday);
+        }
+      },
+
+      updateUI() {
+        const enabled = Boolean(state.reminderEnabled);
+        const timeStr = state.reminderTime || '18:00';
+        if ($('reminderTimeInput') && document.activeElement !== $('reminderTimeInput')) {
+          $('reminderTimeInput').value = timeStr;
+        }
+        const toggleBtn = $('reminderToggleBtn');
+        if (toggleBtn) {
+          toggleBtn.textContent = enabled ? '🔔 Activé' : '🔕 Désactivé';
+          toggleBtn.className = enabled
+            ? 'px-3.5 py-1.5 rounded-full text-xs font-extrabold border bg-emerald-500/15 text-emerald-400 border-emerald-500/30 transition'
+            : 'px-3.5 py-1.5 rounded-full text-xs font-extrabold border opacity-60 transition';
+        }
+        const permBtn = $('notifPermBtn');
+        if (permBtn && 'Notification' in window) {
+          permBtn.textContent = Notification.permission === 'granted' ? '✓ Notifications système actives' : 'Autoriser les notifications';
+        }
+      }
+    };
 
     const getSubjectColor = name => state.subjects.find(s => s.name === name)?.color || '#3b82f6';
     const getDateTotalMinutes = dateKey => state.sessions.filter(s => s.date === dateKey).reduce((a, s) => a + s.minutes, 0);
@@ -1688,278 +1827,8 @@
     }
 
     // =========================================================================
-    // SYSTÈME DE NOTIFICATION QUOTIDIENNE DES TÂCHES RESTANTES (18H00)
-    // =========================================================================
-    const LAST_NOTIF_STORAGE_KEY = 'focuspass_last_notif_date';
-
-    function closeEveningBanner() {
-      $('eveningTaskBanner')?.classList.add('hidden');
-    }
-
-    const TaskReminderEngine = {
-      checkIntervalId: null,
-
-      init() {
-        this.updateUI();
-        if (this.checkIntervalId) clearInterval(this.checkIntervalId);
-        // Vérification toutes les 20 secondes + au retour sur l'application
-        this.checkIntervalId = setInterval(() => this.checkSchedule(), 20000);
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') this.checkSchedule();
-        });
-        setTimeout(() => this.checkSchedule(), 1500);
-      },
-
-      getRemainingTodayTasks() {
-        const todayKey = getTodayKey();
-        return sortTasksByPriority(state.tasks.filter(t => t.date === todayKey && !t.done));
-      },
-
-      updateUI() {
-        const enabled = state.reminderEnabled !== false;
-        const timeStr = state.reminderTime || '18:00';
-        const hasPerm = ('Notification' in window) && Notification.permission === 'granted';
-
-        const chk = $('reminderEnabledCheckbox');
-        if (chk) chk.checked = enabled;
-        const tInput = $('reminderTimeInput');
-        if (tInput && document.activeElement !== tInput) tInput.value = timeStr;
-
-        const dot = $('dashboardNotifDot');
-        const label = $('dashboardNotifLabel');
-        const badge = $('settingsNotifStatusBadge');
-        const permBtn = $('requestNotifPermBtn');
-
-        if (dot) {
-          dot.className = `w-2 h-2 rounded-full ${!enabled ? 'bg-zinc-500' : (hasPerm ? 'bg-emerald-400' : 'bg-amber-400')}`;
-        }
-        if (label) {
-          label.textContent = enabled ? `🔔 Rappel ${timeStr}` : '🔕 Rappel désactivé';
-        }
-        if (badge) {
-          badge.textContent = enabled ? `🔔 Actif (${timeStr})` : '🔕 Désactivé';
-        }
-        if (permBtn) {
-          permBtn.textContent = hasPerm
-            ? '✓ Notifications système autorisées'
-            : 'Autoriser les notifications système (Safari / Chrome / Mobile)';
-        }
-
-        // Planification native automatique pour App Store / Play Store
-        this.scheduleNativeNotification();
-      },
-
-      async handlePillClick() {
-        if ('Notification' in window && Notification.permission === 'default') {
-          await this.requestPermissionInteractive();
-          return;
-        }
-        const remaining = this.getRemainingTodayTasks();
-        if (remaining.length > 0) {
-          this.triggerNotification(true);
-        } else {
-          showToast(`Rappel actif à ${state.reminderTime || '18:00'} (aucune tâche restante pour aujourd'hui !)`, '🔔');
-        }
-      },
-
-      async requestPermissionInteractive() {
-        if (!('Notification' in window)) {
-          showToast('Rappel actif via bannière & alerte sonore intégrée', '🔔');
-          return;
-        }
-        try {
-          const perm = await Notification.requestPermission();
-          this.updateUI();
-          if (perm === 'granted') {
-            showToast('Notifications autorisées ! Rappel fixé à ' + (state.reminderTime || '18:00'), '🔔');
-          } else {
-            showToast('Le rappel s\'affichera dans l\'application à ' + (state.reminderTime || '18:00'), 'ℹ️');
-          }
-        } catch {
-          showToast('Rappel actif dans l\'application', '🔔');
-        }
-      },
-
-      toggleEnabled(val) {
-        state.reminderEnabled = Boolean(val);
-        saveState();
-        this.updateUI();
-        showToast(state.reminderEnabled ? `Rappel activé pour ${state.reminderTime || '18:00'}` : 'Rappel quotidien désactivé', '🔔');
-      },
-
-      updateTime(val) {
-        if (typeof val === 'string' && /^\d{2}:\d{2}$/.test(val)) {
-          state.reminderTime = val;
-          localStorage.removeItem(LAST_NOTIF_STORAGE_KEY);
-          saveState();
-          this.updateUI();
-          showToast(`Heure du rappel réglée sur ${val}`, '⏰');
-        }
-      },
-
-      checkSchedule() {
-        if (state.reminderEnabled === false) return;
-        const todayKey = getTodayKey();
-        if (localStorage.getItem(LAST_NOTIF_STORAGE_KEY) === todayKey) return;
-
-        const now = new Date();
-        const [targetH, targetM] = (state.reminderTime || '18:00').split(':').map(Number);
-        const nowMinutes = now.getHours() * 60 + now.getMinutes();
-        const targetMinutes = (targetH ?? 18) * 60 + (targetM ?? 0);
-
-        if (nowMinutes >= targetMinutes) {
-          const remaining = this.getRemainingTodayTasks();
-          localStorage.setItem(LAST_NOTIF_STORAGE_KEY, todayKey);
-          if (remaining.length > 0) {
-            this.triggerNotification(false);
-          }
-        }
-      },
-
-      playGentleReminderTone() {
-        try {
-          const AudioCtx = window.AudioContext || window.webkitAudioContext;
-          if (!AudioCtx) return;
-          if (!audioCtx) audioCtx = new AudioCtx();
-          if (audioCtx.state === 'suspended') audioCtx.resume();
-          [587.33, 880].forEach((freq, idx) => {
-            const osc = audioCtx.createOscillator();
-            const g = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.value = freq;
-            const start = audioCtx.currentTime + idx * 0.14;
-            g.gain.setValueAtTime(0.001, start);
-            g.gain.linearRampToValueAtTime(0.1, start + 0.02);
-            g.gain.exponentialRampToValueAtTime(0.0001, start + 0.35);
-            osc.connect(g);
-            g.connect(audioCtx.destination);
-            osc.start(start);
-            osc.stop(start + 0.36);
-          });
-        } catch {}
-      },
-
-      async triggerNotification(isManualTest = false) {
-        const remaining = this.getRemainingTodayTasks();
-        const count = remaining.length;
-
-        const title = count > 0
-          ? `📋 FocusPASS — Il te reste ${count} tâche${count > 1 ? 's' : ''} pour aujourd'hui`
-          : `🎉 FocusPASS — Toutes tes tâches du jour sont terminées !`;
-
-        const taskListInline = remaining.map(t => `${t.title} (${t.subject})`).join(', ');
-        const bodyText = count > 0
-          ? `Il reste à faire : ${taskListInline}`
-          : 'Bravo, tu es 100 % à jour dans tes révisions pour aujourd\'hui !';
-
-        this.playGentleReminderTone();
-
-        // c) Bannière In-App & Toast
-        const banner = $('eveningTaskBanner');
-        if (banner) {
-          $('eveningBannerTitle').textContent = title;
-          $('eveningBannerList').textContent = bodyText;
-          banner.classList.remove('hidden');
-        }
-        showToast(count > 0 ? `Il te reste ${count} tâche(s) pour aujourd'hui` : 'Toutes les tâches du jour sont faites !', '🔔');
-
-        // a) Notification Web API & Service Worker
-        if ('Notification' in window) {
-          if (Notification.permission === 'granted') {
-            let sentViaSW = false;
-            if ('serviceWorker' in navigator) {
-              try {
-                const reg = await navigator.serviceWorker.getRegistration();
-                if (reg && typeof reg.showNotification === 'function') {
-                  await reg.showNotification(title, {
-                    body: bodyText,
-                    tag: 'focuspass-daily-tasks',
-                    renotify: true
-                  });
-                  sentViaSW = true;
-                }
-              } catch {}
-            }
-            if (!sentViaSW) {
-              try {
-                const n = new Notification(title, {
-                  body: bodyText,
-                  tag: 'focuspass-daily-tasks',
-                  renotify: true
-                });
-                n.onclick = () => {
-                  window.focus();
-                  switchTab('dashboard');
-                  selectDay(getTodayIndex());
-                  n.close();
-                };
-              } catch {}
-            }
-          } else if (isManualTest && Notification.permission === 'default') {
-            this.requestPermissionInteractive();
-          }
-        }
-
-        // b) Ponts mobiles natifs (App Store / Play Store)
-        try {
-          if (window.webkit?.messageHandlers?.localNotifications) {
-            window.webkit.messageHandlers.localNotifications.postMessage({ action: 'triggerNow', title, body: bodyText });
-          } else if (window.webkit?.messageHandlers?.nativeNotify) {
-            window.webkit.messageHandlers.nativeNotify.postMessage({ title, body: bodyText });
-          }
-        } catch {}
-      },
-
-      scheduleNativeNotification() {
-        try {
-          const remaining = this.getRemainingTodayTasks();
-          const [h, m] = (state.reminderTime || '18:00').split(':').map(Number);
-          const count = remaining.length;
-          const title = `📋 FocusPASS — Il te reste ${count} tâche${count > 1 ? 's' : ''} pour aujourd'hui`;
-          const body = `Il reste à faire : ${remaining.map(t => `${t.title} (${t.subject})`).join(', ')}`;
-
-          if (window.Capacitor?.Plugins?.LocalNotifications) {
-            if (state.reminderEnabled !== false && count > 0) {
-              window.Capacitor.Plugins.LocalNotifications.schedule({
-                notifications: [{
-                  id: 1800,
-                  title,
-                  body,
-                  schedule: { on: { hour: h ?? 18, minute: m ?? 0 }, allowWhileIdle: true }
-                }]
-              }).catch(() => {});
-            } else {
-              window.Capacitor.Plugins.LocalNotifications.cancel({ notifications: [{ id: 1800 }] }).catch(() => {});
-            }
-          }
-
-          if (window.webkit?.messageHandlers?.localNotifications) {
-            window.webkit.messageHandlers.localNotifications.postMessage({
-              action: state.reminderEnabled !== false && count > 0 ? 'scheduleDaily' : 'cancelDaily',
-              hour: h ?? 18,
-              minute: m ?? 0,
-              title,
-              body
-            });
-          }
-        } catch {}
-      }
-    };
-
-    // =========================================================================
     // MOTEUR AUDIO CONTINU SANS COUPURE (15 MINUTES WAV PHASE-PARFAITE + ARRIÈRE-PLAN)
     // =========================================================================
-    // Pourquoi il n'y a plus aucune coupure à 10 secondes ET que l'arrière-plan fonctionne :
-    // 1. La lecture passe 100 % par le lecteur natif HTML5 <audio id="focusBgAudio"> pour que
-    //    Safari, iOS, iPadOS et Android maintiennent le son en arrière-plan et écran verrouillé.
-    // 2. Au lieu d'un fichier de 10s (qui causait un micro-saut du décodeur toutes les 10s),
-    //    on génère en < 10 ms un flux WAV continu de 15 minutes (900 secondes) via Int16Array.set() :
-    //    - Binaural (200 Hz G / 206 Hz D à 16000 Hz Stéréo) : 200 Hz et 206 Hz complètent un
-    //      nombre entier exact de cycles en 1.000s (phase de départ = 0, phase de fin = 0).
-    //      Ce bloc parfait d'1 seconde est copié 900 fois en mémoire = 0 saut de phase !
-    //    - Bruits (Brun, Rose, Blanc à 16000 Hz Mono) : filtre préchauffé pendant 1s puis
-    //      fondu trigonométrique à puissance constante (cos² + sin² = 1) sur 4 secondes pour
-    //      créer une tuile de 28s sans aucune baisse de volume ni clic, répétée 32 fois (~15 min).
     let audioCtx = null, activeAudioType = null;
     let noiseVolume = 0.35;
     const cachedSeamlessWavUrls = {};
@@ -2002,8 +1871,7 @@
       const sr = 16000;
 
       if (type === 'binaural') {
-        // 1.000 seconde à 16000 Hz Stéréo = 16000 frames (32000 échantillons Int16)
-        // 200 Hz fait exactement 200 cycles ; 206 Hz fait exactement 206 cycles -> raccord 100 % continu
+        // 1.000 seconde à 16000 Hz Stéréo : 200 Hz et 206 Hz font un nombre entier exact de cycles (phase 0 -> 0)
         const oneSecFrames = sr;
         const oneSecStereo = new Int16Array(oneSecFrames * 2);
         const amp = 9500;
@@ -2026,10 +1894,9 @@
         return cachedSeamlessWavUrls[type];
       }
 
-      // Génération de bruit (Brun, Rose, Blanc) à 16000 Hz Mono :
-      // 32 secondes générées après 1s de préchauffage du filtre, crossfade égal-puissance de 4s -> tuile de 28s
+      // Génération de bruit (Brun, Rose, Blanc) : préchauffage 1s + boucle de 10s avec fondu croisé cos/sin de 4s répété sur 15 min (900s)
       const warmupSamples = sr * 1;
-      const tileSeconds = 28;
+      const tileSeconds = 10;
       const fadeSeconds = 4;
       const tileLen = sr * tileSeconds;
       const fadeLen = sr * fadeSeconds;
@@ -2058,7 +1925,6 @@
           lp = lp * 0.78 + pink * 0.22;
           sample = lp * 1.15;
         } else {
-          // Bruit Brun profond
           brownLast = (brownLast + 0.025 * w) / 1.025;
           lp = lp * 0.75 + brownLast * 0.25;
           sample = lp * 2.1;
@@ -2069,7 +1935,7 @@
         }
       }
 
-      // Fondu enchaîné circulaire à puissance constante (sin/cos sur 4 secondes : sin² + cos² = 1)
+      // Fondu enchaîné circulaire à puissance constante (sin² + cos² = 1 sur 4 secondes)
       const tileInt16 = new Int16Array(tileLen);
       for (let i = 0; i < tileLen; i++) {
         let val;
@@ -2083,8 +1949,8 @@
         tileInt16[i] = Math.round(clamped * 28000);
       }
 
-      // Répète la tuile parfaite 32 fois -> 896 secondes (~15 minutes continues)
-      const repeats = 32;
+      // Répète la boucle parfaite 90 fois -> 900 secondes (15 minutes continues)
+      const repeats = 90;
       const fullMono = new Int16Array(tileLen * repeats);
       for (let r = 0; r < repeats; r++) {
         fullMono.set(tileInt16, r * tileLen);
@@ -2104,7 +1970,7 @@
           album: 'Concentration & Révisions PASS'
         });
         navigator.mediaSession.setActionHandler('play', () => {
-          const el = $('focusBgAudio');
+          const el = $('bgAudioPlayer');
           if (el && activeAudioType) {
             el.play().catch(() => {});
             navigator.mediaSession.playbackState = 'playing';
@@ -2127,7 +1993,7 @@
 
     function stopCurrentAudio() {
       activeAudioType = null;
-      const el = $('focusBgAudio');
+      const el = $('bgAudioPlayer');
       if (el) {
         try {
           el.pause();
@@ -2154,7 +2020,7 @@
       } catch {}
 
       activeAudioType = type;
-      const el = $('focusBgAudio');
+      const el = $('bgAudioPlayer');
       if (el) {
         try {
           el.src = getGaplessWavUrl(type);
@@ -2177,7 +2043,7 @@
       const cleanVal = SecurityGuard.clampNumber(val, 0, 100, 35);
       noiseVolume = cleanVal / 100;
       $('noiseVolumeLabel').textContent = `${cleanVal}%`;
-      const el = $('focusBgAudio');
+      const el = $('bgAudioPlayer');
       if (el) {
         try { el.volume = Math.max(0, Math.min(1, noiseVolume)); } catch {}
       }
@@ -2288,14 +2154,14 @@
         const isSel = idx === selectedDayIndex;
         const breakdown = getDateSubjectBreakdown(dKey);
         const segments = totalMin > 0
-          ? Object.entries(breakdown).map(([subj, min]) => `<div style="height:${(min / totalMin) * 100}%;background-color:${esc(getSubjectColor(subj))};" class="w-full transition-all duration-300" title="${esc(subj)}: ${formatMinutes(min)}"></div>`).join('')
+          ? Object.entries(breakdown).map(([subj, min]) => `<div style="height:${(min / totalMin) * 100}%;background-color:${esc(getSubjectColor(subj))};" class="w-full bar-segment" title="${esc(subj)}: ${formatMinutes(min)}"></div>`).join('')
           : `<div class="w-full h-full ${isMain ? 'opacity-25' : ''}" style="background-color:var(--bg-input);"></div>`;
 
         const dateSubLabel = isMain ? `<span class="text-[10px] opacity-60 font-normal block leading-tight">${formatShortDate(dateObj)}</span>` : '';
 
         return `<div onclick="selectDay(${idx}); ${isMain ? '' : "statsWeekOffset=0;switchTab('stats');"}" class="flex-1 flex flex-col items-center h-full justify-end cursor-pointer group">
           <span class="${isMain ? 'text-xs font-bold mb-1.5' : 'text-[10px] mb-1'} font-mono-timer opacity-80 group-hover:opacity-100 transition">${totalMin > 0 ? hoursFormatted : (isMain ? '0h' : '')}</span>
-          <div class="w-full ${isMain ? 'max-w-[52px] rounded-t-xl' : 'max-w-[28px] rounded-t-lg'} overflow-hidden flex flex-col-reverse transition-all duration-300 group-hover:brightness-110" style="height:${heightPct}%; ${isSel ? 'outline:2px solid var(--btn-bg);' : ''}">${segments}</div>
+          <div class="w-full ${isMain ? 'max-w-[52px] rounded-t-xl' : 'max-w-[28px] rounded-t-lg'} overflow-hidden flex flex-col-reverse transition-all duration-300 group-hover:brightness-110 shadow-sm" style="height:${heightPct}%; ${isSel ? 'outline:2px solid var(--btn-bg);' : ''}">${segments}</div>
           <span class="${isMain ? 'text-xs mt-2 px-2 py-0.5 rounded-md text-center ' + (isSel ? 'theme-btn-primary' : '') : 'text-[11px] mt-2 ' + (isSel ? 'underline' : '')} font-bold transition" style="${!isSel ? 'color:var(--text-muted);' : ''}">
             ${DAYS_SHORT[idx]}${dateSubLabel}
           </span>
@@ -2314,14 +2180,25 @@
       const curWeekTotalMin = curWeekTotals.reduce((a, b) => a + b, 0);
 
       $('currentDateDisplay').textContent = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-      $('headerGoalBadge').textContent = `${state.dailyGoalHours}h/j`;
       $('todayHoursBig').textContent = formatMinutes(todayMin);
       $('todayPercentBadge').textContent = `${pct}% de l'objectif`;
 
       const todayBreakdown = getDateSubjectBreakdown(todayKey);
-      $('todaySegmentedProgress').innerHTML = todayMin === 0 ? '' : Object.entries(todayBreakdown).map(([subj, min]) =>
-        `<div style="width:${Math.min(100, (min / Math.max(goalMin, todayMin)) * 100)}%;background-color:${esc(getSubjectColor(subj))};" class="h-full first:rounded-l-full last:rounded-r-full transition-all duration-500" title="${esc(subj)}: ${formatMinutes(min)}"></div>`
+      const todayEntries = Object.entries(todayBreakdown);
+      $('todaySegmentedProgress').innerHTML = todayMin === 0 ? '' : todayEntries.map(([subj, min]) =>
+        `<div style="width:${Math.min(100, (min / Math.max(goalMin, todayMin)) * 100)}%;background-color:${esc(getSubjectColor(subj))};" class="h-full bar-segment first:rounded-l-full last:rounded-r-full" title="${esc(subj)}: ${formatMinutes(min)}"></div>`
       ).join('');
+
+      if ($('todaySubjectsChips')) {
+        $('todaySubjectsChips').innerHTML = todayEntries.map(([subj, min]) => {
+          const c = esc(getSubjectColor(subj));
+          return `<span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full" style="background-color:${c}24;color:${c};border:1px solid ${c}55;">
+            <span class="w-2 h-2 rounded-full" style="background-color:${c};box-shadow:0 0 6px ${c};"></span>
+            <span>${esc(subj)}</span>
+            <span class="font-mono-timer opacity-90">${formatMinutes(min)}</span>
+          </span>`;
+        }).join('');
+      }
 
       const rem = Math.max(0, goalMin - todayMin);
       $('remainingTimeText').textContent = rem > 0 ? `Encore ${formatMinutes(rem)} pour atteindre ton objectif de ${state.dailyGoalHours}h` : `🔥 Objectif quotidien de ${state.dailyGoalHours}h atteint !`;
@@ -2335,7 +2212,7 @@
       renderDashboardTasks();
       renderDailyGoals();
 
-      $('miniSubjectLegend').innerHTML = state.subjects.map(s => `<span class="inline-flex items-center gap-1 text-[10px] font-semibold" style="color:var(--text-muted);"><span class="w-2 h-2 rounded-full" style="background-color:${esc(s.color)};"></span>${esc(s.name)}</span>`).join('');
+      $('miniSubjectLegend').innerHTML = state.subjects.map(s => `<span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-md border" style="color:var(--text-main);border-color:var(--border-color);background-color:var(--bg-main);"><span class="w-2 h-2 rounded-full" style="background-color:${esc(s.color)};box-shadow:0 0 6px ${esc(s.color)};"></span>${esc(s.name)}</span>`).join('');
       $('miniBarChart').innerHTML = buildBarChartHtml(curWeekDates, Math.max(goalMin, ...curWeekTotals, 60), false);
 
       renderStatsView(streak);
@@ -2351,27 +2228,27 @@
       const p = PRIORITIES[task.priority] || PRIORITIES.todo;
       const safeId = Number(task.id) || 0;
       return `<button type="button" ${clickable ? `onclick="event.preventDefault(); cycleTaskPriority(${safeId})" title="Cliquer pour changer la priorité"` : ''}
-        class="text-[11px] px-2.5 py-0.5 rounded-full font-bold w-fit transition hover:opacity-80"
+        class="text-[11px] px-2.5 py-0.5 rounded-full font-extrabold w-fit transition hover:scale-105 inline-flex items-center gap-1.5"
         style="background-color:${p.bg};color:${p.text};border:1px solid ${p.border};">
-        ${p.label}
+        <span class="w-1.5 h-1.5 rounded-full" style="background-color:${p.dot};"></span>${p.label}
       </button>`;
     }
 
     function renderOverdueTaskItem(t) {
       const c = esc(getSubjectColor(t.subject));
       const safeId = Number(t.id) || 0;
-      return `<div class="task-row flex items-center justify-between p-3 rounded-xl gap-2" style="border-color:rgba(239,68,68,0.28);">
+      return `<div class="task-row flex items-center justify-between p-3 rounded-xl gap-2" style="border-color:rgba(239,68,68,0.32);border-left:4px solid ${c};">
         <label class="flex items-center gap-3 cursor-pointer flex-1">
           <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${safeId})" class="w-5 h-5 rounded cursor-pointer accent-red-500 flex-shrink-0" />
           <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 flex-wrap">
-            <span class="text-sm font-medium ${t.done ? 'line-through opacity-45' : ''}">${esc(t.title)}</span>
+            <span class="text-sm font-semibold ${t.done ? 'line-through opacity-45' : ''}">${esc(t.title)}</span>
             <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-extrabold bg-red-500/20 text-red-300 border border-red-500/30">
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-extrabold bg-red-500/20 text-red-300 border border-red-500/35">
                 Pas fait • ${esc(formatTaskOriginDate(t.date))}
               </span>
               ${renderPriorityBadge(t, true)}
-              <span class="text-[11px] px-2.5 py-0.5 rounded-full font-bold w-fit flex items-center gap-1.5" style="background-color:${c}22;color:${c};border:1px solid ${c}44;">
-                <span class="w-1.5 h-1.5 rounded-full" style="background-color:${c};"></span>${esc(t.subject)}
+              <span class="text-[11px] px-2.5 py-0.5 rounded-full font-extrabold w-fit flex items-center gap-1.5" style="background-color:${c}26;color:${c};border:1px solid ${c}55;">
+                <span class="w-2 h-2 rounded-full" style="background-color:${c};box-shadow:0 0 6px ${c};"></span>${esc(t.subject)}
               </span>
             </div>
           </div>
@@ -2452,15 +2329,15 @@
         : sortedTasks.map(t => {
             const c = esc(getSubjectColor(t.subject));
             const safeId = Number(t.id) || 0;
-            return `<div class="task-row flex items-center justify-between p-3.5 rounded-xl gap-2">
+            return `<div class="task-row flex items-center justify-between p-3.5 rounded-xl gap-2" style="border-left:4px solid ${c};">
               <label class="flex items-center gap-3 cursor-pointer flex-1">
                 <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${safeId})" class="w-5 h-5 rounded cursor-pointer accent-current flex-shrink-0" />
                 <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 flex-wrap">
-                  <span class="text-sm font-medium ${t.done ? 'line-through opacity-45' : ''}">${esc(t.title)}</span>
+                  <span class="text-sm font-semibold ${t.done ? 'line-through opacity-45' : ''}">${esc(t.title)}</span>
                   <div class="flex items-center gap-1.5 flex-wrap">
                     ${renderPriorityBadge(t, true)}
-                    <span class="text-[11px] px-2.5 py-0.5 rounded-full font-bold w-fit flex items-center gap-1.5" style="background-color:${c}22;color:${c};border:1px solid ${c}44;">
-                      <span class="w-1.5 h-1.5 rounded-full" style="background-color:${c};"></span>${esc(t.subject)}
+                    <span class="text-[11px] px-2.5 py-0.5 rounded-full font-extrabold w-fit flex items-center gap-1.5" style="background-color:${c}26;color:${c};border:1px solid ${c}55;">
+                      <span class="w-2 h-2 rounded-full" style="background-color:${c};box-shadow:0 0 6px ${c};"></span>${esc(t.subject)}
                     </span>
                   </div>
                 </div>
@@ -2656,7 +2533,7 @@
       $('statGoalRate').textContent = `${state.goals.length ? Math.round((weekGoalsChecks / maxWeekGoals) * 100) : 0}%`;
       $('chartGoalLegend').textContent = `${state.dailyGoalHours}h`;
 
-      $('mainChartLegend').innerHTML = state.subjects.map(s => `<span class="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-lg border" style="background-color:var(--bg-main);border-color:var(--border-color);"><span class="w-3 h-3 rounded-full" style="background-color:${esc(s.color)};"></span><span>${esc(s.name)}</span></span>`).join('');
+      $('mainChartLegend').innerHTML = state.subjects.map(s => `<span class="inline-flex items-center gap-2 text-xs font-bold px-2.5 py-1 rounded-lg border" style="background-color:var(--bg-main);border-color:var(--border-color);"><span class="w-3 h-3 rounded-full" style="background-color:${esc(s.color)};box-shadow:0 0 6px ${esc(s.color)};"></span><span>${esc(s.name)}</span></span>`).join('');
 
       const maxScaleMin = Math.max(state.dailyGoalHours * 72, ...dailyTotals, 120);
       $('goalLine').style.bottom = `${Math.min(94, Math.round(((state.dailyGoalHours * 60) / maxScaleMin) * 100))}%`;
@@ -2683,8 +2560,8 @@
         : entries.map(([subj, min]) => {
             const c = esc(getSubjectColor(subj)), p = Math.round((min / dayTotalMin) * 100);
             return `<div class="p-3 rounded-xl border" style="background-color:var(--bg-main);border-color:var(--border-color);">
-              <div class="flex justify-between items-center text-xs font-bold mb-1.5"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background-color:${c};"></span>${esc(subj)}</span><span class="font-mono-timer">${formatMinutes(min)} (${p}%)</span></div>
-              <div class="w-full h-2 rounded-full overflow-hidden" style="background-color:var(--bg-input);"><div class="h-full rounded-full transition-all duration-500" style="width:${p}%;background-color:${c};"></div></div>
+              <div class="flex justify-between items-center text-xs font-bold mb-1.5"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background-color:${c};box-shadow:0 0 6px ${c};"></span>${esc(subj)}</span><span class="font-mono-timer">${formatMinutes(min)} (${p}%)</span></div>
+              <div class="w-full h-2 rounded-full overflow-hidden" style="background-color:var(--bg-input);"><div class="h-full rounded-full bar-segment" style="width:${p}%;background-color:${c};"></div></div>
             </div>`;
           }).join('');
 
@@ -2693,8 +2570,9 @@
         ? `<p class="text-xs" style="color:var(--text-muted);">Aucune session enregistrée ce jour.</p>`
         : daySessions.map(s => {
             const safeId = Number(s.id) || 0;
-            return `<div class="flex items-center justify-between px-3 py-2 rounded-xl border text-xs" style="background-color:var(--bg-main);border-color:var(--border-color);">
-              <div class="flex items-center gap-2"><span class="font-mono-timer opacity-60">${esc(s.time)}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color:${esc(getSubjectColor(s.subject))};"></span><span class="font-semibold">${esc(s.subject)}</span></div>
+            const c = esc(getSubjectColor(s.subject));
+            return `<div class="flex items-center justify-between px-3 py-2 rounded-xl border text-xs" style="background-color:var(--bg-main);border-color:var(--border-color);border-left:3px solid ${c};">
+              <div class="flex items-center gap-2"><span class="font-mono-timer opacity-60">${esc(s.time)}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color:${c};"></span><span class="font-semibold">${esc(s.subject)}</span></div>
               <div class="flex items-center gap-3"><span class="font-mono-timer font-bold">+ ${formatMinutes(s.minutes)}</span><button onclick="deleteSession(${safeId})" class="opacity-40 hover:opacity-100 hover:text-red-400">✕</button></div>
             </div>`;
           }).join('');
@@ -2706,7 +2584,7 @@
         : dayTasks.map(t => {
             const c = esc(getSubjectColor(t.subject));
             const safeId = Number(t.id) || 0;
-            return `<div class="flex items-center justify-between p-3 rounded-xl border gap-2" style="background-color:var(--bg-main);border-color:var(--border-color);">
+            return `<div class="flex items-center justify-between p-3 rounded-xl border gap-2" style="background-color:var(--bg-main);border-color:var(--border-color);border-left:3px solid ${c};">
               <label class="flex items-center gap-2.5 cursor-pointer flex-1"><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${safeId})" class="w-4 h-4 rounded cursor-pointer" /><span class="text-xs font-medium ${t.done ? 'line-through opacity-50' : ''}">${esc(t.title)}</span></label>
               <div class="flex items-center gap-1.5 flex-shrink-0">
                 ${renderPriorityBadge(t, true)}
@@ -2739,8 +2617,8 @@
       $('subjectBreakdownList').innerHTML = Object.entries(totals).map(([subj, min]) => {
         const p = min > 0 ? Math.round((min / sumAll) * 100) : 0, c = esc(getSubjectColor(subj));
         return `<div>
-          <div class="flex justify-between text-xs font-semibold mb-1.5"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background-color:${c};"></span>${esc(subj)}</span><span class="font-mono-timer">${formatMinutes(min)} (${p}%)</span></div>
-          <div class="w-full h-2.5 rounded-full overflow-hidden" style="background-color:var(--bg-input);"><div class="h-full rounded-full transition-all duration-500" style="width:${p}%;background-color:${c};"></div></div>
+          <div class="flex justify-between text-xs font-semibold mb-1.5"><span class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background-color:${c};box-shadow:0 0 6px ${c};"></span>${esc(subj)}</span><span class="font-mono-timer">${formatMinutes(min)} (${p}%)</span></div>
+          <div class="w-full h-2.5 rounded-full overflow-hidden" style="background-color:var(--bg-input);"><div class="h-full rounded-full bar-segment" style="width:${p}%;background-color:${c};"></div></div>
         </div>`;
       }).join('');
 
@@ -2857,7 +2735,7 @@
     }
 
     // =========================================================================
-    // CHRONO HAUTE PRÉCISION & PLEIN ÉCRAN FOCUS SANS AUDIO UI
+    // CHRONO HAUTE PRÉCISION & PLEIN ÉCRAN FOCUS CENTRÉ SUR TABLETTE
     // =========================================================================
     let timerInterval = null, timerRunning = false, timerMode = 'countup';
     let elapsedSeconds = 0, countdownTargetSeconds = 3600;
@@ -2878,6 +2756,15 @@
         requestWakeLock(true);
       }
     });
+
+    function syncFullscreenClasses() {
+      const c = $('flipClockContainer');
+      const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      const isFs = isNativeFs || Boolean(c?.classList.contains('is-fullscreen'));
+      document.body.classList.toggle('timer-is-fullscreen', isFs);
+    }
+    document.addEventListener('fullscreenchange', syncFullscreenClasses);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenClasses);
 
     function updateLiveTimestamp() {
       const now = new Date();
@@ -3015,52 +2902,31 @@
       showToast(`Session de ${formatMinutes(addedMin)} (${currentTimerSubject}) enregistrée !`, '🔥');
     }
 
-    function syncFullscreenUIState() {
-      const c = $('flipClockContainer');
-      if (!c) return;
-      const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
-      const isCustomFs = c.classList.contains('is-fullscreen');
-      const isActive = isNativeFs || isCustomFs;
-
-      document.body.classList.toggle('timer-is-fullscreen', isActive);
-      $('fullscreenIconExpand')?.classList.toggle('hidden', isActive);
-      $('fullscreenIconShrink')?.classList.toggle('hidden', !isActive);
-    }
-
-    document.addEventListener('fullscreenchange', syncFullscreenUIState);
-    document.addEventListener('webkitfullscreenchange', syncFullscreenUIState);
-
     function toggleFullScreenTimer() {
       const c = $('flipClockContainer');
-      const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
-      const isCustomFs = c.classList.contains('is-fullscreen');
-
-      if (isNativeFs || isCustomFs) {
-        if (isNativeFs) {
-          (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
-        }
+      const isNativeFs = document.fullscreenElement || document.webkitFullscreenElement;
+      if (isNativeFs) {
+        (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
         c.classList.remove('is-fullscreen');
-        syncFullscreenUIState();
+      } else if (c.classList.contains('is-fullscreen')) {
+        c.classList.remove('is-fullscreen');
       } else {
         c.classList.add('is-fullscreen');
-        syncFullscreenUIState();
         const req = c.requestFullscreen || c.webkitRequestFullscreen;
         if (req) {
-          req.call(c).then(syncFullscreenUIState).catch(() => {
-            c.classList.add('is-fullscreen');
-            syncFullscreenUIState();
-          });
+          req.call(c).catch(() => {});
         }
       }
+      syncFullscreenClasses();
     }
 
     function exitFullscreenOrBack() {
       const c = $('flipClockContainer');
-      const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      const isNativeFs = document.fullscreenElement || document.webkitFullscreenElement;
       if (isNativeFs || c.classList.contains('is-fullscreen')) {
         if (isNativeFs) (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
         c.classList.remove('is-fullscreen');
-        syncFullscreenUIState();
+        syncFullscreenClasses();
       } else {
         switchTab('dashboard');
       }
@@ -3072,8 +2938,8 @@
         ? `<p class="text-xs py-3" style="color:var(--text-muted);">Aucune session enregistrée aujourd'hui.</p>`
         : list.map(s => {
             const c = esc(getSubjectColor(s.subject));
-            return `<div class="task-row flex items-center justify-between p-3 rounded-xl">
-              <div class="flex items-center gap-2.5"><span class="text-xs font-mono-timer opacity-60">${esc(s.time)}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color:${c};"></span><span class="font-bold text-xs" style="color:${c};">${esc(s.subject)}</span></div>
+            return `<div class="task-row flex items-center justify-between p-3 rounded-xl" style="border-left:4px solid ${c};">
+              <div class="flex items-center gap-2.5"><span class="text-xs font-mono-timer opacity-60">${esc(s.time)}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color:${c};box-shadow:0 0 6px ${c};"></span><span class="font-extrabold text-xs" style="color:${c};">${esc(s.subject)}</span></div>
               <span class="font-mono-timer font-bold text-xs">+ ${formatMinutes(s.minutes)}</span>
             </div>`;
           }).join('');
@@ -3116,7 +2982,7 @@
       const curColor = SecurityGuard.cleanHexColor($('newSubjectColorInput').value, '#10b981');
       $('subjectPresetPalette').innerHTML = MAIN_5_COLORS.map(hex => `<button type="button" onclick="$('newSubjectColorInput').value='${hex}';renderSettings();" class="w-7 h-7 rounded-full transition transform hover:scale-110 ${curColor === hex ? 'scale-110 ring-2 ring-offset-2 ring-offset-black ring-white' : 'opacity-80 hover:opacity-100'}" style="background-color:${hex};"></button>`).join('');
 
-      $('subjectsListEditor').innerHTML = state.subjects.map((s, idx) => `<div class="task-row flex items-center justify-between p-3 rounded-xl gap-2">
+      $('subjectsListEditor').innerHTML = state.subjects.map((s, idx) => `<div class="task-row flex items-center justify-between p-3 rounded-xl gap-2" style="border-left:4px solid ${esc(s.color)};">
         <div class="flex items-center gap-3 flex-1">
           <input type="color" value="${esc(s.color)}" onchange="updateSubjectColor(${idx}, this.value)" class="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0 flex-shrink-0" />
           <input type="text" value="${esc(s.name)}" maxlength="40" onchange="renameSubject(${idx}, this.value)" class="bg-transparent text-sm font-bold focus:outline-none border-b border-transparent focus:border-zinc-500 px-1 py-0.5 w-full" title="Cliquer pour renommer la matière" />
