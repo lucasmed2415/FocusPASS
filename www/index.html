@@ -360,6 +360,23 @@
     </div>
   </div>
 
+  <!-- INVITATION DIRECTE AU DÉMARRAGE POUR AUTORISER LES NOTIFICATIONS -->
+  <div id="startupNotifBanner" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-lg card rounded-2xl p-4 border-2 border-blue-500/70 shadow-2xl backdrop-blur-xl">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center flex-shrink-0 text-lg">🔔</div>
+        <div>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-blue-400">Activer le rappel quotidien (18h00)</h4>
+          <p class="text-xs mt-0.5 leading-relaxed" style="color: var(--text-muted);">Autorise les notifications maintenant pour être prévenu s'il te reste des tâches à terminer en fin de journée.</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-2 flex-shrink-0">
+        <button type="button" onclick="TaskReminderEngine.dismissStartupPrompt()" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold opacity-60 hover:opacity-100 transition">Plus tard</button>
+        <button type="button" onclick="TaskReminderEngine.authorizeFromStartup()" class="theme-btn-primary px-4 py-2 rounded-xl text-xs font-extrabold shadow-lg">Autoriser</button>
+      </div>
+    </div>
+  </div>
+
   <header class="sticky top-0 z-30 backdrop-blur-xl bg-opacity-85 border-b" style="background-color: color-mix(in srgb, var(--bg-card) 86%, transparent); border-color: var(--border-color);">
     <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3 cursor-pointer group" onclick="switchTab('dashboard')">
@@ -395,13 +412,13 @@
     <!-- ========================================================== -->
     <section id="view-dashboard" class="space-y-6 view-animate">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="card rounded-2xl p-5 md:col-span-2 flex flex-col justify-between">
+        <div id="heroOverviewCard" class="card rounded-2xl p-5 md:col-span-2 flex flex-col justify-between">
           <div class="flex items-start justify-between gap-2">
             <div>
               <span class="text-[11px] font-bold uppercase tracking-widest" style="color: var(--text-muted);">Aperçu de ta journée</span>
               <h2 class="text-2xl font-extrabold mt-1 tracking-tight">Prêt à tout donner ?</h2>
             </div>
-            <button onclick="switchTab('timer')" class="theme-btn-primary px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 flex-shrink-0">
+            <button id="launchChronoHeroBtn" onclick="switchTab('timer')" class="theme-btn-primary px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 flex-shrink-0">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
               Lancer le Chrono
             </button>
@@ -419,12 +436,12 @@
             <div id="todaySubjectsChips" class="flex flex-wrap gap-1.5 mt-2.5 empty:hidden"></div>
             <div class="flex flex-wrap justify-between items-center text-xs mt-3 gap-2" style="color: var(--text-muted);">
               <span id="remainingTimeText">Objectif quotidien : 7h00</span>
-              <button onclick="openManualTimeModal(getTodayKey())" class="font-semibold underline hover:opacity-80 transition" style="color: var(--text-main);">+ Ajouter une session manuellement</button>
+              <button id="addManualSessionHeroBtn" onclick="openManualTimeModal(getTodayKey())" class="font-semibold underline hover:opacity-80 transition" style="color: var(--text-main);">+ Ajouter une session manuellement</button>
             </div>
           </div>
         </div>
 
-        <div class="card rounded-2xl p-5 flex flex-col justify-between space-y-3">
+        <div id="summaryStatsCard" class="card rounded-2xl p-5 flex flex-col justify-between space-y-3">
           <div class="grid grid-cols-2 gap-3">
             <div class="p-3 rounded-xl border" style="background-color: var(--bg-main); border-color: var(--border-color);">
               <span class="text-[10px] font-bold uppercase tracking-wider block" style="color: var(--text-muted);">Tâches du jour</span>
@@ -460,7 +477,7 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- COLONNE GAUCHE (2/3) : TÂCHES AVEC CASE SPÉCIALE RETARD / PAS FAIT -->
-        <div class="card rounded-2xl p-5 lg:col-span-2 flex flex-col">
+        <div id="tasksMainCard" class="card rounded-2xl p-5 lg:col-span-2 flex flex-col">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
             <h3 class="font-extrabold text-lg tracking-tight">Tâches</h3>
             <div id="dashboardDayPills" class="flex gap-1 p-1 rounded-xl border" style="background-color: var(--bg-main); border-color: var(--border-color);"></div>
@@ -508,7 +525,7 @@
         <!-- COLONNE DROITE (1/3) : OBJECTIFS QUOTIDIENS + MINI SEMAINE -->
         <div class="space-y-6 flex flex-col justify-between">
           <!-- RUBRIQUE OBJECTIFS QUOTIDIENS -->
-          <div class="card rounded-2xl p-5 flex flex-col">
+          <div id="dailyGoalsCard" class="card rounded-2xl p-5 flex flex-col">
             <div class="flex items-center justify-between mb-1">
               <h3 class="font-extrabold text-lg tracking-tight">Objectifs quotidiens</h3>
               <span id="goalsSelectedDayBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full theme-accent-soft-bg theme-accent-text">Aujourd'hui</span>
@@ -708,7 +725,7 @@
       </div>
 
       <!-- GRAPHIQUE HEURES & MATIÈRES DE LA SEMAINE SÉLECTIONNÉE -->
-      <div class="card rounded-2xl p-6">
+      <div id="statsChartCard" class="card rounded-2xl p-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
             <h3 class="font-extrabold text-lg tracking-tight">Heures & Matières travaillées par jour</h3>
@@ -748,6 +765,12 @@
             </tfoot>
           </table>
         </div>
+
+        <form onsubmit="addDailyGoal(event)" class="flex gap-2 pt-3 border-t" style="border-color: var(--border-color);">
+          <input type="text" maxlength="60" autocomplete="off" placeholder="Nouvel objectif quotidien (ex: Boire 1,5L d'eau, Faire 30 min de sport...)" required
+            class="input-field flex-1 px-3.5 py-2 rounded-xl text-xs focus:outline-none" />
+          <button type="submit" class="theme-btn-primary px-4 py-2 rounded-xl text-xs font-bold flex-shrink-0">+ Créer</button>
+        </form>
       </div>
 
       <!-- COMPTE RENDU QUOTIDIEN DÉTAILLÉ -->
@@ -789,6 +812,11 @@
                 <span id="inspectorGoalsBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full theme-accent-soft-bg theme-accent-text">0/0 atteints</span>
               </div>
               <div id="inspectorGoalsList" class="space-y-2"></div>
+              <form onsubmit="addDailyGoal(event)" class="flex gap-2 pt-1">
+                <input type="text" maxlength="60" autocomplete="off" placeholder="Nouvel objectif (ex: Boire 1,5L d'eau...)" required
+                  class="input-field flex-1 px-3 py-2 rounded-xl text-xs focus:outline-none" />
+                <button type="submit" class="theme-btn-primary px-3.5 py-2 rounded-xl text-xs font-bold flex-shrink-0">+ Créer</button>
+              </form>
             </div>
           </div>
         </div>
@@ -819,7 +847,7 @@
     <!-- VUE 4 : PARAMÈTRES, MATIÈRES, RAPPEL 18H & SYNCHRO CLOUD   -->
     <!-- ========================================================== -->
     <section id="view-settings" class="hidden max-w-2xl mx-auto space-y-6">
-      <div class="card rounded-2xl p-6 space-y-5">
+      <div id="settingsSubjectsCard" class="card rounded-2xl p-6 space-y-5">
         <div>
           <h3 class="font-extrabold text-lg tracking-tight">Paramétrer mes Matières & Couleurs</h3>
           <p class="text-xs mt-0.5" style="color: var(--text-muted);">Associe une couleur vive à chaque matière ou renomme tes matières existantes.</p>
@@ -877,7 +905,7 @@
       </div>
 
       <!-- SYNCHRONISATION MULTI-APPAREILS (TÉLÉPHONE & TABLETTE) -->
-      <div class="card rounded-2xl p-6 space-y-4">
+      <div id="settingsSyncCard" class="card rounded-2xl p-6 space-y-4">
         <div class="flex items-start justify-between gap-3">
           <div>
             <h3 class="font-extrabold text-lg tracking-tight">Synchronisation Téléphone & Tablette</h3>
@@ -951,8 +979,8 @@
       <!-- BOUTON POUR REVOIR LE TUTORIEL MANUELLEMENT SI BESOIN -->
       <div class="card rounded-2xl p-5 flex items-center justify-between gap-3">
         <div>
-          <h3 class="font-extrabold text-sm tracking-tight">Guide de démarrage FocusPASS</h3>
-          <p class="text-xs mt-0.5" style="color: var(--text-muted);">Relancer le tutoriel interactif de présentation des fonctionnalités.</p>
+          <h3 class="font-extrabold text-sm tracking-tight">Guide interactif FocusPASS</h3>
+          <p class="text-xs mt-0.5" style="color: var(--text-muted);">Relancer la visite guidée directement sur les boutons de l'interface.</p>
         </div>
         <button type="button" onclick="OnboardingWizard.open(true)" class="px-4 py-2 rounded-xl text-xs font-extrabold border hover:opacity-85 transition flex-shrink-0" style="background-color: var(--bg-main); border-color: var(--border-color);">
           🎓 Revoir le tuto
@@ -962,34 +990,36 @@
 
   </main>
 
-  <!-- MODALE D'ONBOARDING INTERACTIF (AFFICHÉE UNIQUEMENT À LA 1ÈRE OUVERTURE) -->
-  <div id="onboardingModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-    <div class="card rounded-3xl max-w-lg w-full p-6 sm:p-7 space-y-5 border-2 relative my-auto view-animate" style="border-color: var(--border-color);" onclick="event.stopPropagation()">
-      <!-- En-tête du tutoriel avec barre de progression -->
+  <!-- VISITE GUIDÉE SPOTLIGHT DIRECTEMENT SUR L'INTERFACE (1ÈRE OUVERTURE) -->
+  <div id="onboardingModal" class="fixed inset-0 z-[9990] hidden pointer-events-none">
+    <!-- 4 panneaux floutés autour de l'élément mis en évidence -->
+    <div id="spBlurTop" class="fixed left-0 right-0 top-0 bg-black/75 backdrop-blur-md transition-all duration-300 pointer-events-auto" onclick="OnboardingWizard.next()"></div>
+    <div id="spBlurBottom" class="fixed left-0 right-0 bottom-0 bg-black/75 backdrop-blur-md transition-all duration-300 pointer-events-auto" onclick="OnboardingWizard.next()"></div>
+    <div id="spBlurLeft" class="fixed left-0 bg-black/75 backdrop-blur-md transition-all duration-300 pointer-events-auto" onclick="OnboardingWizard.next()"></div>
+    <div id="spBlurRight" class="fixed right-0 bg-black/75 backdrop-blur-md transition-all duration-300 pointer-events-auto" onclick="OnboardingWizard.next()"></div>
+
+    <!-- Cadre lumineux autour du composant ciblé -->
+    <div id="spHighlightRing" class="fixed pointer-events-none rounded-2xl border-2 border-amber-400 transition-all duration-300" style="box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.2), 0 0 30px rgba(251, 191, 36, 0.55);"></div>
+
+    <!-- Bulle explicative flottante qui pointe vers l'élément -->
+    <div id="spTooltipCard" class="fixed pointer-events-auto card rounded-2xl p-5 w-[92vw] max-w-sm border-2 border-amber-400/90 shadow-2xl transition-all duration-300 space-y-3.5" style="background-color: var(--bg-card); color: var(--text-main);">
+      <div id="spArrowIndicator" class="w-3.5 h-3.5 rotate-45 absolute border-amber-400/90" style="background-color: var(--bg-card);"></div>
+
       <div class="flex items-center justify-between gap-2">
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-lg bg-white text-black font-black text-sm flex items-center justify-center">F</div>
-          <span id="onboardingStepLabel" class="text-xs font-extrabold uppercase tracking-wider" style="color: var(--text-muted);">Étape 1 sur 5</span>
-        </div>
-        <button type="button" onclick="OnboardingWizard.finish()" class="text-xs font-semibold px-2.5 py-1 rounded-lg border opacity-70 hover:opacity-100 transition" style="border-color: var(--border-color); color: var(--text-muted);">
-          Passer l'intro ✕
+        <span id="onboardingStepLabel" class="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-400 text-black">Étape 1 / 9</span>
+        <button type="button" onclick="OnboardingWizard.finish()" class="text-xs font-bold opacity-60 hover:opacity-100 transition px-2 py-0.5 rounded-lg border" style="border-color: var(--border-color);">
+          Passer ✕
         </button>
       </div>
 
-      <div class="w-full h-1.5 rounded-full overflow-hidden flex gap-1" style="background-color: var(--bg-input);">
-        <div id="onboardingProgressFill" class="h-full rounded-full transition-all duration-300" style="width: 20%; background-color: var(--btn-bg);"></div>
-      </div>
+      <div id="onboardingStepContent" class="space-y-2"></div>
 
-      <!-- Contenu dynamique de l'étape -->
-      <div id="onboardingStepContent" class="space-y-4 min-h-[270px] flex flex-col justify-between"></div>
-
-      <!-- Pied de modale : Précédent / Suivant -->
-      <div class="flex items-center justify-between pt-3 border-t" style="border-color: var(--border-color);">
-        <button type="button" id="onboardingPrevBtn" onclick="OnboardingWizard.prev()" class="px-4 py-2.5 rounded-xl text-xs font-bold border hover:opacity-85 transition" style="background-color: var(--bg-main); border-color: var(--border-color);">
-          ← Retour
+      <div class="flex items-center justify-between pt-2.5 border-t" style="border-color: var(--border-color);">
+        <button type="button" id="onboardingPrevBtn" onclick="OnboardingWizard.prev()" class="px-3.5 py-2 rounded-xl text-xs font-bold border hover:opacity-85 transition" style="background-color: var(--bg-main); border-color: var(--border-color);">
+          ← Précédent
         </button>
-        <div id="onboardingDots" class="flex items-center gap-1.5"></div>
-        <button type="button" id="onboardingNextBtn" onclick="OnboardingWizard.next()" class="theme-btn-primary px-5 py-2.5 rounded-xl text-xs font-extrabold">
+        <div id="onboardingDots" class="flex items-center gap-1"></div>
+        <button type="button" id="onboardingNextBtn" onclick="OnboardingWizard.next()" class="px-4 py-2 rounded-xl text-xs font-extrabold bg-amber-400 text-black hover:opacity-90 transition shadow-md">
           Suivant →
         </button>
       </div>
@@ -1085,6 +1115,7 @@
     const STORAGE_KEY = 'focuspass_v4';
     const LAST_NOTIF_STORAGE_KEY = 'focuspass_last_notif_date';
     const ONBOARDING_STORAGE_KEY = 'focuspass_onboarding_done_v1';
+    const STARTUP_NOTIF_PROMPT_KEY = 'focuspass_notif_prompt_dismissed_v1';
     const TIMER_STORAGE_KEY = 'focuspass_active_timer_v1';
     const $ = id => document.getElementById(id);
     const esc = str => String(str ?? '').replace(/[&<>"'`]/g, m => ({
@@ -1599,6 +1630,30 @@
         if (this.checkTimer) clearInterval(this.checkTimer);
         this.checkTimer = setInterval(() => this.checkDueReminder(), 25000);
         setTimeout(() => this.checkDueReminder(), 2500);
+        this.checkStartupNotificationPrompt();
+      },
+
+      checkStartupNotificationPrompt() {
+        if (!('Notification' in window)) return;
+        if (Notification.permission === 'default' && localStorage.getItem(STARTUP_NOTIF_PROMPT_KEY) !== '1') {
+          $('startupNotifBanner')?.classList.remove('hidden');
+        } else {
+          $('startupNotifBanner')?.classList.add('hidden');
+        }
+      },
+
+      async authorizeFromStartup() {
+        $('startupNotifBanner')?.classList.add('hidden');
+        localStorage.setItem(STARTUP_NOTIF_PROMPT_KEY, '1');
+        state.reminderEnabled = true;
+        saveState();
+        await this.requestPermission(true);
+        if (OnboardingWizard.isOpen) OnboardingWizard.renderStep();
+      },
+
+      dismissStartupPrompt() {
+        $('startupNotifBanner')?.classList.add('hidden');
+        localStorage.setItem(STARTUP_NOTIF_PROMPT_KEY, '1');
       },
 
       updateSettingsUI() {
@@ -1620,6 +1675,7 @@
           if (Notification.permission === 'granted') {
             permBtn.textContent = '✓ Notifications autorisées';
             permBtn.classList.add('text-emerald-400');
+            $('startupNotifBanner')?.classList.add('hidden');
           } else if (Notification.permission === 'denied') {
             permBtn.textContent = 'Notifications bloquées (navigateur)';
           } else {
@@ -1857,27 +1913,26 @@
       frame();
     }
 
+    let audioCtx = null;
     function playCelebrationChime() {
       try {
-        const Ctx = window.AudioContext || window.webkitAudioContext;
-        if (!Ctx) return;
-        const ctx = new Ctx();
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         const notes = [523.25, 659.25, 783.99, 1046.5];
         notes.forEach((freq, i) => {
-          const osc = ctx.createOscillator();
-          const g = ctx.createGain();
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
           osc.type = 'triangle';
           osc.frequency.value = freq;
-          const start = ctx.currentTime + i * 0.09;
+          const start = audioCtx.currentTime + i * 0.09;
           g.gain.setValueAtTime(0.001, start);
           g.gain.linearRampToValueAtTime(0.12, start + 0.02);
           g.gain.exponentialRampToValueAtTime(0.0001, start + 0.45);
           osc.connect(g);
-          g.connect(ctx.destination);
+          g.connect(audioCtx.destination);
           osc.start(start);
           osc.stop(start + 0.46);
         });
-        setTimeout(() => { try { ctx.close(); } catch {} }, 1200);
       } catch {}
     }
 
@@ -1903,26 +1958,31 @@
     }
 
     // =========================================================================
-    // MOTEUR AUDIO ULTRA-CONTINU (15 MINUTES SANS COUPURE + ARRIÈRE-PLAN SAFARI)
+    // MOTEUR AUDIO CONTINU 15 MINUTES SANS COUPURE & LECTURE EN ARRIÈRE-PLAN
     // =========================================================================
     let activeAudioType = null;
     let noiseVolume = 0.35;
     const cachedWavUrls = {};
 
-    function generateSeamlessWavUrl(type) {
+    function buildContinuousWavBlobUrl(type) {
       if (cachedWavUrls[type]) return cachedWavUrls[type];
 
       const sampleRate = 16000;
-      const totalSeconds = 900; // 15 minutes continues sans rebuffering
-      const numChannels = type === 'binaural' ? 2 : 1;
-      const totalFrames = sampleRate * totalSeconds;
-      const dataSize = totalFrames * numChannels * 2;
-      const buffer = new ArrayBuffer(44 + dataSize);
-      const view = new DataView(buffer);
+      const isStereo = type === 'binaural';
+      const numChannels = isStereo ? 2 : 1;
+      const totalSeconds = 900; // 15 minutes continues sans aucune coupure
+      const totalSamples = sampleRate * totalSeconds;
+      const totalInterleaved = totalSamples * numChannels;
 
+      const pcmBuffer = new ArrayBuffer(44 + totalInterleaved * 2);
+      const view = new DataView(pcmBuffer);
       const writeStr = (offset, str) => {
         for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
       };
+
+      const byteRate = sampleRate * numChannels * 2;
+      const blockAlign = numChannels * 2;
+      const dataSize = totalInterleaved * 2;
 
       writeStr(0, 'RIFF');
       view.setUint32(4, 36 + dataSize, true);
@@ -1932,49 +1992,50 @@
       view.setUint16(20, 1, true);
       view.setUint16(22, numChannels, true);
       view.setUint32(24, sampleRate, true);
-      view.setUint32(28, sampleRate * numChannels * 2, true);
-      view.setUint16(32, numChannels * 2, true);
+      view.setUint32(28, byteRate, true);
+      view.setUint16(32, blockAlign, true);
       view.setUint16(34, 16, true);
       writeStr(36, 'data');
       view.setUint32(40, dataSize, true);
 
-      const pcm = new Int16Array(buffer, 44);
+      const pcm16 = new Int16Array(pcmBuffer, 44, totalInterleaved);
 
       if (type === 'binaural') {
-        const unitFrames = sampleRate;
-        const unitSamples = unitFrames * 2;
-        const unitBlock = new Int16Array(unitSamples);
+        // 1 seconde exacte = 200 cycles G et 206 cycles D -> Phase 0 parfaite au raccord
+        const unitSamples = sampleRate;
+        const unitBlock = new Int16Array(unitSamples * 2);
         const twoPi = 2 * Math.PI;
-
-        for (let i = 0; i < unitFrames; i++) {
+        for (let i = 0; i < unitSamples; i++) {
           const t = i / sampleRate;
-          unitBlock[i * 2]     = Math.round(Math.sin(twoPi * 200 * t) * 9500);
+          unitBlock[i * 2] = Math.round(Math.sin(twoPi * 200 * t) * 9500);
           unitBlock[i * 2 + 1] = Math.round(Math.sin(twoPi * 206 * t) * 9500);
         }
-
         for (let sec = 0; sec < totalSeconds; sec++) {
-          pcm.set(unitBlock, sec * unitSamples);
+          pcm16.set(unitBlock, sec * unitBlock.length);
         }
       } else {
-        const periodSeconds = 60;
-        const periodFrames = sampleRate * periodSeconds;
-        const crossfadeFrames = sampleRate * 4;
-        const rawGenFrames = periodFrames + crossfadeFrames;
-        const rawFloat = new Float32Array(rawGenFrames);
+        // Bloc de 30s avec préchauffage et fondu trigonométrique à puissance constante (cos² + sin² = 1)
+        const baseSecs = 30;
+        const fadeSecs = 4;
+        const baseLen = sampleRate * baseSecs;
+        const fadeLen = sampleRate * fadeSecs;
+        const rawLen = baseLen + fadeLen;
+        const raw = new Float32Array(rawLen);
 
-        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
-        let lastBrown = 0;
-        let lpState = 0;
-        const cutFreq = type === 'brown' ? 380 : type === 'pink' ? 620 : 1850;
-        const rc = 1 / (2 * Math.PI * cutFreq);
-        const dt = 1 / sampleRate;
-        const alpha = dt / (rc + dt);
+        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, lastBrown = 0, lp = 0;
+        const alpha = type === 'brown' ? 0.14 : type === 'pink' ? 0.22 : 0.55;
 
-        const nextFilteredSample = () => {
+        // Préchauffage de 1 seconde pour stabiliser les filtres dès l'échantillon 0
+        for (let w = 0; w < sampleRate; w++) {
+          const r = Math.random() * 2 - 1;
+          lastBrown = (lastBrown + 0.02 * r) / 1.02;
+        }
+
+        for (let i = 0; i < rawLen; i++) {
           const w = Math.random() * 2 - 1;
-          let raw = 0;
+          let sample = 0;
           if (type === 'white') {
-            raw = w * 0.36;
+            sample = w * 0.28;
           } else if (type === 'pink') {
             b0 = 0.99886 * b0 + w * 0.0555179;
             b1 = 0.99332 * b1 + w * 0.0750759;
@@ -1982,86 +2043,36 @@
             b3 = 0.86650 * b3 + w * 0.3104856;
             b4 = 0.55000 * b4 + w * 0.5329522;
             b5 = -0.7616 * b5 - w * 0.0168980;
-            raw = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.075;
+            sample = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.055;
             b6 = w * 0.115926;
           } else {
             lastBrown = (lastBrown + 0.02 * w) / 1.02;
-            raw = lastBrown * 2.5;
+            sample = lastBrown * 1.65;
           }
-          lpState += alpha * (raw - lpState);
-          return lpState;
-        };
+          lp += alpha * (sample - lp);
+          raw[i] = lp;
+        }
 
-        for (let w = 0; w < sampleRate; w++) nextFilteredSample();
-        for (let i = 0; i < rawGenFrames; i++) rawFloat[i] = nextFilteredSample();
-
-        const periodBlock = new Int16Array(periodFrames);
-        const halfPi = Math.PI * 0.5;
-
-        for (let i = 0; i < periodFrames; i++) {
-          let val;
-          if (i < crossfadeFrames) {
-            const prog = i / crossfadeFrames;
-            const gainHead = Math.sin(prog * halfPi);
-            const gainTail = Math.cos(prog * halfPi);
-            val = rawFloat[i] * gainHead + rawFloat[periodFrames + i] * gainTail;
-          } else {
-            val = rawFloat[i];
+        const unitBlock = new Int16Array(baseLen);
+        for (let i = 0; i < baseLen; i++) {
+          let val = raw[i];
+          if (i < fadeLen) {
+            const theta = (i / fadeLen) * (Math.PI * 0.5);
+            val = raw[i] * Math.sin(theta) + raw[baseLen + i] * Math.cos(theta);
           }
           const clamped = Math.max(-0.95, Math.min(0.95, val));
-          periodBlock[i] = Math.round(clamped * 28000);
+          unitBlock[i] = Math.round(clamped * 28000);
         }
 
-        const repeats = totalSeconds / periodSeconds;
+        const repeats = Math.floor(totalSamples / baseLen);
         for (let r = 0; r < repeats; r++) {
-          pcm.set(periodBlock, r * periodFrames);
+          pcm16.set(unitBlock, r * baseLen);
         }
       }
 
-      const blob = new Blob([buffer], { type: 'audio/wav' });
-      const url = URL.createObjectURL(blob);
-      cachedWavUrls[type] = url;
-      return url;
-    }
-
-    function setupBackgroundMediaSession(type) {
-      try {
-        if ('audioSession' in navigator && navigator.audioSession) {
-          navigator.audioSession.type = 'playback';
-        }
-      } catch {}
-
-      if ('mediaSession' in navigator && navigator.mediaSession) {
-        const titles = {
-          brown: 'Bruit Brun (Concentration Profonde)',
-          pink: 'Bruit Rose Doux (Pluie)',
-          white: 'Bruit Blanc (Isolation)',
-          binaural: 'Ondes Binaurales 6 Hz (Focus)'
-        };
-        try {
-          navigator.mediaSession.metadata = new MediaMetadata({
-            title: titles[type] || 'FocusPASS Audio',
-            artist: 'FocusPASS',
-            album: 'Session de révision'
-          });
-          navigator.mediaSession.setActionHandler('play', () => {
-            const p = $('bgAudioPlayer');
-            if (p && activeAudioType) {
-              p.play().catch(() => {});
-              navigator.mediaSession.playbackState = 'playing';
-            }
-          });
-          navigator.mediaSession.setActionHandler('pause', () => {
-            const p = $('bgAudioPlayer');
-            if (p) {
-              p.pause();
-              activeAudioType = null;
-              navigator.mediaSession.playbackState = 'paused';
-              ['brown', 'pink', 'white', 'binaural'].forEach(t => $(`noise-btn-${t}`)?.classList.remove('active'));
-            }
-          });
-        } catch {}
-      }
+      const blob = new Blob([pcmBuffer], { type: 'audio/wav' });
+      cachedWavUrls[type] = URL.createObjectURL(blob);
+      return cachedWavUrls[type];
     }
 
     function stopCurrentAudio() {
@@ -2073,11 +2084,9 @@
           player.load();
         } catch {}
       }
-      try {
-        if ('mediaSession' in navigator && navigator.mediaSession) {
-          navigator.mediaSession.playbackState = 'none';
-        }
-      } catch {}
+      if ('mediaSession' in navigator) {
+        try { navigator.mediaSession.playbackState = 'none'; } catch {}
+      }
     }
 
     function toggleAudioSource(type) {
@@ -2089,22 +2098,39 @@
         stopCurrentAudio();
       } else {
         activeAudioType = type;
-        const wavUrl = generateSeamlessWavUrl(type);
+        try {
+          if (navigator.audioSession) navigator.audioSession.type = 'playback';
+        } catch {}
+
+        const wavUrl = buildContinuousWavBlobUrl(type);
         player.src = wavUrl;
         player.loop = true;
         player.volume = noiseVolume;
-        setupBackgroundMediaSession(type);
-        player.play().then(() => {
+        player.play().catch(() => {});
+
+        if ('mediaSession' in navigator) {
+          const labels = {
+            brown: 'Bruit Brun (Profond)',
+            pink: 'Bruit Rose Doux (Pluie)',
+            white: 'Bruit Blanc (Isolation)',
+            binaural: 'Ondes Binaurales 6 Hz'
+          };
           try {
-            if ('mediaSession' in navigator && navigator.mediaSession) {
-              navigator.mediaSession.playbackState = 'playing';
-            }
+            navigator.mediaSession.metadata = new MediaMetadata({
+              title: labels[type] || 'Audio FocusPASS',
+              artist: 'FocusPASS — Concentration',
+              album: currentTimerSubject
+            });
+            navigator.mediaSession.playbackState = 'playing';
+            navigator.mediaSession.setActionHandler('play', () => player.play());
+            navigator.mediaSession.setActionHandler('pause', () => toggleAudioSource(activeAudioType));
           } catch {}
-        }).catch(() => {
-          showToast('Clique à nouveau pour lancer le flux audio', '🔊');
-        });
+        }
       }
-      ['brown', 'pink', 'white', 'binaural'].forEach(t => $(`noise-btn-${t}`)?.classList.toggle('active', activeAudioType === t));
+
+      ['brown', 'pink', 'white', 'binaural'].forEach(t =>
+        $(`noise-btn-${t}`)?.classList.toggle('active', activeAudioType === t)
+      );
     }
 
     function updateNoiseVolume(val) {
@@ -2116,24 +2142,22 @@
     }
 
     // =========================================================================
-    // NAVIGATION, SEMAINES & THÈMES
+    // NAVIGATION, SEMAINES & THÈMES (5 THÈMES DONT ROUGE SOMBRE & VERT CLAIR)
     // =========================================================================
-    const VALID_THEMES = Object.freeze(['oled', 'dark', 'crimson', 'light', 'mint']);
-
     function applyTheme() {
-      const activeTheme = VALID_THEMES.includes(state.theme) ? state.theme : 'oled';
-      document.documentElement.setAttribute('data-theme', activeTheme);
-      VALID_THEMES.forEach(t => {
+      const theme = ['oled', 'dark', 'crimson', 'light', 'mint'].includes(state.theme) ? state.theme : 'oled';
+      document.documentElement.setAttribute('data-theme', theme);
+      ['oled', 'dark', 'crimson', 'light', 'mint'].forEach(t => {
         const btn = $(`theme-btn-${t}`);
         if (btn) {
-          btn.style.borderColor = activeTheme === t ? 'var(--btn-bg)' : 'var(--border-color)';
-          btn.style.borderWidth = activeTheme === t ? '2px' : '1px';
+          btn.style.borderColor = theme === t ? 'var(--btn-bg)' : 'var(--border-color)';
+          btn.style.borderWidth = theme === t ? '2px' : '1px';
         }
       });
     }
 
     function setTheme(themeName) {
-      if (!VALID_THEMES.includes(themeName)) return;
+      if (!['oled', 'dark', 'crimson', 'light', 'mint'].includes(themeName)) return;
       state.theme = themeName;
       saveState();
       applyTheme();
@@ -2146,8 +2170,16 @@
       saveState();
       renderAll();
     }
-    function selectDay(dayIdx) { selectedDayIndex = SecurityGuard.clampNumber(dayIdx, 0, 6, 0); renderAll(); }
-    function setPriorityFilter(filter) { currentPriorityFilter = filter; renderDashboardTasks(); }
+
+    function selectDay(dayIdx) {
+      selectedDayIndex = SecurityGuard.clampNumber(dayIdx, 0, 6, 0);
+      renderAll();
+    }
+
+    function setPriorityFilter(filter) {
+      currentPriorityFilter = filter;
+      renderDashboardTasks();
+    }
 
     function changeStatsWeek(delta) {
       statsWeekOffset = Math.min(0, statsWeekOffset + delta);
@@ -2164,6 +2196,7 @@
       currentActiveTab = tabName;
       ['dashboard', 'timer', 'stats', 'settings'].forEach(t => {
         const view = $(`view-${t}`);
+        if (!view) return;
         const isTarget = t === tabName;
         view.classList.toggle('hidden', !isTarget);
         if (isTarget) {
@@ -2175,17 +2208,25 @@
         if (desk) desk.className = isTarget ? 'px-4 py-2 rounded-lg text-sm font-bold transition theme-btn-primary' : 'px-4 py-2 rounded-lg text-sm font-semibold transition opacity-70 hover:opacity-100';
         if (mob) mob.style.color = isTarget ? 'var(--text-main)' : 'var(--text-muted)';
       });
-      if (typeof saveTimerPersistence === 'function') saveTimerPersistence();
       renderAll();
     }
 
-    function toggleCustomSubjectDropdown(e) { e.stopPropagation(); $('customSubjectDropdownMenu').classList.toggle('hidden'); }
-    function closeCustomDropdownOutside() { $('customSubjectDropdownMenu')?.classList.add('hidden'); }
+    function toggleCustomSubjectDropdown(e) {
+      e.stopPropagation();
+      $('customSubjectDropdownMenu').classList.toggle('hidden');
+    }
+
+    function closeCustomDropdownOutside() {
+      $('customSubjectDropdownMenu')?.classList.add('hidden');
+    }
+
     function selectTimerSubjectByIndex(idx) {
-      if (state.subjects[idx]) currentTimerSubject = state.subjects[idx].name;
+      if (state.subjects[idx]) {
+        currentTimerSubject = state.subjects[idx].name;
+        saveTimerPersistence();
+      }
       closeCustomDropdownOutside();
       renderSubjectSelects();
-      if (typeof saveTimerPersistence === 'function') saveTimerPersistence();
     }
 
     function renderSubjectSelects() {
@@ -2226,10 +2267,7 @@
         const isSel = idx === selectedDayIndex;
         const breakdown = getDateSubjectBreakdown(dKey);
         const segments = totalMin > 0
-          ? Object.entries(breakdown).map(([subj, min]) => {
-              const c = esc(getSubjectColor(subj));
-              return `<div style="height:${(min / totalMin) * 100}%;background-color:${c};" class="w-full bar-segment" title="${esc(subj)}: ${formatMinutes(min)}"></div>`;
-            }).join('')
+          ? Object.entries(breakdown).map(([subj, min]) => `<div style="height:${(min / totalMin) * 100}%;background-color:${esc(getSubjectColor(subj))};" class="w-full bar-segment" title="${esc(subj)}: ${formatMinutes(min)}"></div>`).join('')
           : `<div class="w-full h-full ${isMain ? 'opacity-25' : ''}" style="background-color:var(--bg-input);"></div>`;
 
         const dateSubLabel = isMain ? `<span class="text-[10px] opacity-60 font-normal block leading-tight">${formatShortDate(dateObj)}</span>` : '';
@@ -2259,16 +2297,14 @@
       $('todayPercentBadge').textContent = `${pct}% de l'objectif`;
 
       const todayBreakdown = getDateSubjectBreakdown(todayKey);
-      $('todaySegmentedProgress').innerHTML = todayMin === 0 ? '' : Object.entries(todayBreakdown).map(([subj, min]) => {
-        const c = esc(getSubjectColor(subj));
-        return `<div style="width:${Math.min(100, (min / Math.max(goalMin, todayMin)) * 100)}%;background-color:${c};" class="h-full first:rounded-l-full last:rounded-r-full bar-segment" title="${esc(subj)}: ${formatMinutes(min)}"></div>`;
-      }).join('');
+      $('todaySegmentedProgress').innerHTML = todayMin === 0 ? '' : Object.entries(todayBreakdown).map(([subj, min]) =>
+        `<div style="width:${Math.min(100, (min / Math.max(goalMin, todayMin)) * 100)}%;background-color:${esc(getSubjectColor(subj))};" class="h-full first:rounded-l-full last:rounded-r-full bar-segment" title="${esc(subj)}: ${formatMinutes(min)}"></div>`
+      ).join('');
 
-      const chipsEl = $('todaySubjectsChips');
-      if (chipsEl) {
-        chipsEl.innerHTML = Object.entries(todayBreakdown).map(([subj, min]) => {
+      if ($('todaySubjectsChips')) {
+        $('todaySubjectsChips').innerHTML = Object.entries(todayBreakdown).map(([subj, min]) => {
           const c = esc(getSubjectColor(subj));
-          return `<span class="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full" style="background-color:${c}20;color:${c};border:1px solid ${c}45;">
+          return `<span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5" style="background-color:${c}22;color:${c};border:1px solid ${c}44;">
             <span class="w-1.5 h-1.5 rounded-full" style="background-color:${c};"></span>${esc(subj)} • ${formatMinutes(min)}
           </span>`;
         }).join('');
@@ -2286,7 +2322,7 @@
       renderDashboardTasks();
       renderDailyGoals();
 
-      $('miniSubjectLegend').innerHTML = state.subjects.map(s => `<span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-md" style="background-color:${esc(s.color)}18;color:${esc(s.color)};"><span class="w-2 h-2 rounded-full" style="background-color:${esc(s.color)};"></span>${esc(s.name)}</span>`).join('');
+      $('miniSubjectLegend').innerHTML = state.subjects.map(s => `<span class="inline-flex items-center gap-1 text-[10px] font-semibold" style="color:var(--text-muted);"><span class="w-2 h-2 rounded-full" style="background-color:${esc(s.color)};"></span>${esc(s.name)}</span>`).join('');
       $('miniBarChart').innerHTML = buildBarChartHtml(curWeekDates, Math.max(goalMin, ...curWeekTotals, 60), false);
 
       renderStatsView(streak);
@@ -2311,7 +2347,7 @@
     function renderOverdueTaskItem(t) {
       const c = esc(getSubjectColor(t.subject));
       const safeId = Number(t.id) || 0;
-      return `<div class="task-row flex items-center justify-between p-3 rounded-xl gap-2" style="border-color:rgba(239,68,68,0.28);border-left:3px solid ${c};">
+      return `<div class="task-row flex items-center justify-between p-3 rounded-xl gap-2" style="border-color:rgba(239,68,68,0.28);">
         <label class="flex items-center gap-3 cursor-pointer flex-1">
           <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${safeId})" class="w-5 h-5 rounded cursor-pointer accent-red-500 flex-shrink-0" />
           <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 flex-wrap">
@@ -2403,7 +2439,7 @@
         : sortedTasks.map(t => {
             const c = esc(getSubjectColor(t.subject));
             const safeId = Number(t.id) || 0;
-            return `<div class="task-row flex items-center justify-between p-3.5 rounded-xl gap-2" style="border-left: 3px solid ${c};">
+            return `<div class="task-row flex items-center justify-between p-3.5 rounded-xl gap-2">
               <label class="flex items-center gap-3 cursor-pointer flex-1">
                 <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${safeId})" class="w-5 h-5 rounded cursor-pointer accent-current flex-shrink-0" />
                 <div class="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 flex-wrap">
@@ -2489,8 +2525,18 @@
         renderAll();
       }
     }
-    function deleteTask(id) { state.tasks = state.tasks.filter(x => x.id !== id); saveState(); renderAll(); }
-    function deleteSession(id) { state.sessions = state.sessions.filter(x => x.id !== id); saveState(); renderAll(); }
+
+    function deleteTask(id) {
+      state.tasks = state.tasks.filter(x => x.id !== id);
+      saveState();
+      renderAll();
+    }
+
+    function deleteSession(id) {
+      state.sessions = state.sessions.filter(x => x.id !== id);
+      saveState();
+      renderAll();
+    }
 
     // =========================================================================
     // GESTION DES OBJECTIFS QUOTIDIENS (AVEC VERROUILLAGE J-2 À JOUR J)
@@ -2527,7 +2573,8 @@
 
     function addDailyGoal(e) {
       e.preventDefault();
-      const input = $('newGoalInput');
+      const input = e.target?.querySelector('input') || $('newGoalInput');
+      if (!input) return;
       const title = SecurityGuard.cleanText(input.value, 60);
       if (!title) return;
       state.goals.push({ id: Date.now(), title, completedDates: [] });
@@ -2607,7 +2654,7 @@
       $('statGoalRate').textContent = `${state.goals.length ? Math.round((weekGoalsChecks / maxWeekGoals) * 100) : 0}%`;
       $('chartGoalLegend').textContent = `${state.dailyGoalHours}h`;
 
-      $('mainChartLegend').innerHTML = state.subjects.map(s => `<span class="inline-flex items-center gap-2 text-xs font-bold px-3 py-1 rounded-xl border" style="background-color:${esc(s.color)}18;color:${esc(s.color)};border-color:${esc(s.color)}40;"><span class="w-2.5 h-2.5 rounded-full" style="background-color:${esc(s.color)};"></span><span>${esc(s.name)}</span></span>`).join('');
+      $('mainChartLegend').innerHTML = state.subjects.map(s => `<span class="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-lg border" style="background-color:var(--bg-main);border-color:var(--border-color);"><span class="w-3 h-3 rounded-full" style="background-color:${esc(s.color)};"></span><span>${esc(s.name)}</span></span>`).join('');
 
       const maxScaleMin = Math.max(state.dailyGoalHours * 72, ...dailyTotals, 120);
       $('goalLine').style.bottom = `${Math.min(94, Math.round(((state.dailyGoalHours * 60) / maxScaleMin) * 100))}%`;
@@ -2645,7 +2692,7 @@
         : daySessions.map(s => {
             const safeId = Number(s.id) || 0;
             return `<div class="flex items-center justify-between px-3 py-2 rounded-xl border text-xs" style="background-color:var(--bg-main);border-color:var(--border-color);">
-              <div class="flex items-center gap-2"><span class="font-mono-timer opacity-60">${esc(s.time)}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color:${esc(getSubjectColor(s.subject))};"></span><span class="font-semibold">${esc(s.subject)}</span></div>
+              <div class="flex items-center gap-2"><span class="font-mono-timer opacity-75 font-bold">${esc(s.time)}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color:${esc(getSubjectColor(s.subject))};"></span><span class="font-semibold">${esc(s.subject)}</span></div>
               <div class="flex items-center gap-3"><span class="font-mono-timer font-bold">+ ${formatMinutes(s.minutes)}</span><button onclick="deleteSession(${safeId})" class="opacity-40 hover:opacity-100 hover:text-red-400">✕</button></div>
             </div>`;
           }).join('');
@@ -2657,7 +2704,7 @@
         : dayTasks.map(t => {
             const c = esc(getSubjectColor(t.subject));
             const safeId = Number(t.id) || 0;
-            return `<div class="flex items-center justify-between p-3 rounded-xl border gap-2" style="background-color:var(--bg-main);border-color:var(--border-color);border-left:3px solid ${c};">
+            return `<div class="flex items-center justify-between p-3 rounded-xl border gap-2" style="background-color:var(--bg-main);border-color:var(--border-color);">
               <label class="flex items-center gap-2.5 cursor-pointer flex-1"><input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${safeId})" class="w-4 h-4 rounded cursor-pointer" /><span class="text-xs font-medium ${t.done ? 'line-through opacity-50' : ''}">${esc(t.title)}</span></label>
               <div class="flex items-center gap-1.5 flex-shrink-0">
                 ${renderPriorityBadge(t, true)}
@@ -2678,7 +2725,10 @@
                 <input type="checkbox" ${isChecked ? 'checked' : ''} ${isSelectedEditable ? '' : 'disabled'} onchange="toggleDailyGoalByDate(${safeId}, '${esc(selectedDateKey)}')" class="w-4 h-4 rounded ${isSelectedEditable ? 'cursor-pointer' : 'cursor-not-allowed'} accent-emerald-500" />
                 <span class="text-xs font-medium ${isChecked ? 'line-through opacity-50' : ''}">${esc(g.title)}</span>
               </label>
-              <span class="text-[10px] font-bold ${isChecked ? 'text-emerald-400' : 'opacity-40'}">${isChecked ? '✓ Atteint' : (isSelectedEditable ? 'Non coché' : '🔒 Verrouillé')}</span>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold ${isChecked ? 'text-emerald-400' : 'opacity-40'}">${isChecked ? '✓ Atteint' : (isSelectedEditable ? 'Non coché' : '🔒 Verrouillé')}</span>
+                <button type="button" onclick="deleteDailyGoal(${safeId})" class="text-xs opacity-40 hover:opacity-100 hover:text-red-400 px-1" title="Supprimer cet objectif">✕</button>
+              </div>
             </div>`;
           }).join('');
 
@@ -2808,7 +2858,7 @@
     }
 
     // =========================================================================
-    // CHRONO HAUTE PRÉCISION, PERSISTANCE ANTI-REDÉMARRAGE & PLEIN ÉCRAN FOCUS
+    // CHRONO HAUTE PRÉCISION AVEC PERSISTANCE ANTI-REDÉMARRAGE EN ARRIÈRE-PLAN
     // =========================================================================
     let timerInterval = null, timerRunning = false, timerMode = 'countup';
     let elapsedSeconds = 0, countdownTargetSeconds = 3600;
@@ -2817,14 +2867,19 @@
 
     function saveTimerPersistence() {
       try {
+        if (!timerRunning && elapsedSeconds === 0 && timerBaseElapsed === 0) {
+          localStorage.removeItem(TIMER_STORAGE_KEY);
+          return;
+        }
         const payload = {
-          running: Boolean(timerRunning),
-          mode: timerMode === 'countdown' ? 'countdown' : 'countup',
-          anchorTimestamp: timerRunning ? (timerAnchorTimestamp || Date.now()) : null,
-          baseElapsed: Number(timerRunning ? timerBaseElapsed : elapsedSeconds) || 0,
-          countdownTargetSeconds: Number(countdownTargetSeconds) || 3600,
-          subject: currentTimerSubject || (state.subjects[0]?.name || 'Anatomie'),
-          activeTab: currentActiveTab || 'dashboard'
+          running: timerRunning,
+          mode: timerMode,
+          anchorTimestamp: timerAnchorTimestamp,
+          baseElapsed: timerBaseElapsed,
+          elapsedSeconds,
+          countdownTargetSeconds,
+          subject: currentTimerSubject,
+          savedAt: Date.now()
         };
         localStorage.setItem(TIMER_STORAGE_KEY, JSON.stringify(payload));
       } catch {}
@@ -2832,70 +2887,59 @@
 
     function restoreTimerPersistence() {
       try {
-        const raw = SecurityGuard.safeJsonParse(localStorage.getItem(TIMER_STORAGE_KEY));
-        if (!raw || typeof raw !== 'object') return false;
+        const saved = SecurityGuard.safeJsonParse(localStorage.getItem(TIMER_STORAGE_KEY));
+        if (!saved || typeof saved !== 'object') return false;
 
-        if (raw.subject && state.subjects.some(s => s.name === raw.subject)) {
-          currentTimerSubject = raw.subject;
+        timerMode = saved.mode === 'countdown' ? 'countdown' : 'countup';
+        countdownTargetSeconds = SecurityGuard.clampNumber(saved.countdownTargetSeconds, 60, 86400, 3600);
+        if (saved.subject && state.subjects.some(s => s.name === saved.subject)) {
+          currentTimerSubject = saved.subject;
         }
-        countdownTargetSeconds = SecurityGuard.clampNumber(raw.countdownTargetSeconds, 60, 86400, 3600);
-        const savedMode = raw.mode === 'countdown' ? 'countdown' : 'countup';
-        timerMode = savedMode;
+
         $('seg-countdown')?.classList.toggle('active', timerMode === 'countdown');
         $('seg-countup')?.classList.toggle('active', timerMode === 'countup');
         ['h', 'm', 's'].forEach(u => $(`wheel-${u}`)?.classList.toggle('wheel-interactive', timerMode === 'countdown'));
 
-        const baseSec = SecurityGuard.clampNumber(raw.baseElapsed, 0, 86400, 0);
+        const startBtn = $('timerStartBtn');
+        if (saved.running && saved.anchorTimestamp) {
+          timerBaseElapsed = SecurityGuard.clampNumber(saved.baseElapsed, 0, 86400, 0);
+          timerAnchorTimestamp = Number(saved.anchorTimestamp) || Date.now();
+          elapsedSeconds = timerBaseElapsed + Math.max(0, Math.floor((Date.now() - timerAnchorTimestamp) / 1000));
 
-        if (raw.running && raw.anchorTimestamp) {
-          const anchor = Number(raw.anchorTimestamp);
-          const deltaSec = Math.max(0, Math.floor((Date.now() - anchor) / 1000));
-          const totalElapsed = baseSec + deltaSec;
-
-          if (timerMode === 'countdown' && totalElapsed >= countdownTargetSeconds) {
+          if (timerMode === 'countdown' && elapsedSeconds >= countdownTargetSeconds) {
             elapsedSeconds = countdownTargetSeconds;
             timerBaseElapsed = countdownTargetSeconds;
             timerRunning = false;
             timerAnchorTimestamp = null;
-            switchTab('timer');
+            localStorage.removeItem(TIMER_STORAGE_KEY);
+            updateFlipClockDisplay();
             finishAndSaveSession();
             return true;
           }
 
-          timerBaseElapsed = baseSec;
-          timerAnchorTimestamp = anchor;
-          elapsedSeconds = totalElapsed;
           timerRunning = true;
-
-          const startBtn = $('timerStartBtn');
           if (startBtn) {
             startBtn.textContent = 'Pause';
             startBtn.classList.add('is-running');
           }
           $('timerSaveBtn')?.classList.remove('hidden');
+          requestWakeLock(true);
           if (timerInterval) clearInterval(timerInterval);
           timerInterval = setInterval(syncTimerWithRealClock, 500);
-          requestWakeLock(true);
           updateFlipClockDisplay();
-          switchTab('timer');
-          showToast(`Chrono maintenu en arrière-plan (${formatMinutes(Math.max(1, Math.floor(elapsedSeconds / 60)))})`, '⏱️');
           return true;
-        } else if (baseSec > 0) {
-          timerBaseElapsed = baseSec;
-          elapsedSeconds = baseSec;
+        } else if (saved.elapsedSeconds > 0 || saved.baseElapsed > 0) {
           timerRunning = false;
           timerAnchorTimestamp = null;
-          const startBtn = $('timerStartBtn');
+          timerBaseElapsed = SecurityGuard.clampNumber(saved.baseElapsed || saved.elapsedSeconds, 0, 86400, 0);
+          elapsedSeconds = timerBaseElapsed;
           if (startBtn) {
             startBtn.textContent = 'Reprendre';
             startBtn.classList.remove('is-running');
           }
           $('timerSaveBtn')?.classList.remove('hidden');
           updateFlipClockDisplay();
-          if (raw.activeTab === 'timer') {
-            switchTab('timer');
-            return true;
-          }
+          return true;
         }
       } catch {}
       return false;
@@ -2911,23 +2955,20 @@
 
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') {
-        saveTimerPersistence();
-      } else if (document.visibilityState === 'visible' && timerRunning) {
-        syncTimerWithRealClock();
-        requestWakeLock(true);
+        if (timerRunning || elapsedSeconds > 0) saveTimerPersistence();
+      } else if (document.visibilityState === 'visible') {
+        if (timerRunning) {
+          syncTimerWithRealClock();
+          requestWakeLock(true);
+        } else {
+          restoreTimerPersistence();
+        }
       }
     });
-    window.addEventListener('pagehide', saveTimerPersistence);
-    window.addEventListener('beforeunload', saveTimerPersistence);
 
-    function syncFullscreenClasses() {
-      const c = $('flipClockContainer');
-      const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
-      const isCssFs = Boolean(c && c.classList.contains('is-fullscreen'));
-      document.body.classList.toggle('timer-is-fullscreen', isNativeFs || isCssFs);
-    }
-    document.addEventListener('fullscreenchange', syncFullscreenClasses);
-    document.addEventListener('webkitfullscreenchange', syncFullscreenClasses);
+    window.addEventListener('pagehide', () => {
+      if (timerRunning || elapsedSeconds > 0) saveTimerPersistence();
+    });
 
     function updateLiveTimestamp() {
       const now = new Date();
@@ -2940,11 +2981,11 @@
       if (timerRunning) toggleTimer();
       timerMode = mode === 'countdown' ? 'countdown' : 'countup';
       elapsedSeconds = 0; timerBaseElapsed = 0;
+      localStorage.removeItem(TIMER_STORAGE_KEY);
       $('seg-countdown').classList.toggle('active', timerMode === 'countdown');
       $('seg-countup').classList.toggle('active', timerMode === 'countup');
       ['h', 'm', 's'].forEach(u => $(`wheel-${u}`)?.classList.toggle('wheel-interactive', timerMode === 'countdown'));
       updateFlipClockDisplay();
-      saveTimerPersistence();
     }
 
     function adjustCountdownByWheel(unit, stepDir) {
@@ -2957,7 +2998,6 @@
       wheelOffsets[unit] += stepDir * 4;
       $(`wheel-${unit}`)?.style.setProperty('--wheel-offset', `${wheelOffsets[unit]}px`);
       updateFlipClockDisplay();
-      saveTimerPersistence();
     }
 
     function initFlipWheels() {
@@ -2998,7 +3038,7 @@
 
     function syncTimerWithRealClock() {
       if (!timerRunning || !timerAnchorTimestamp) return;
-      elapsedSeconds = timerBaseElapsed + Math.floor((Date.now() - timerAnchorTimestamp) / 1000);
+      elapsedSeconds = timerBaseElapsed + Math.max(0, Math.floor((Date.now() - timerAnchorTimestamp) / 1000));
       if (timerMode === 'countdown' && elapsedSeconds >= countdownTargetSeconds) {
         elapsedSeconds = countdownTargetSeconds;
         finishAndSaveSession();
@@ -3035,13 +3075,13 @@
     function resetTimer() {
       timerRunning = false; timerAnchorTimestamp = null; timerBaseElapsed = 0; elapsedSeconds = 0;
       clearInterval(timerInterval);
+      localStorage.removeItem(TIMER_STORAGE_KEY);
       requestWakeLock(false);
       const startBtn = $('timerStartBtn');
       startBtn.textContent = 'Commencer';
       startBtn.classList.remove('is-running');
       $('timerSaveBtn').classList.add('hidden');
       updateFlipClockDisplay();
-      saveTimerPersistence();
     }
 
     function updateFlipClockDisplay() {
@@ -3058,35 +3098,47 @@
         return;
       }
       const addedMin = SecurityGuard.clampNumber(Math.round(elapsedSeconds / 60), 1, 1440, 1);
+      const endDate = new Date();
+      const startDate = new Date(endDate.getTime() - elapsedSeconds * 1000);
+      const fmt = d => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      const slotStr = `${fmt(startDate)} → ${fmt(endDate)}`;
+
       state.sessions.unshift({
         id: Date.now(),
         date: getTodayKey(),
         subject: currentTimerSubject,
         minutes: addedMin,
-        time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+        time: slotStr
       });
+      localStorage.removeItem(TIMER_STORAGE_KEY);
       saveState();
       resetTimer();
       renderAll();
       showToast(`Session de ${formatMinutes(addedMin)} (${currentTimerSubject}) enregistrée !`, '🔥');
     }
 
+    function syncFullscreenBodyClass() {
+      const c = $('flipClockContainer');
+      const isNativeFs = document.fullscreenElement === c || document.webkitFullscreenElement === c;
+      const isActive = isNativeFs || c?.classList.contains('is-fullscreen');
+      document.body.classList.toggle('timer-is-fullscreen', Boolean(isActive));
+    }
+
+    document.addEventListener('fullscreenchange', syncFullscreenBodyClass);
+    document.addEventListener('webkitfullscreenchange', syncFullscreenBodyClass);
+
     function toggleFullScreenTimer() {
       const c = $('flipClockContainer');
       const isNativeFs = document.fullscreenElement || document.webkitFullscreenElement;
-      if (isNativeFs) {
-        (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
-        c.classList.remove('is-fullscreen');
-      } else if (c.classList.contains('is-fullscreen')) {
+      if (isNativeFs || c.classList.contains('is-fullscreen')) {
+        if (isNativeFs) (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
         c.classList.remove('is-fullscreen');
       } else {
         c.classList.add('is-fullscreen');
         const req = c.requestFullscreen || c.webkitRequestFullscreen;
-        if (req) {
-          req.call(c).catch(() => {});
-        }
+        if (req) req.call(c).catch(() => {});
       }
-      syncFullscreenClasses();
+      syncFullscreenBodyClass();
     }
 
     function exitFullscreenOrBack() {
@@ -3095,7 +3147,7 @@
       if (isNativeFs || c.classList.contains('is-fullscreen')) {
         if (isNativeFs) (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
         c.classList.remove('is-fullscreen');
-        syncFullscreenClasses();
+        syncFullscreenBodyClass();
       } else {
         switchTab('dashboard');
       }
@@ -3108,62 +3160,68 @@
         : list.map(s => {
             const c = esc(getSubjectColor(s.subject));
             return `<div class="task-row flex items-center justify-between p-3 rounded-xl">
-              <div class="flex items-center gap-2.5"><span class="text-xs font-mono-timer opacity-60">${esc(s.time)}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color:${c};"></span><span class="font-bold text-xs" style="color:${c};">${esc(s.subject)}</span></div>
+              <div class="flex items-center gap-2.5"><span class="text-xs font-mono-timer font-bold opacity-75">${esc(s.time)}</span><span class="w-2.5 h-2.5 rounded-full" style="background-color:${c};"></span><span class="font-bold text-xs" style="color:${c};">${esc(s.subject)}</span></div>
               <span class="font-mono-timer font-bold text-xs">+ ${formatMinutes(s.minutes)}</span>
             </div>`;
           }).join('');
     }
 
-    function openManualTimeModal(dateKey) {
-      $('manualDateInput').value = SecurityGuard.isValidDateKey(dateKey) ? dateKey : getTodayKey();
-      const now = new Date();
-      const h = SecurityGuard.clampNumber($('manualHoursInput')?.value, 0, 15, 1);
-      const m = SecurityGuard.clampNumber($('manualMinutesInput')?.value, 0, 59, 30);
-      const startDate = new Date(now.getTime() - (h * 60 + m) * 60000);
-      const defaultStart = `${String(startDate.getHours()).padStart(2, '0')}:${String(startDate.getMinutes()).padStart(2, '0')}`;
-      if ($('manualTimeInput')) $('manualTimeInput').value = defaultStart;
-      updateManualTimeSlotPreview();
-      $('manualTimeModal').classList.remove('hidden');
-    }
-
-    function computeTimeRangeString(startTimeStr, durationMinutes) {
-      const startClean = SecurityGuard.isValidTime(startTimeStr) ? startTimeStr : '14:00';
-      const [sH, sM] = startClean.split(':').map(Number);
-      const endTotalMin = (sH * 60 + sM + Math.max(0, durationMinutes)) % 1440;
+    function computeTimeRangeLabel(startHHMM, durationMinutes) {
+      if (!SecurityGuard.isValidTime(startHHMM)) return startHHMM || '14:00';
+      const [sH, sM] = startHHMM.split(':').map(Number);
+      const endTotalMin = (sH * 60 + sM + durationMinutes) % 1440;
       const eH = String(Math.floor(endTotalMin / 60)).padStart(2, '0');
       const eM = String(endTotalMin % 60).padStart(2, '0');
-      return `${startClean} → ${eH}:${eM}`;
+      return `${startHHMM} → ${eH}:${eM}`;
     }
 
     function updateManualTimeSlotPreview() {
-      const startStr = $('manualTimeInput')?.value || '14:00';
+      const startVal = $('manualTimeInput')?.value || '14:00';
       const h = SecurityGuard.clampNumber($('manualHoursInput')?.value, 0, 15, 0);
       const m = SecurityGuard.clampNumber($('manualMinutesInput')?.value, 0, 59, 0);
-      const previewEl = $('manualTimeSlotPreview');
-      if (previewEl) {
-        previewEl.textContent = computeTimeRangeString(startStr, h * 60 + m);
+      const totalMin = h * 60 + m;
+      const preview = $('manualTimeSlotPreview');
+      if (preview) {
+        preview.textContent = computeTimeRangeLabel(startVal, totalMin);
       }
+    }
+
+    function openManualTimeModal(dateKey) {
+      $('manualDateInput').value = SecurityGuard.isValidDateKey(dateKey) ? dateKey : getTodayKey();
+      const h = SecurityGuard.clampNumber($('manualHoursInput')?.value, 0, 15, 1);
+      const m = SecurityGuard.clampNumber($('manualMinutesInput')?.value, 0, 59, 30);
+      const defStart = new Date(Date.now() - (h * 60 + m) * 60000);
+      const hh = String(defStart.getHours()).padStart(2, '0');
+      const mm = String(defStart.getMinutes()).padStart(2, '0');
+      if ($('manualTimeInput')) $('manualTimeInput').value = `${hh}:${mm}`;
+      updateManualTimeSlotPreview();
+      $('manualTimeModal').classList.remove('hidden');
     }
 
     function submitManualTime(e) {
       e.preventDefault();
       const rawDate = $('manualDateInput').value;
       const dateKey = SecurityGuard.isValidDateKey(rawDate) ? rawDate : getTodayKey();
+      const rawStartTime = $('manualTimeInput')?.value || '14:00';
+      const startTime = SecurityGuard.isValidTime(rawStartTime) ? rawStartTime : '14:00';
       const h = SecurityGuard.clampNumber($('manualHoursInput').value, 0, 15, 0);
       const m = SecurityGuard.clampNumber($('manualMinutesInput').value, 0, 59, 0);
       const totalMin = h * 60 + m;
       if (totalMin <= 0) return;
       const subj = SecurityGuard.cleanText($('manualSubjectSelect').value, 40) || state.subjects[0].name;
-      const rawStart = $('manualTimeInput')?.value || '14:00';
-      const timeSlot = computeTimeRangeString(rawStart, totalMin);
+      const timeRange = computeTimeRangeLabel(startTime, totalMin);
+
       state.sessions.unshift({
-        id: Date.now(), date: dateKey, subject: subj,
-        minutes: totalMin, time: timeSlot
+        id: Date.now(),
+        date: dateKey,
+        subject: subj,
+        minutes: totalMin,
+        time: timeRange
       });
       saveState();
       $('manualTimeModal').classList.add('hidden');
       renderAll();
-      showToast(`+ ${formatMinutes(totalMin)} ajoutées en ${subj} (${timeSlot})`, '📚');
+      showToast(`+ ${formatMinutes(totalMin)} (${timeRange}) ajoutées en ${subj}`, '📚');
     }
 
     // =========================================================================
@@ -3179,7 +3237,7 @@
       const curColor = SecurityGuard.cleanHexColor($('newSubjectColorInput').value, '#10b981');
       $('subjectPresetPalette').innerHTML = MAIN_5_COLORS.map(hex => `<button type="button" onclick="$('newSubjectColorInput').value='${hex}';renderSettings();" class="w-7 h-7 rounded-full transition transform hover:scale-110 ${curColor === hex ? 'scale-110 ring-2 ring-offset-2 ring-offset-black ring-white' : 'opacity-80 hover:opacity-100'}" style="background-color:${hex};"></button>`).join('');
 
-      $('subjectsListEditor').innerHTML = state.subjects.map((s, idx) => `<div class="task-row flex items-center justify-between p-3 rounded-xl gap-2" style="border-left: 3px solid ${esc(s.color)};">
+      $('subjectsListEditor').innerHTML = state.subjects.map((s, idx) => `<div class="task-row flex items-center justify-between p-3 rounded-xl gap-2">
         <div class="flex items-center gap-3 flex-1">
           <input type="color" value="${esc(s.color)}" onchange="updateSubjectColor(${idx}, this.value)" class="w-8 h-8 rounded-lg cursor-pointer bg-transparent border-0 flex-shrink-0" />
           <input type="text" value="${esc(s.name)}" maxlength="40" onchange="renameSubject(${idx}, this.value)" class="bg-transparent text-sm font-bold focus:outline-none border-b border-transparent focus:border-zinc-500 px-1 py-0.5 w-full" title="Cliquer pour renommer la matière" />
@@ -3237,315 +3295,94 @@
     }
 
     // =========================================================================
-    // PROTOCOLE DE TUTORIEL INTERACTIF (AFFICHÉ UNIQUEMENT À LA 1ÈRE OUVERTURE)
+    // VISITE GUIDÉE SPOTLIGHT DIRECTEMENT SUR LES ÉLÉMENTS DE L'INTERFACE
     // =========================================================================
     const OnboardingWizard = {
       step: 1,
-      totalSteps: 5,
-      selectedColor: '#3b82f6',
+      totalSteps: 9,
+      isOpen: false,
+
+      stepsConfig: [
+        {
+          tab: 'dashboard',
+          targetId: 'launchChronoHeroBtn',
+          title: '⏱️ Lancer ton Chrono Focus',
+          desc: "Ce bouton lance directement ton chronomètre d'étude. Toutes les minutes travaillées s'ajoutent automatiquement à ta barre d'objectif du jour."
+        },
+        {
+          tab: 'dashboard',
+          targetId: 'addManualSessionHeroBtn',
+          title: '➕ Ajouter une session avec l’heure',
+          desc: "Tu as travaillé sans le chrono ? Clique ici pour ajouter manuellement une session en choisissant la date, la matière, la durée et l'heure exacte de révision."
+        },
+        {
+          tab: 'dashboard',
+          targetId: 'tasksMainCard',
+          title: '📋 Tes Tâches & Priorités du jour',
+          desc: "Ajoute ici tes cours ou QCM à faire, classe-les en Urgent / Important / À faire. S'il t'en reste à 18h00, FocusPASS t'enverra un rappel !",
+          showNotifButton: true
+        },
+        {
+          tab: 'dashboard',
+          targetId: 'dailyGoalsCard',
+          title: '🎯 Objectifs quotidiens & Série 🔥',
+          desc: "Coche chaque jour tes habitudes clés (sommeil, sport, hydratation...). Valide 100 % de tes objectifs plusieurs jours d'affilée pour débloquer les 11 Badges !"
+        },
+        {
+          tab: 'timer',
+          targetId: 'timerModeSegmented',
+          title: '⏳ Compte à rebours ou Chrono libre',
+          desc: "Choisis entre « Compter jusqu'à » (chrono libre) ou « Compte à rebours » (glisse sur les molettes à droite des chiffres pour régler ton temps). Le chrono continue même si tu changes d'appli !"
+        },
+        {
+          tab: 'timer',
+          targetId: 'timerAudioPanel',
+          title: '🎧 Bruits de concentration en arrière-plan',
+          desc: "Active un Bruit Brun, Pluie ou des Ondes Binaurales 6 Hz. Le son est continu sans aucune coupure et continue de tourner même si tu vas sur Safari ou verrouilles ta tablette."
+        },
+        {
+          tab: 'stats',
+          targetId: 'statsChartCard',
+          title: '📈 Bilan, Semaines & Compte rendu détaillé',
+          desc: "Visualise tes heures en couleurs sur toute la semaine. Clique sur la colonne d'un jour pour inspecter toutes tes sessions, tâches et tes 11 Badges de régularité juste en dessous."
+        },
+        {
+          tab: 'settings',
+          targetId: 'settingsSubjectsCard',
+          title: '🎨 Paramétrer tes Matières & Couleurs',
+          desc: "C'est ici que tu ajoutes toutes tes matières avec leurs couleurs dédiées ou que tu les renommes à tout moment."
+        },
+        {
+          tab: 'settings',
+          targetId: 'settingsSyncCard',
+          title: '☁️ Synchronisation Téléphone & Tablette',
+          desc: "Pour synchroniser tes données en direct entre ton téléphone et ta tablette, entre simplement ce même Code Synchro sur tes deux appareils puis clique sur « Lier » !"
+        }
+      ],
 
       shouldAutoStart() {
-        if (localStorage.getItem(ONBOARDING_STORAGE_KEY) === '1') return false;
-        if (state.onboardingDone) {
-          localStorage.setItem(ONBOARDING_STORAGE_KEY, '1');
-          return false;
-        }
-        return true;
+        return !state.onboardingDone && localStorage.getItem(ONBOARDING_STORAGE_KEY) !== '1';
       },
 
       open(force = false) {
         if (!force && !this.shouldAutoStart()) return;
         this.step = 1;
-        this.selectedColor = state.subjects[0]?.color || '#3b82f6';
+        this.isOpen = true;
         $('onboardingModal')?.classList.remove('hidden');
         this.renderStep();
       },
 
-      pickColor(hex) {
-        this.selectedColor = SecurityGuard.cleanHexColor(hex, '#3b82f6');
-        this.renderStep();
-      },
-
-      addSubjectFromWizard() {
-        const input = $('obSubjectInput');
-        const name = SecurityGuard.cleanText(input?.value || '', 40);
-        if (!name) {
-          showToast("Écris le nom d'une matière", '✏️');
-          return;
-        }
-        if (state.subjects.length === 1 && state.subjects[0].name === 'Anatomie' && name.toLowerCase() !== 'anatomie') {
-          renameSubject(0, name);
-          updateSubjectColor(0, this.selectedColor);
-        } else {
-          const existingIdx = state.subjects.findIndex(s => s.name.toLowerCase() === name.toLowerCase());
-          if (existingIdx >= 0) {
-            updateSubjectColor(existingIdx, this.selectedColor);
-          } else {
-            state.subjects.push({ name, color: this.selectedColor });
-            saveState();
-            renderAll();
-          }
-        }
-        this.selectedColor = MAIN_5_COLORS[state.subjects.length % MAIN_5_COLORS.length];
-        this.renderStep();
-        showToast(`Matière "${name}" configurée !`, '🎨');
-      },
-
-      addTaskFromWizard() {
-        const input = $('obTaskInput');
-        const prioSelect = $('obTaskPriority');
-        const subjSelect = $('obTaskSubject');
-        const title = SecurityGuard.cleanText(input?.value || '', 120);
-        if (!title) {
-          showToast("Écris l'intitulé de ta tâche", '✏️');
-          return;
-        }
-        const prio = PRIORITIES[prioSelect?.value] ? prioSelect.value : 'important';
-        const subj = SecurityGuard.cleanText(subjSelect?.value || '', 40) || state.subjects[0].name;
-
-        if (state.tasks.length === 1 && state.tasks[0].title === 'Réviser mon premier cours') {
-          state.tasks[0] = { id: Date.now(), date: getTodayKey(), title, subject: subj, priority: prio, done: false };
-        } else {
-          state.tasks.push({ id: Date.now(), date: getTodayKey(), title, subject: subj, priority: prio, done: false });
-        }
+      finish() {
+        this.isOpen = false;
+        state.onboardingDone = true;
+        localStorage.setItem(ONBOARDING_STORAGE_KEY, '1');
         saveState();
-        renderAll();
-        this.renderStep();
-        showToast('Première tâche ajoutée !', '✅');
-      },
-
-      addGoalFromWizard() {
-        const input = $('obGoalInput');
-        const title = SecurityGuard.cleanText(input?.value || '', 60);
-        if (!title) {
-          showToast('Écris ton objectif quotidien', '✏️');
-          return;
-        }
-        if (!state.goals.some(g => g.title.toLowerCase() === title.toLowerCase())) {
-          state.goals.push({ id: Date.now(), title, completedDates: [] });
-          saveState();
-          renderAll();
-        }
-        this.renderStep();
-        showToast('Objectif quotidien ajouté !', '🎯');
-      },
-
-      renderStep() {
-        $('onboardingStepLabel').textContent = `Étape ${this.step} sur ${this.totalSteps}`;
-        $('onboardingProgressFill').style.width = `${(this.step / this.totalSteps) * 100}%`;
-        $('onboardingPrevBtn').classList.toggle('invisible', this.step === 1);
-        $('onboardingNextBtn').textContent = this.step === this.totalSteps ? 'Commencer FocusPASS 🚀' : 'Suivant →';
-
-        $('onboardingDots').innerHTML = Array.from({ length: this.totalSteps }, (_, i) => {
-          const active = (i + 1) === this.step;
-          return `<span class="h-1.5 rounded-full transition-all ${active ? 'w-5 bg-white' : 'w-1.5 bg-zinc-600'}"></span>`;
-        }).join('');
-
-        const box = $('onboardingStepContent');
-        if (!box) return;
-
-        if (this.step === 1) {
-          const paletteHtml = MAIN_5_COLORS.map(hex => `
-            <button type="button" onclick="OnboardingWizard.pickColor('${hex}')"
-              class="w-7 h-7 rounded-full transition transform ${this.selectedColor === hex ? 'scale-110 ring-2 ring-white ring-offset-2 ring-offset-black' : 'opacity-75 hover:opacity-100'}"
-              style="background-color:${hex};"></button>
-          `).join('');
-
-          const chipsHtml = state.subjects.map(s => `
-            <span class="inline-flex items-center gap-1.5 text-xs font-extrabold px-3 py-1 rounded-full border" style="background-color:${esc(s.color)}22;color:${esc(s.color)};border-color:${esc(s.color)}55;">
-              <span class="w-2 h-2 rounded-full" style="background-color:${esc(s.color)};"></span>${esc(s.name)}
-            </span>
-          `).join('');
-
-          box.innerHTML = `
-            <div class="space-y-2">
-              <span class="text-xs font-extrabold uppercase tracking-wider text-blue-400">Bienvenue sur FocusPASS 👋</span>
-              <h3 class="text-xl font-black tracking-tight">1. Crée tes matières & couleurs</h3>
-              <p class="text-xs leading-relaxed" style="color: var(--text-muted);">
-                Chaque matière possède sa propre couleur qui s'affichera dans ton chronomètre, tes tâches et tes graphiques de la semaine. Ajoute tes matières dès maintenant :
-              </p>
-            </div>
-
-            <div class="p-4 rounded-2xl border space-y-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
-              <div class="flex gap-2">
-                <input type="text" id="obSubjectInput" maxlength="40" placeholder="Ex: Anatomie, Biochimie, Biocell..."
-                  onkeydown="if(event.key==='Enter'){event.preventDefault();OnboardingWizard.addSubjectFromWizard();}"
-                  class="input-field flex-1 px-3.5 py-2 rounded-xl text-xs font-semibold focus:outline-none" />
-                <button type="button" onclick="OnboardingWizard.addSubjectFromWizard()" class="theme-btn-primary px-4 py-2 rounded-xl text-xs font-extrabold flex-shrink-0">
-                  + Ajouter
-                </button>
-              </div>
-              <div class="flex items-center justify-between gap-2 pt-1 flex-wrap">
-                <span class="text-[11px] font-semibold" style="color: var(--text-muted);">Choisis une couleur :</span>
-                <div class="flex items-center gap-2">${paletteHtml}</div>
-              </div>
-            </div>
-
-            <div class="space-y-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider block" style="color: var(--text-muted);">Tes matières actives :</span>
-              <div class="flex flex-wrap gap-1.5">${chipsHtml}</div>
-            </div>
-          `;
-        } else if (this.step === 2) {
-          const todayTasks = state.tasks.filter(t => t.date === getTodayKey());
-          const subjOptions = state.subjects.map(s => `<option value="${esc(s.name)}">${esc(s.name)}</option>`).join('');
-          const tasksPreview = todayTasks.slice(0, 3).map(t => {
-            const c = esc(getSubjectColor(t.subject));
-            const p = PRIORITIES[t.priority] || PRIORITIES.todo;
-            return `<div class="flex items-center justify-between p-2.5 rounded-xl border text-xs" style="background-color:var(--bg-main);border-color:var(--border-color);border-left:3px solid ${c};">
-              <span class="font-bold truncate pr-2">${esc(t.title)}</span>
-              <div class="flex items-center gap-1.5 flex-shrink-0">
-                <span class="text-[10px] px-2 py-0.5 rounded-full font-extrabold" style="background-color:${p.bg};color:${p.text};">${p.label}</span>
-                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold" style="background-color:${c}22;color:${c};">${esc(t.subject)}</span>
-              </div>
-            </div>`;
-          }).join('');
-
-          box.innerHTML = `
-            <div class="space-y-2">
-              <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">Organisation quotidienne ✅</span>
-              <h3 class="text-xl font-black tracking-tight">2. Planifie ta première tâche</h3>
-              <p class="text-xs leading-relaxed" style="color: var(--text-muted);">
-                Classe tes tâches par priorité (<strong>Urgent</strong>, <strong>Important</strong>, <strong>À faire</strong>). Si une tâche n'est pas cochée le soir, elle passe automatiquement dans la boîte <em>« En retard / Pas fait »</em> le lendemain, et un rappel te prévient à <strong>18h00</strong>.
-              </p>
-            </div>
-
-            <div class="p-4 rounded-2xl border space-y-2.5" style="background-color: var(--bg-main); border-color: var(--border-color);">
-              <input type="text" id="obTaskInput" maxlength="120" placeholder="Ex: Fiche cours Ostéologie, Faire 40 QCM..."
-                onkeydown="if(event.key==='Enter'){event.preventDefault();OnboardingWizard.addTaskFromWizard();}"
-                class="input-field w-full px-3.5 py-2 rounded-xl text-xs font-semibold focus:outline-none" />
-              <div class="flex gap-2">
-                <select id="obTaskPriority" class="input-field px-2.5 py-2 rounded-xl text-xs font-bold flex-1">
-                  <option value="urgent">🔴 Urgent</option>
-                  <option value="important" selected>🟠 Important</option>
-                  <option value="todo">🔵 À faire</option>
-                </select>
-                <select id="obTaskSubject" class="input-field px-2.5 py-2 rounded-xl text-xs font-bold flex-1">${subjOptions}</select>
-                <button type="button" onclick="OnboardingWizard.addTaskFromWizard()" class="theme-btn-primary px-4 py-2 rounded-xl text-xs font-extrabold flex-shrink-0">
-                  + Ajouter
-                </button>
-              </div>
-            </div>
-
-            <div class="space-y-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider block" style="color: var(--text-muted);">Tâches prévues aujourd'hui (${todayTasks.length}) :</span>
-              <div class="space-y-1.5">${tasksPreview}</div>
-            </div>
-          `;
-        } else if (this.step === 3) {
-          const goalsPreview = state.goals.map(g => `
-            <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-xl border" style="background-color:var(--bg-main);border-color:var(--border-color);">
-              <span>🎯</span><span>${esc(g.title)}</span>
-            </span>
-          `).join('');
-
-          box.innerHTML = `
-            <div class="space-y-2">
-              <span class="text-xs font-extrabold uppercase tracking-wider text-amber-400">Hygiène de vie & Discipline 🔥</span>
-              <h3 class="text-xl font-black tracking-tight">3. Tes Objectifs & les 11 Badges</h3>
-              <p class="text-xs leading-relaxed" style="color: var(--text-muted);">
-                Coche chaque jour tes habitudes de vie. Chaque journée validée à <strong>100 %</strong> augmente ta série 🔥 et débloque les <strong>11 Badges de Régularité</strong> (d'<em>Apprenti</em> 🌱 à <em>Légende</em> 🏛️).
-              </p>
-            </div>
-
-            <div class="p-4 rounded-2xl border space-y-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
-              <div class="flex gap-2">
-                <input type="text" id="obGoalInput" maxlength="60" placeholder="Ex: Boire 1,5L d'eau, Pas d'écran après 22h30..."
-                  onkeydown="if(event.key==='Enter'){event.preventDefault();OnboardingWizard.addGoalFromWizard();}"
-                  class="input-field flex-1 px-3.5 py-2 rounded-xl text-xs font-semibold focus:outline-none" />
-                <button type="button" onclick="OnboardingWizard.addGoalFromWizard()" class="theme-btn-primary px-4 py-2 rounded-xl text-xs font-extrabold flex-shrink-0">
-                  + Créer
-                </button>
-              </div>
-
-              <div class="pt-2 border-t flex items-center justify-between gap-3" style="border-color: var(--border-color);">
-                <span class="text-xs font-bold">Objectif d'étude par jour : <strong id="obGoalHoursLabel" class="font-mono-timer text-amber-400">${state.dailyGoalHours}h/j</strong></span>
-                <input type="range" min="1" max="14" step="0.5" value="${state.dailyGoalHours}"
-                  oninput="updateDailyGoal(this.value);$('obGoalHoursLabel').textContent=this.value+'h/j';"
-                  class="w-32 accent-white cursor-pointer" />
-              </div>
-            </div>
-
-            <div class="space-y-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider block" style="color: var(--text-muted);">Tes habitudes quotidiennes :</span>
-              <div class="flex flex-wrap gap-1.5">${goalsPreview}</div>
-            </div>
-          `;
-        } else if (this.step === 4) {
-          box.innerHTML = `
-            <div class="space-y-2">
-              <span class="text-xs font-extrabold uppercase tracking-wider text-violet-400">Concentration maximale ⏱️</span>
-              <h3 class="text-xl font-black tracking-tight">4. Chrono Flip Clock & Audio continu</h3>
-              <p class="text-xs leading-relaxed" style="color: var(--text-muted);">
-                Le chronomètre est conçu pour tes longues sessions de révision sur tablette et téléphone :
-              </p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-2.5 text-xs">
-              <div class="p-3 rounded-2xl border flex items-start gap-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
-                <span class="text-lg">🛡️</span>
-                <div>
-                  <h4 class="font-extrabold">Chrono persistant en arrière-plan</h4>
-                  <p class="mt-0.5 opacity-80">Tu peux quitter FocusPASS pour faire tes QCM ou lire tes cours sur une autre appli : le chrono garde l'heure exacte même si ta tablette recharge la page.</p>
-                </div>
-              </div>
-              <div class="p-3 rounded-2xl border flex items-start gap-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
-                <span class="text-lg">🎧</span>
-                <div>
-                  <h4 class="font-extrabold">Bruits Brun, Rose, Blanc & Ondes Binaurales (6 Hz)</h4>
-                  <p class="mt-0.5 opacity-80">Flux audio continu sans coupure qui continue de jouer en arrière-plan ou écran verrouillé.</p>
-                </div>
-              </div>
-              <div class="p-3 rounded-2xl border flex items-start gap-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
-                <span class="text-lg">🎛️</span>
-                <div>
-                  <h4 class="font-extrabold">Molettes tactiles & Mode Grand Écran</h4>
-                  <p class="mt-0.5 opacity-80">En mode <em>Compte à rebours</em>, glisse ton doigt sur les molettes à droite des chiffres pour régler le temps, et passe en plein écran épuré.</p>
-                </div>
-              </div>
-            </div>
-          `;
-        } else {
-          box.innerHTML = `
-            <div class="space-y-2">
-              <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-400">Prêt à tout donner 🚀</span>
-              <h3 class="text-xl font-black tracking-tight">5. Bilan & Synchro Téléphone / Tablette</h3>
-              <p class="text-xs leading-relaxed" style="color: var(--text-muted);">
-                Retrouve tes graphiques colorés par matière dans l'onglet <strong>Bilan</strong> et synchronise tous tes appareils en temps réel.
-              </p>
-            </div>
-
-            <div class="p-4 rounded-2xl border space-y-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
-              <div class="flex items-center justify-between gap-2">
-                <div>
-                  <span class="text-xs font-extrabold block">Ton code Cloud personnel :</span>
-                  <span class="text-[11px]" style="color: var(--text-muted);">Entre ce même code dans <em>Matières & Options</em> sur ton 2e appareil</span>
-                </div>
-                <span class="px-3 py-1.5 rounded-xl font-mono-timer font-black text-sm border bg-emerald-500/15 text-emerald-400 border-emerald-500/30">${esc(state.syncKey)}</span>
-              </div>
-            </div>
-
-            <div class="p-3.5 rounded-2xl border text-xs leading-relaxed" style="background-color: var(--bg-main); border-color: var(--border-color); color: var(--text-muted);">
-              💡 <strong style="color: var(--text-main);">Astuce :</strong> Ce tutoriel ne s'affichera plus lors de tes prochaines visites. Tu pourras toujours le relancer depuis l'onglet <em>Matières & Options</em>.
-            </div>
-          `;
-        }
+        $('onboardingModal')?.classList.add('hidden');
+        switchTab('dashboard');
+        showToast("Visite terminée ! Bon courage pour tes révisions 🚀", '🎓');
       },
 
       next() {
-        const subjInput = $('obSubjectInput');
-        if (this.step === 1 && subjInput && subjInput.value.trim()) {
-          this.addSubjectFromWizard();
-        }
-        const taskInput = $('obTaskInput');
-        if (this.step === 2 && taskInput && taskInput.value.trim()) {
-          this.addTaskFromWizard();
-        }
-        const goalInput = $('obGoalInput');
-        if (this.step === 3 && goalInput && goalInput.value.trim()) {
-          this.addGoalFromWizard();
-        }
-
         if (this.step < this.totalSteps) {
           this.step++;
           this.renderStep();
@@ -3561,25 +3398,146 @@
         }
       },
 
-      finish() {
-        localStorage.setItem(ONBOARDING_STORAGE_KEY, '1');
-        state.onboardingDone = true;
-        saveState();
-        $('onboardingModal')?.classList.add('hidden');
-        renderAll();
-        showToast('Configuration terminée, bon courage dans tes révisions !', '🚀');
+      updateSpotlightGeometry() {
+        if (!this.isOpen) return;
+        const cfg = this.stepsConfig[this.step - 1];
+        const target = $(cfg.targetId);
+        if (!target) return;
+
+        const rect = target.getBoundingClientRect();
+        const pad = 8;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        const t = Math.max(0, rect.top - pad);
+        const l = Math.max(0, rect.left - pad);
+        const r = Math.min(vw, rect.right + pad);
+        const b = Math.min(vh, rect.bottom + pad);
+        const w = Math.max(0, r - l);
+        const h = Math.max(0, b - t);
+
+        const topEl = $('spBlurTop'), botEl = $('spBlurBottom'), leftEl = $('spBlurLeft'), rightEl = $('spBlurRight');
+        topEl.style.height = `${t}px`;
+        botEl.style.top = `${b}px`;
+        botEl.style.height = `${Math.max(0, vh - b)}px`;
+
+        leftEl.style.top = `${t}px`;
+        leftEl.style.height = `${h}px`;
+        leftEl.style.width = `${l}px`;
+
+        rightEl.style.top = `${t}px`;
+        rightEl.style.height = `${h}px`;
+        rightEl.style.left = `${r}px`;
+        rightEl.style.width = `${Math.max(0, vw - r)}px`;
+
+        const ring = $('spHighlightRing');
+        ring.style.top = `${t}px`;
+        ring.style.left = `${l}px`;
+        ring.style.width = `${w}px`;
+        ring.style.height = `${h}px`;
+
+        const card = $('spTooltipCard');
+        const arrow = $('spArrowIndicator');
+        const cardW = Math.min(360, vw * 0.92);
+        const cardH = card.offsetHeight || 210;
+
+        let cardLeft = l + w / 2 - cardW / 2;
+        cardLeft = Math.max(12, Math.min(vw - cardW - 12, cardLeft));
+
+        const spaceBelow = vh - b;
+        let cardTop;
+        let placeAbove = false;
+
+        if (spaceBelow >= cardH + 24 || t < cardH + 24) {
+          cardTop = Math.min(vh - cardH - 14, b + 16);
+          placeAbove = false;
+        } else {
+          cardTop = Math.max(14, t - cardH - 16);
+          placeAbove = true;
+        }
+
+        card.style.left = `${cardLeft}px`;
+        card.style.top = `${cardTop}px`;
+
+        const arrowX = Math.max(24, Math.min(cardW - 32, (l + w / 2) - cardLeft - 7));
+        arrow.style.left = `${arrowX}px`;
+        if (placeAbove) {
+          arrow.style.bottom = '-8px';
+          arrow.style.top = 'auto';
+          arrow.style.borderRight = '2px solid rgba(251, 191, 36, 0.9)';
+          arrow.style.borderBottom = '2px solid rgba(251, 191, 36, 0.9)';
+          arrow.style.borderLeft = 'none';
+          arrow.style.borderTop = 'none';
+        } else {
+          arrow.style.top = '-8px';
+          arrow.style.bottom = 'auto';
+          arrow.style.borderLeft = '2px solid rgba(251, 191, 36, 0.9)';
+          arrow.style.borderTop = '2px solid rgba(251, 191, 36, 0.9)';
+          arrow.style.borderRight = 'none';
+          arrow.style.borderBottom = 'none';
+        }
+      },
+
+      renderStep() {
+        const cfg = this.stepsConfig[this.step - 1];
+        if (!cfg) return;
+
+        if (currentActiveTab !== cfg.tab) {
+          switchTab(cfg.tab);
+        }
+
+        $('onboardingStepLabel').textContent = `Étape ${this.step} / ${this.totalSteps}`;
+        $('onboardingPrevBtn').classList.toggle('invisible', this.step === 1);
+        $('onboardingNextBtn').textContent = this.step === this.totalSteps ? "C'est parti ! 🚀" : 'Suivant →';
+
+        $('onboardingDots').innerHTML = Array.from({ length: this.totalSteps }, (_, i) => {
+          const active = i + 1 === this.step;
+          return `<span class="h-1.5 rounded-full transition-all ${active ? 'w-4 bg-amber-400' : 'w-1.5 bg-zinc-600'}"></span>`;
+        }).join('');
+
+        const notifGranted = ('Notification' in window) && Notification.permission === 'granted';
+        const notifBlock = cfg.showNotifButton && !notifGranted
+          ? `<div class="pt-2">
+              <button type="button" onclick="TaskReminderEngine.authorizeFromStartup()" class="w-full py-2 px-3 rounded-xl text-xs font-extrabold bg-blue-500 text-white hover:bg-blue-400 transition flex items-center justify-center gap-2 shadow">
+                🔔 Autoriser les notifications (Rappel 18h00)
+              </button>
+            </div>`
+          : (cfg.showNotifButton && notifGranted
+              ? `<div class="pt-1 text-[11px] font-bold text-emerald-400">✓ Notifications à 18h00 déjà autorisées</div>`
+              : '');
+
+        $('onboardingStepContent').innerHTML = `
+          <h3 class="text-sm font-black tracking-tight">${cfg.title}</h3>
+          <p class="text-xs leading-relaxed" style="color: var(--text-muted);">${cfg.desc}</p>
+          ${notifBlock}
+        `;
+
+        const target = $(cfg.targetId);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => this.updateSpotlightGeometry(), 120);
+          setTimeout(() => this.updateSpotlightGeometry(), 340);
+        }
       }
     };
+
+    window.addEventListener('resize', () => OnboardingWizard.updateSpotlightGeometry());
+    window.addEventListener('scroll', () => OnboardingWizard.updateSpotlightGeometry(), { passive: true });
 
     initFlipWheels();
     applyTheme();
     setTimerMode('countup');
     CloudSyncEngine.init();
     TaskReminderEngine.init();
-    if (!restoreTimerPersistence()) {
-      switchTab('dashboard');
-    }
-    OnboardingWizard.open(false);
+
+    const hadRunningTimer = restoreTimerPersistence();
+    switchTab(hadRunningTimer ? 'timer' : 'dashboard');
+
+    setTimeout(() => {
+      if (OnboardingWizard.shouldAutoStart()) {
+        OnboardingWizard.open(false);
+      }
+    }, 450);
   </script>
 </body>
 </html>
