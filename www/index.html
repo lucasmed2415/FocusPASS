@@ -346,28 +346,28 @@
     <span id="appToastText">Action effectuée</span>
   </div>
 
-  <!-- BANNIÈRE DE RAPPEL DES TÂCHES À 18H00 -->
+  <!-- BANNIÈRE D'ALERTE : RAPPEL QUOTIDIEN (TÂCHES + OBJECTIFS) OU FIN DE CHRONO -->
   <div id="reminderBannerModal" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-md card rounded-2xl p-4 border-2 border-amber-400/80 shadow-2xl">
     <div class="flex items-start justify-between gap-3">
       <div class="flex items-start gap-3">
-        <span class="text-2xl">⏰</span>
+        <span id="reminderBannerIcon" class="text-2xl">⏰</span>
         <div>
-          <h4 id="reminderBannerTitle" class="text-sm font-extrabold text-amber-400">Rappel de 18h00 — Tâches du jour</h4>
-          <p id="reminderBannerBody" class="text-xs mt-1 leading-relaxed" style="color: var(--text-main);"></p>
+          <h4 id="reminderBannerTitle" class="text-sm font-extrabold text-amber-400">Rappel de 18h00 — Bilan du jour</h4>
+          <p id="reminderBannerBody" class="text-xs mt-1 leading-relaxed whitespace-pre-line" style="color: var(--text-main);"></p>
         </div>
       </div>
       <button type="button" onclick="$('reminderBannerModal').classList.add('hidden')" class="text-xs opacity-60 hover:opacity-100 p-1">✕</button>
     </div>
   </div>
 
-  <!-- INVITATION DIRECTE AU DÉMARRAGE POUR AUTORISER LES NOTIFICATIONS -->
+  <!-- INVITATION POUR AUTORISER LES NOTIFICATIONS (S'AFFICHE UNIQUEMENT APRÈS LE TUTORIEL) -->
   <div id="startupNotifBanner" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-lg card rounded-2xl p-4 border-2 border-blue-500/70 shadow-2xl backdrop-blur-xl">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="flex items-start gap-3">
         <div class="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center flex-shrink-0 text-lg">🔔</div>
         <div>
-          <h4 class="text-xs font-extrabold uppercase tracking-wider text-blue-400">Activer le rappel quotidien (18h00)</h4>
-          <p class="text-xs mt-0.5 leading-relaxed" style="color: var(--text-muted);">Autorise les notifications maintenant pour être prévenu s'il te reste des tâches à terminer en fin de journée.</p>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-blue-400">Activer les notifications (18h00 & Chrono)</h4>
+          <p class="text-xs mt-0.5 leading-relaxed" style="color: var(--text-muted);">Sois prévenu quand ton compte à rebours est terminé et à 18h00 s'il te reste des tâches ou objectifs non atteints.</p>
         </div>
       </div>
       <div class="flex items-center justify-end gap-2 flex-shrink-0">
@@ -548,7 +548,7 @@
                 <h3 class="font-extrabold text-lg tracking-tight">Semaine en couleurs</h3>
               </div>
               <div id="miniSubjectLegend" class="flex flex-wrap gap-2 mb-3"></div>
-              <div id="miniBarChart" class="h-40 flex items-end justify-between gap-2 pt-6 pb-2 px-1"></div>
+              <div id="miniBarChart" class="h-44 flex items-end justify-between gap-2 pt-2 pb-1 px-1"></div>
             </div>
 
             <div class="mt-4 pt-3 border-t flex items-center justify-between text-xs" style="border-color: var(--border-color); color: var(--text-muted);">
@@ -633,10 +633,10 @@
               <span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Bruit Brun (Profond)</span>
             </button>
             <button type="button" onclick="toggleAudioSource('pink')" id="noise-btn-pink" class="noise-pill">
-              <span class="w-2 h-2 rounded-full bg-pink-400"></span><span>Bruit Rose Doux (Pluie)</span>
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span><span>Pluie Douce (Apaisant)</span>
             </button>
             <button type="button" onclick="toggleAudioSource('white')" id="noise-btn-white" class="noise-pill">
-              <span class="w-2 h-2 rounded-full bg-zinc-300"></span><span>Bruit Blanc (Isolation)</span>
+              <span class="w-2 h-2 rounded-full bg-zinc-300"></span><span>Bruit Blanc Doux</span>
             </button>
             <button type="button" onclick="toggleAudioSource('binaural')" id="noise-btn-binaural" class="noise-pill">
               <span class="w-2 h-2 rounded-full bg-violet-400"></span><span>Ondes Binaurales (6 Hz - Casque)</span>
@@ -660,7 +660,7 @@
 
           <div class="flex items-center gap-3 mx-auto">
             <button onclick="toggleTimer()" id="timerStartBtn" class="btn-commencer">Commencer</button>
-            <button onclick="finishAndSaveSession()" id="timerSaveBtn" class="hidden px-5 py-2.5 rounded-2xl font-extrabold text-sm bg-emerald-400 text-black hover:bg-emerald-300 transition shadow-lg">✓ Enregistrer</button>
+            <button onclick="finishAndSaveSession(false)" id="timerSaveBtn" class="hidden px-5 py-2.5 rounded-2xl font-extrabold text-sm bg-emerald-400 text-black hover:bg-emerald-300 transition shadow-lg">✓ Enregistrer</button>
           </div>
 
           <button onclick="resetTimer()" class="p-2.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-900 transition" title="Réinitialiser">
@@ -724,7 +724,7 @@
         </div>
       </div>
 
-      <!-- GRAPHIQUE HEURES & MATIÈRES DE LA SEMAINE SÉLECTIONNÉE -->
+      <!-- GRAPHIQUE HEURES & MATIÈRES DE LA SEMAINE SÉLECTIONNÉE (ÉCHELLE EXACTE) -->
       <div id="statsChartCard" class="card rounded-2xl p-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
@@ -736,11 +736,15 @@
 
         <div id="mainChartLegend" class="flex flex-wrap gap-3 mb-6 pb-3 border-b" style="border-color: var(--border-color);"></div>
 
-        <div class="relative h-64 pt-8 pb-8 px-2 sm:px-6 border-b" style="border-color: var(--border-color);">
-          <div id="goalLine" class="absolute left-0 right-0 border-t-2 border-dashed border-amber-400/80 z-10 pointer-events-none flex justify-end pr-2" style="bottom: 50%;">
-            <span class="text-[10px] font-bold bg-amber-400 text-black px-1.5 py-0.5 rounded -mt-2.5 shadow">Objectif</span>
+        <!-- Zone de tracé calibrée : les barres et la ligne d'objectif partagent exactement la même hauteur de référence (180px) -->
+        <div class="pt-4 px-2 sm:px-6">
+          <div class="relative h-[180px] border-b" style="border-color: var(--border-color);">
+            <div id="goalLine" class="absolute left-0 right-0 border-t-2 border-dashed border-amber-400/90 z-20 pointer-events-none flex justify-end pr-1 transition-all duration-300" style="bottom: 50%;">
+              <span id="goalLineBadgeText" class="text-[10px] font-extrabold bg-amber-400 text-black px-1.5 py-0.5 rounded -mt-2.5 shadow">Objectif</span>
+            </div>
+            <div id="mainBarChart" class="h-full flex items-end justify-between gap-2 sm:gap-6 relative z-10"></div>
           </div>
-          <div id="mainBarChart" class="h-full flex items-end justify-between gap-2 sm:gap-6 relative z-0"></div>
+          <div id="mainBarChartLabels" class="flex items-start justify-between gap-2 sm:gap-6 pt-2.5 pb-1"></div>
         </div>
       </div>
 
@@ -844,7 +848,7 @@
     </section>
 
     <!-- ========================================================== -->
-    <!-- VUE 4 : PARAMÈTRES, MATIÈRES, RAPPEL 18H & SYNCHRO CLOUD   -->
+    <!-- VUE 4 : PARAMÈTRES, MATIÈRES, THÈMES, RAPPEL & SYNCHRO     -->
     <!-- ========================================================== -->
     <section id="view-settings" class="hidden max-w-2xl mx-auto space-y-6">
       <div id="settingsSubjectsCard" class="card rounded-2xl p-6 space-y-5">
@@ -876,12 +880,42 @@
         <div class="space-y-2" id="subjectsListEditor"></div>
       </div>
 
-      <!-- NOTIFICATION QUOTIDIENNE DES TÂCHES RESTANTES (18H00 PAR DÉFAUT) -->
-      <div class="card rounded-2xl p-6 space-y-4">
+      <!-- CARTE DES THÈMES ET COULEURS DE L'INTERFACE -->
+      <div id="settingsThemesCard" class="card rounded-2xl p-6 space-y-4">
+        <div>
+          <h3 class="font-extrabold text-lg tracking-tight">Thème & Couleurs de l'interface</h3>
+          <p class="text-xs mt-0.5" style="color: var(--text-muted);">Personnalise l'ambiance visuelle de FocusPASS selon tes préférences.</p>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-1">
+          <button onclick="setTheme('oled')" id="theme-btn-oled" class="p-3 rounded-xl border text-left transition flex flex-col gap-2 hover:scale-[1.01]">
+            <div class="w-full h-8 rounded-lg bg-black border border-zinc-800 flex items-center px-2 gap-1.5"><span class="w-3 h-3 rounded-full bg-white"></span><span class="w-8 h-2 rounded bg-zinc-800"></span></div>
+            <span class="text-xs font-bold">Noir Pur (OLED)</span>
+          </button>
+          <button onclick="setTheme('dark')" id="theme-btn-dark" class="p-3 rounded-xl border text-left transition flex flex-col gap-2 hover:scale-[1.01]">
+            <div class="w-full h-8 rounded-lg bg-slate-900 border border-slate-700 flex items-center px-2 gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-200"></span><span class="w-8 h-2 rounded bg-slate-700"></span></div>
+            <span class="text-xs font-bold">Gris Sombre</span>
+          </button>
+          <button onclick="setTheme('crimson')" id="theme-btn-crimson" class="p-3 rounded-xl border text-left transition flex flex-col gap-2 hover:scale-[1.01]">
+            <div class="w-full h-8 rounded-lg bg-[#0d0306] border border-rose-900/80 flex items-center px-2 gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500"></span><span class="w-8 h-2 rounded bg-rose-950"></span></div>
+            <span class="text-xs font-bold">Rouge Sombre</span>
+          </button>
+          <button onclick="setTheme('light')" id="theme-btn-light" class="p-3 rounded-xl border text-left transition flex flex-col gap-2 hover:scale-[1.01]">
+            <div class="w-full h-8 rounded-lg bg-slate-100 border border-slate-300 flex items-center px-2 gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-900"></span><span class="w-8 h-2 rounded bg-slate-300"></span></div>
+            <span class="text-xs font-bold">Mode Clair</span>
+          </button>
+          <button onclick="setTheme('mint')" id="theme-btn-mint" class="p-3 rounded-xl border text-left transition flex flex-col gap-2 hover:scale-[1.01]">
+            <div class="w-full h-8 rounded-lg bg-emerald-50 border border-emerald-300 flex items-center px-2 gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-600"></span><span class="w-8 h-2 rounded bg-emerald-200"></span></div>
+            <span class="text-xs font-bold">Vert Clair</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- NOTIFICATION QUOTIDIENNE DES TÂCHES & OBJECTIFS RESTANTS -->
+      <div id="settingsReminderCard" class="card rounded-2xl p-6 space-y-4">
         <div class="flex items-start justify-between gap-3">
           <div>
-            <h3 class="font-extrabold text-lg tracking-tight">Rappel quotidien des tâches (18h00)</h3>
-            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Reçois une notification s'il te reste des tâches non cochées pour aujourd'hui.</p>
+            <h3 class="font-extrabold text-lg tracking-tight">Rappel quotidien (Tâches & Objectifs)</h3>
+            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Reçois une notification à l'heure choisie s'il te reste des tâches ou des objectifs quotidiens non atteints.</p>
           </div>
           <button type="button" onclick="TaskReminderEngine.toggleEnabled()" id="reminderToggleBtn" class="px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition">
             🔔 Activé
@@ -934,35 +968,6 @@
       </div>
 
       <div class="card rounded-2xl p-6 space-y-4">
-        <div>
-          <h3 class="font-extrabold text-lg tracking-tight">Thème de l'interface</h3>
-          <p class="text-xs mt-0.5" style="color: var(--text-muted);">Les contrastes s'adaptent automatiquement au thème choisi.</p>
-        </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 pt-1">
-          <button onclick="setTheme('oled')" id="theme-btn-oled" class="p-3 rounded-xl border text-left transition flex flex-col gap-2 hover:scale-[1.01]">
-            <div class="w-full h-8 rounded-lg bg-black border border-zinc-800 flex items-center px-2 gap-1.5"><span class="w-3 h-3 rounded-full bg-white"></span><span class="w-8 h-2 rounded bg-zinc-800"></span></div>
-            <span class="text-xs font-bold">Noir Pur (OLED)</span>
-          </button>
-          <button onclick="setTheme('dark')" id="theme-btn-dark" class="p-3 rounded-xl border text-left transition flex flex-col gap-2 hover:scale-[1.01]">
-            <div class="w-full h-8 rounded-lg bg-slate-900 border border-slate-700 flex items-center px-2 gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-200"></span><span class="w-8 h-2 rounded bg-slate-700"></span></div>
-            <span class="text-xs font-bold">Gris Sombre</span>
-          </button>
-          <button onclick="setTheme('crimson')" id="theme-btn-crimson" class="p-3 rounded-xl border text-left transition flex flex-col gap-2 hover:scale-[1.01]">
-            <div class="w-full h-8 rounded-lg bg-[#0d0306] border border-rose-900/80 flex items-center px-2 gap-1.5"><span class="w-3 h-3 rounded-full bg-rose-500"></span><span class="w-8 h-2 rounded bg-rose-950"></span></div>
-            <span class="text-xs font-bold">Rouge Sombre</span>
-          </button>
-          <button onclick="setTheme('light')" id="theme-btn-light" class="p-3 rounded-xl border text-left transition flex flex-col gap-2 hover:scale-[1.01]">
-            <div class="w-full h-8 rounded-lg bg-slate-100 border border-slate-300 flex items-center px-2 gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-900"></span><span class="w-8 h-2 rounded bg-slate-300"></span></div>
-            <span class="text-xs font-bold">Mode Clair</span>
-          </button>
-          <button onclick="setTheme('mint')" id="theme-btn-mint" class="p-3 rounded-xl border text-left transition flex flex-col gap-2 hover:scale-[1.01]">
-            <div class="w-full h-8 rounded-lg bg-emerald-50 border border-emerald-300 flex items-center px-2 gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-600"></span><span class="w-8 h-2 rounded bg-emerald-200"></span></div>
-            <span class="text-xs font-bold">Vert Clair</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="card rounded-2xl p-6 space-y-4">
         <div class="flex justify-between items-center">
           <div>
             <h3 class="font-extrabold text-lg tracking-tight">Objectif d'heures quotidien</h3>
@@ -1006,7 +1011,7 @@
       <div id="spArrowIndicator" class="w-3.5 h-3.5 rotate-45 absolute border-amber-400/90" style="background-color: var(--bg-card);"></div>
 
       <div class="flex items-center justify-between gap-2">
-        <span id="onboardingStepLabel" class="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-400 text-black">Étape 1 / 9</span>
+        <span id="onboardingStepLabel" class="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-400 text-black">Étape 1 / 10</span>
         <button type="button" onclick="OnboardingWizard.finish()" class="text-xs font-bold opacity-60 hover:opacity-100 transition px-2 py-0.5 rounded-lg border" style="border-color: var(--border-color);">
           Passer ✕
         </button>
@@ -1198,17 +1203,17 @@
     });
 
     const STREAK_BADGES = Object.freeze([
-      Object.freeze({ days: 1,    period: '1 jour',     title: 'Apprenti',    icon: '🌱', message: "Le plus dur, c'est de s'y mettre. Tu as fait le premier pas, c'est top !" }),
-      Object.freeze({ days: 3,    period: '3 jours',    title: 'Initié',      icon: '🔥', message: "Trois jours de suite ! Tu as compris le principe, ne casse surtout pas la chaîne." }),
-      Object.freeze({ days: 7,    period: '1 semaine',  title: 'Pratiquant',  icon: '⚡', message: "Une semaine complète ! Ce n'est plus un simple essai, ça commence à devenir une vraie habitude." }),
-      Object.freeze({ days: 14,   period: '2 semaines', title: 'Challenger',  icon: '🚀', message: "14 jours sans flancher. T'es une vraie machine, le processus est bien enclenché !" }),
-      Object.freeze({ days: 30,   period: '1 mois',     title: 'Adepte',      icon: '🏅', message: "Un mois entier ! 30 jours de discipline. Prends deux secondes pour apprécier le chemin parcouru." }),
-      Object.freeze({ days: 90,   period: '3 mois',     title: 'Spécialiste', icon: '💎', message: "Un trimestre au top. La motivation c'est bien, mais là c'est ta détermination qui parle." }),
-      Object.freeze({ days: 180,  period: '6 mois',     title: 'Expert',      icon: '🛡️', message: "Une demi-année ! Tu as un mental d'acier. Plus grand-chose ne peut t'arrêter maintenant." }),
-      Object.freeze({ days: 365,  period: '1 an',       title: 'Maître',      icon: '👑', message: "365 jours ! C'est monumental. Tu maîtrises ton sujet à la perfection." }),
-      Object.freeze({ days: 730,  period: '2 ans',      title: 'Sage',        icon: '🧙‍♂️', message: "Deux ans de régularité. À ce stade, c'est toi qui devrais donner des conseils aux autres !" }),
-      Object.freeze({ days: 1825, period: '5 ans',      title: 'Oracle',      icon: '🌌', message: "Cinq ans... Tu n'as pas juste adopté une habitude, tu as carrément changé de vie. Une vraie masterclass." }),
-      Object.freeze({ days: 3650, period: '10 ans',     title: 'Légende',     icon: '🏛️', message: "Une décennie complète. On n'a même plus les mots. Bienvenue au Panthéon !" })
+      Object.freeze({ days: 1,    period: '1 jour',      title: 'Apprenti',    icon: '🌱', message: "Le plus dur, c'est de s'y mettre. Tu as fait le premier pas, c'est top !" }),
+      Object.freeze({ days: 3,    period: '3 jours',     title: 'Initié',      icon: '🔥', message: "Trois jours de suite ! Tu as compris le principe, ne casse surtout pas la chaîne." }),
+      Object.freeze({ days: 7,    period: '1 semaine',   title: 'Pratiquant',  icon: '⚡', message: "Une semaine complète ! Ce n'est plus un simple essai, ça commence à devenir une vraie habitude." }),
+      Object.freeze({ days: 14,   period: '2 semaines',  title: 'Challenger',  icon: '🚀', message: "14 jours sans flancher. T'es une vraie machine, le processus est bien enclenché !" }),
+      Object.freeze({ days: 30,   period: '1 mois',      title: 'Adepte',      icon: '🏅', message: "Un mois entier ! 30 jours de discipline. Prends deux secondes pour apprécier le chemin parcouru." }),
+      Object.freeze({ days: 90,   period: '3 mois',      title: 'Spécialiste', icon: '💎', message: "Un trimestre au top. La motivation c'est bien, mais là c'est ta détermination qui parle." }),
+      Object.freeze({ days: 180,  period: '6 mois',      title: 'Expert',      icon: '🛡️', message: "Une demi-année ! Tu as un mental d'acier. Plus grand-chose ne peut t'arrêter maintenant." }),
+      Object.freeze({ days: 365,  period: '1 an',        title: 'Maître',      icon: '👑', message: "365 jours ! C'est monumental. Tu maîtrises ton sujet à la perfection." }),
+      Object.freeze({ days: 730,  period: '2 ans',       title: 'Sage',        icon: '🧙‍♂️', message: "Deux ans de régularité. À ce stade, c'est toi qui devrais donner des conseils aux autres !" }),
+      Object.freeze({ days: 1825, period: '5 ans',       title: 'Oracle',      icon: '🌌', message: "Cinq ans... Tu n'as pas juste adopté une habitude, tu as carrément changé de vie. Une vraie masterclass." }),
+      Object.freeze({ days: 3650, period: '10 ans',      title: 'Légende',     icon: '🏛️', message: "Une décennie complète. On n'a même plus les mots. Bienvenue au Panthéon !" })
     ]);
 
     let toastTimer = null;
@@ -1223,7 +1228,7 @@
       toastTimer = setTimeout(() => {
         t.classList.remove('opacity-100', 'translate-y-0');
         t.classList.add('opacity-0', 'translate-y-3');
-      }, 2400);
+      }, 2800);
     }
 
     // =========================================================================
@@ -1620,7 +1625,7 @@
     };
 
     // =========================================================================
-    // MOTEUR DE RAPPEL QUOTIDIEN DES TÂCHES À 18H00 (TASK REMINDER ENGINE)
+    // MOTEUR DE RAPPEL QUOTIDIEN (TÂCHES + OBJECTIFS NON ATTEINTS) & NOTIF CHRONO
     // =========================================================================
     const TaskReminderEngine = {
       checkTimer: null,
@@ -1630,10 +1635,14 @@
         if (this.checkTimer) clearInterval(this.checkTimer);
         this.checkTimer = setInterval(() => this.checkDueReminder(), 25000);
         setTimeout(() => this.checkDueReminder(), 2500);
-        this.checkStartupNotificationPrompt();
+        // La demande de notification ne s'affiche au démarrage QUE si le tutoriel a déjà été fait
+        if (!OnboardingWizard.shouldAutoStart()) {
+          this.checkStartupNotificationPrompt();
+        }
       },
 
       checkStartupNotificationPrompt() {
+        if (OnboardingWizard.isOpen) return;
         if (!('Notification' in window)) return;
         if (Notification.permission === 'default' && localStorage.getItem(STARTUP_NOTIF_PROMPT_KEY) !== '1') {
           $('startupNotifBanner')?.classList.remove('hidden');
@@ -1724,6 +1733,11 @@
         return sortTasksByPriority(state.tasks.filter(t => t.date === todayKey && !t.done));
       },
 
+      getUnmetTodayGoals() {
+        const todayKey = getTodayKey();
+        return state.goals.filter(g => !Array.isArray(g.completedDates) || !g.completedDates.includes(todayKey));
+      },
+
       checkDueReminder() {
         if (state.reminderEnabled === false) return;
         const todayKey = getTodayKey();
@@ -1736,61 +1750,97 @@
         const targetMinutes = tH * 60 + tM;
 
         if (nowMinutes >= targetMinutes) {
-          const remaining = this.getRemainingTodayTasks();
+          const remainingTasks = this.getRemainingTodayTasks();
+          const unmetGoals = this.getUnmetTodayGoals();
           localStorage.setItem(LAST_NOTIF_STORAGE_KEY, todayKey);
-          if (remaining.length > 0) {
-            this.fireNotification(remaining, false);
+          if (remainingTasks.length > 0 || unmetGoals.length > 0) {
+            this.fireNotification(remainingTasks, unmetGoals, false);
           }
         }
       },
 
       async testNotificationNow() {
         await this.requestPermission(false);
-        const remaining = this.getRemainingTodayTasks();
-        this.fireNotification(remaining, true);
+        const remainingTasks = this.getRemainingTodayTasks();
+        const unmetGoals = this.getUnmetTodayGoals();
+        this.fireNotification(remainingTasks, unmetGoals, true);
       },
 
-      fireNotification(remainingTasks, isTest = false) {
-        const count = remainingTasks.length;
-        const timeStr = SecurityGuard.isValidTime(state.reminderTime) ? state.reminderTime : '18:00';
-        const title = count > 0
-          ? `📋 FocusPASS — Il te reste ${count} tâche${count > 1 ? 's' : ''} pour aujourd'hui`
-          : `🎉 FocusPASS — Toutes tes tâches du jour sont faites !`;
-
-        const previewNames = remainingTasks.slice(0, 3).map(t => `• ${t.title} (${t.subject})`).join('\n');
-        const moreText = count > 3 ? `\n+ ${count - 3} autre(s) tâche(s) à terminer.` : '';
-        const body = count > 0
-          ? `Il te reste ça à faire pour aujourd'hui :\n${previewNames}${moreText}`
-          : `Bravo, tu as terminé toutes tes tâches prévues aujourd'hui !`;
-
-        const banner = $('reminderBannerModal');
-        if (banner) {
-          $('reminderBannerTitle').textContent = isTest ? `Test du rappel (${timeStr})` : `Rappel de ${timeStr} — Tâches du jour`;
-          $('reminderBannerBody').textContent = count > 0
-            ? `Il te reste ${count} tâche${count > 1 ? 's' : ''} à faire aujourd'hui : ${remainingTasks.map(t => t.title).join(', ')}.`
-            : `Toutes tes tâches d'aujourd'hui sont cochées, continue comme ça !`;
-          banner.classList.remove('hidden');
-        }
-
+      sendSystemAndNativeNotif(title, body, tag = 'focuspass-notif') {
         if ('Notification' in window && Notification.permission === 'granted') {
           try {
             if (navigator.serviceWorker?.ready) {
-              navigator.serviceWorker.ready.then(reg => reg.showNotification(title, { body, tag: 'focuspass-daily-tasks' })).catch(() => {});
+              navigator.serviceWorker.ready.then(reg => reg.showNotification(title, { body, tag })).catch(() => {});
             }
-            new Notification(title, { body, tag: 'focuspass-daily-tasks' });
+            new Notification(title, { body, tag });
           } catch {}
         }
 
         try {
           if (window.Capacitor?.Plugins?.LocalNotifications) {
             window.Capacitor.Plugins.LocalNotifications.schedule({
-              notifications: [{ id: 1800, title, body, schedule: { at: new Date(Date.now() + 500) } }]
+              notifications: [{ id: Math.floor(Math.random() * 9000) + 1000, title, body, schedule: { at: new Date(Date.now() + 300) } }]
             });
           }
           if (window.webkit?.messageHandlers?.localNotifications) {
-            window.webkit.messageHandlers.localNotifications.postMessage({ title, body, time: timeStr });
+            window.webkit.messageHandlers.localNotifications.postMessage({ title, body });
           }
         } catch {}
+      },
+
+      fireNotification(remainingTasks, unmetGoals, isTest = false) {
+        const tCount = remainingTasks.length;
+        const gCount = unmetGoals.length;
+        const timeStr = SecurityGuard.isValidTime(state.reminderTime) ? state.reminderTime : '18:00';
+
+        let title = `🎉 FocusPASS — Tout est validé aujourd'hui !`;
+        if (tCount > 0 && gCount > 0) {
+          title = `⏰ FocusPASS — ${tCount} tâche${tCount > 1 ? 's' : ''} & ${gCount} objectif${gCount > 1 ? 's' : ''} restants`;
+        } else if (tCount > 0) {
+          title = `📋 FocusPASS — Il te reste ${tCount} tâche${tCount > 1 ? 's' : ''} aujourd'hui`;
+        } else if (gCount > 0) {
+          title = `🎯 FocusPASS — ${gCount} objectif${gCount > 1 ? 's' : ''} quotidien${gCount > 1 ? 's' : ''} à valider`;
+        }
+
+        const sections = [];
+        if (tCount > 0) {
+          const tPreview = remainingTasks.slice(0, 3).map(t => `• ${t.title} (${t.subject})`).join('\n');
+          const tMore = tCount > 3 ? `\n+ ${tCount - 3} autre(s) tâche(s)` : '';
+          sections.push(`📋 Tâches restantes (${tCount}) :\n${tPreview}${tMore}`);
+        }
+        if (gCount > 0) {
+          const gPreview = unmetGoals.slice(0, 4).map(g => `• ${g.title}`).join('\n');
+          const gMore = gCount > 4 ? `\n+ ${gCount - 4} autre(s) objectif(s)` : '';
+          sections.push(`🎯 Objectifs non atteints (${gCount}) :\n${gPreview}${gMore}`);
+        }
+        const body = sections.length > 0
+          ? sections.join('\n\n')
+          : `Bravo ! Toutes tes tâches et tous tes objectifs quotidiens du jour sont cochés.`;
+
+        const banner = $('reminderBannerModal');
+        if (banner) {
+          $('reminderBannerIcon').textContent = '⏰';
+          $('reminderBannerTitle').textContent = isTest ? `Test du rappel (${timeStr}) — Tâches & Objectifs` : `Rappel de ${timeStr} — Bilan de ta journée`;
+          $('reminderBannerBody').textContent = body;
+          banner.classList.remove('hidden');
+        }
+
+        this.sendSystemAndNativeNotif(title, body, 'focuspass-daily-reminder');
+      },
+
+      fireTimerFinishedNotification(subject, formattedDuration, slotStr) {
+        const title = `⏱️ Session terminée — ${subject} (${formattedDuration})`;
+        const body = `Bravo ! Ton compte à rebours est terminé.\nTa session de ${formattedDuration} (${slotStr}) en ${subject} a été enregistrée automatiquement.`;
+
+        const banner = $('reminderBannerModal');
+        if (banner) {
+          $('reminderBannerIcon').textContent = '🎉';
+          $('reminderBannerTitle').textContent = `Session terminée & enregistrée !`;
+          $('reminderBannerBody').textContent = body;
+          banner.classList.remove('hidden');
+        }
+
+        this.sendSystemAndNativeNotif(title, body, 'focuspass-timer-done');
       }
     };
 
@@ -1830,7 +1880,7 @@
     }
 
     // =========================================================================
-    // CALCUL DE LA SÉRIE (STREAK) & ANIMATION CONFETTIS DE BADGE
+    // CALCUL DE LA SÉRIE (STREAK), SONNERIES & ANIMATION CONFETTIS DE BADGE
     // =========================================================================
     function isDateAllGoalsCompleted(dateKey) {
       if (!state.goals.length) return false;
@@ -1926,13 +1976,46 @@
           osc.frequency.value = freq;
           const start = audioCtx.currentTime + i * 0.09;
           g.gain.setValueAtTime(0.001, start);
-          g.gain.linearRampToValueAtTime(0.12, start + 0.02);
+          g.gain.linearRampToValueAtTime(0.14, start + 0.02);
           g.gain.exponentialRampToValueAtTime(0.0001, start + 0.45);
           osc.connect(g);
           g.connect(audioCtx.destination);
           osc.start(start);
           osc.stop(start + 0.46);
         });
+      } catch {}
+    }
+
+    // Sonnerie claire et agréable quand le compte à rebours atteint 00:00:00
+    function playTimerEndRingtone() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const pattern = [
+          { freq: 587.33, delay: 0.00, dur: 0.22 },
+          { freq: 783.99, delay: 0.18, dur: 0.22 },
+          { freq: 880.00, delay: 0.36, dur: 0.25 },
+          { freq: 1174.66, delay: 0.56, dur: 0.55 },
+          { freq: 880.00, delay: 1.25, dur: 0.22 },
+          { freq: 1174.66, delay: 1.45, dur: 0.70 }
+        ];
+        pattern.forEach(n => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = n.freq;
+          const start = audioCtx.currentTime + n.delay;
+          gain.gain.setValueAtTime(0.001, start);
+          gain.gain.linearRampToValueAtTime(0.24, start + 0.025);
+          gain.gain.exponentialRampToValueAtTime(0.0001, start + n.dur);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(start);
+          osc.stop(start + n.dur + 0.02);
+        });
+        if (navigator.vibrate) {
+          navigator.vibrate([200, 100, 200, 100, 350]);
+        }
       } catch {}
     }
 
@@ -1958,7 +2041,7 @@
     }
 
     // =========================================================================
-    // MOTEUR AUDIO CONTINU 15 MINUTES SANS COUPURE & LECTURE EN ARRIÈRE-PLAN
+    // MOTEUR AUDIO CONTINU 15 MIN SANS COUPURE (AVEC VRAIE PLUIE DOUCE FEUTRÉE)
     // =========================================================================
     let activeAudioType = null;
     let noiseVolume = 0.35;
@@ -2001,20 +2084,18 @@
       const pcm16 = new Int16Array(pcmBuffer, 44, totalInterleaved);
 
       if (type === 'binaural') {
-        // 1 seconde exacte = 200 cycles G et 206 cycles D -> Phase 0 parfaite au raccord
         const unitSamples = sampleRate;
         const unitBlock = new Int16Array(unitSamples * 2);
         const twoPi = 2 * Math.PI;
         for (let i = 0; i < unitSamples; i++) {
           const t = i / sampleRate;
-          unitBlock[i * 2] = Math.round(Math.sin(twoPi * 200 * t) * 9500);
-          unitBlock[i * 2 + 1] = Math.round(Math.sin(twoPi * 206 * t) * 9500);
+          unitBlock[i * 2] = Math.round(Math.sin(twoPi * 200 * t) * 8500);
+          unitBlock[i * 2 + 1] = Math.round(Math.sin(twoPi * 206 * t) * 8500);
         }
         for (let sec = 0; sec < totalSeconds; sec++) {
           pcm16.set(unitBlock, sec * unitBlock.length);
         }
       } else {
-        // Bloc de 30s avec préchauffage et fondu trigonométrique à puissance constante (cos² + sin² = 1)
         const baseSecs = 30;
         const fadeSecs = 4;
         const baseLen = sampleRate * baseSecs;
@@ -2022,35 +2103,54 @@
         const rawLen = baseLen + fadeLen;
         const raw = new Float32Array(rawLen);
 
-        let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, lastBrown = 0, lp = 0;
-        const alpha = type === 'brown' ? 0.14 : type === 'pink' ? 0.22 : 0.55;
+        let b0 = 0, b1 = 0, b2 = 0, lastBrown = 0;
+        let lp1 = 0, lp2 = 0, lp3 = 0, lp4 = 0;
 
-        // Préchauffage de 1 seconde pour stabiliser les filtres dès l'échantillon 0
+        // Préchauffage de 1 seconde pour stabiliser tous les filtres
         for (let w = 0; w < sampleRate; w++) {
           const r = Math.random() * 2 - 1;
           lastBrown = (lastBrown + 0.02 * r) / 1.02;
+          b0 = 0.997 * b0 + r * 0.03;
+          b1 = 0.985 * b1 + r * 0.06;
+          b2 = 0.940 * b2 + r * 0.12;
+          const warmRain = (b0 + b1 + b2) * 0.35 + lastBrown * 0.55;
+          lp1 += 0.065 * (warmRain - lp1);
+          lp2 += 0.065 * (lp1 - lp2);
+          lp3 += 0.065 * (lp2 - lp3);
+          lp4 += 0.065 * (lp3 - lp4);
         }
 
+        const twoPi = 2 * Math.PI;
         for (let i = 0; i < rawLen; i++) {
           const w = Math.random() * 2 - 1;
-          let sample = 0;
-          if (type === 'white') {
-            sample = w * 0.28;
-          } else if (type === 'pink') {
-            b0 = 0.99886 * b0 + w * 0.0555179;
-            b1 = 0.99332 * b1 + w * 0.0750759;
-            b2 = 0.96900 * b2 + w * 0.1538520;
-            b3 = 0.86650 * b3 + w * 0.3104856;
-            b4 = 0.55000 * b4 + w * 0.5329522;
-            b5 = -0.7616 * b5 - w * 0.0168980;
-            sample = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.055;
-            b6 = w * 0.115926;
-          } else {
+          if (type === 'pink') {
+            // PLUIE DOUCE ULTRA FEUTRÉE : Quadruple filtre passe-bas en cascade (coupe 100% des aigus agressifs) + respiration naturelle d'averse
+            b0 = 0.997 * b0 + w * 0.03;
+            b1 = 0.985 * b1 + w * 0.06;
+            b2 = 0.940 * b2 + w * 0.12;
             lastBrown = (lastBrown + 0.02 * w) / 1.02;
-            sample = lastBrown * 1.65;
+            const warmRain = (b0 + b1 + b2) * 0.32 + lastBrown * 0.58;
+
+            lp1 += 0.065 * (warmRain - lp1);
+            lp2 += 0.065 * (lp1 - lp2);
+            lp3 += 0.065 * (lp2 - lp3);
+            lp4 += 0.065 * (lp3 - lp4);
+
+            // Légère ondulation périodique sur 30s pour un effet de pluie vivante très douce
+            const tSec = i / sampleRate;
+            const gentleWave = 0.90 + 0.10 * Math.sin((twoPi * tSec) / 15.0);
+            raw[i] = lp4 * 1.15 * gentleWave;
+          } else if (type === 'brown') {
+            lastBrown = (lastBrown + 0.02 * w) / 1.02;
+            lp1 += 0.12 * (lastBrown * 1.55 - lp1);
+            lp2 += 0.12 * (lp1 - lp2);
+            raw[i] = lp2;
+          } else {
+            // Bruit blanc adouci (sans sifflement métallique)
+            lp1 += 0.25 * (w * 0.26 - lp1);
+            lp2 += 0.25 * (lp1 - lp2);
+            raw[i] = lp2;
           }
-          lp += alpha * (sample - lp);
-          raw[i] = lp;
         }
 
         const unitBlock = new Int16Array(baseLen);
@@ -2060,8 +2160,8 @@
             const theta = (i / fadeLen) * (Math.PI * 0.5);
             val = raw[i] * Math.sin(theta) + raw[baseLen + i] * Math.cos(theta);
           }
-          const clamped = Math.max(-0.95, Math.min(0.95, val));
-          unitBlock[i] = Math.round(clamped * 28000);
+          const clamped = Math.max(-0.92, Math.min(0.92, val));
+          unitBlock[i] = Math.round(clamped * 26000);
         }
 
         const repeats = Math.floor(totalSamples / baseLen);
@@ -2111,8 +2211,8 @@
         if ('mediaSession' in navigator) {
           const labels = {
             brown: 'Bruit Brun (Profond)',
-            pink: 'Bruit Rose Doux (Pluie)',
-            white: 'Bruit Blanc (Isolation)',
+            pink: 'Pluie Douce (Apaisant)',
+            white: 'Bruit Blanc Doux',
             binaural: 'Ondes Binaurales 6 Hz'
           };
           try {
@@ -2162,7 +2262,7 @@
       saveState();
       applyTheme();
       renderAll();
-      showToast('Thème mis à jour', '🎨');
+      showToast('Couleurs de l’interface mises à jour', '🎨');
     }
 
     function updateDailyGoal(val) {
@@ -2258,28 +2358,60 @@
       }).join('');
     }
 
-    function buildBarChartHtml(weekDates, maxScaleMin, isMain) {
-      return weekDates.map((dateObj, idx) => {
+    // Graphique calibré au pixel près : la hauteur des barres et la ligne d'objectif partagent exactement 100% de la zone de tracé
+    function renderCalibratedCharts(weekDates, maxScaleMin, isMain) {
+      if (!isMain) {
+        $('miniBarChart').innerHTML = weekDates.map((dateObj, idx) => {
+          const dKey = toDateKey(dateObj);
+          const totalMin = getDateTotalMinutes(dKey);
+          const heightPct = totalMin > 0 ? Math.min(100, Math.max(8, Math.round((totalMin / maxScaleMin) * 100))) : 4;
+          const hoursFormatted = (totalMin / 60).toFixed(1).replace('.0', '') + 'h';
+          const isSel = idx === selectedDayIndex;
+          const breakdown = getDateSubjectBreakdown(dKey);
+          const segments = totalMin > 0
+            ? Object.entries(breakdown).map(([subj, min]) => `<div style="height:${(min / totalMin) * 100}%;background-color:${esc(getSubjectColor(subj))};" class="w-full bar-segment" title="${esc(subj)}: ${formatMinutes(min)}"></div>`).join('')
+            : `<div class="w-full h-full" style="background-color:var(--bg-input);"></div>`;
+
+          return `<div onclick="selectDay(${idx}); statsWeekOffset=0; switchTab('stats');" class="flex-1 flex flex-col items-center h-full justify-end cursor-pointer group">
+            <span class="text-[10px] mb-1 font-mono-timer opacity-80 group-hover:opacity-100 transition">${totalMin > 0 ? hoursFormatted : ''}</span>
+            <div class="w-full h-[112px] flex items-end justify-center">
+              <div class="w-full max-w-[28px] rounded-t-lg overflow-hidden flex flex-col-reverse transition-all duration-300 group-hover:brightness-110" style="height:${heightPct}%; ${isSel ? 'outline:2px solid var(--btn-bg);' : ''}">${segments}</div>
+            </div>
+            <span class="text-[11px] mt-2 ${isSel ? 'underline' : ''} font-bold transition" style="${!isSel ? 'color:var(--text-muted);' : ''}">${DAYS_SHORT[idx]}</span>
+          </div>`;
+        }).join('');
+        return;
+      }
+
+      // Graphique principal du Bilan : les barres occupent exactement la boîte relative de 180px où se trouve #goalLine
+      $('mainBarChart').innerHTML = weekDates.map((dateObj, idx) => {
         const dKey = toDateKey(dateObj);
         const totalMin = getDateTotalMinutes(dKey);
-        const heightPct = totalMin > 0 ? Math.max(isMain ? 8 : 10, Math.round((totalMin / maxScaleMin) * 100)) : 4;
+        const heightPct = totalMin > 0 ? Math.min(100, Math.max(4, (totalMin / maxScaleMin) * 100)) : 2;
         const hoursFormatted = (totalMin / 60).toFixed(1).replace('.0', '') + 'h';
         const isSel = idx === selectedDayIndex;
         const breakdown = getDateSubjectBreakdown(dKey);
         const segments = totalMin > 0
           ? Object.entries(breakdown).map(([subj, min]) => `<div style="height:${(min / totalMin) * 100}%;background-color:${esc(getSubjectColor(subj))};" class="w-full bar-segment" title="${esc(subj)}: ${formatMinutes(min)}"></div>`).join('')
-          : `<div class="w-full h-full ${isMain ? 'opacity-25' : ''}" style="background-color:var(--bg-input);"></div>`;
+          : `<div class="w-full h-full opacity-25" style="background-color:var(--bg-input);"></div>`;
 
-        const dateSubLabel = isMain ? `<span class="text-[10px] opacity-60 font-normal block leading-tight">${formatShortDate(dateObj)}</span>` : '';
-
-        return `<div onclick="selectDay(${idx}); ${isMain ? '' : "statsWeekOffset=0;switchTab('stats');"}" class="flex-1 flex flex-col items-center h-full justify-end cursor-pointer group">
-          <span class="${isMain ? 'text-xs font-bold mb-1.5' : 'text-[10px] mb-1'} font-mono-timer opacity-80 group-hover:opacity-100 transition">${totalMin > 0 ? hoursFormatted : (isMain ? '0h' : '')}</span>
-          <div class="w-full ${isMain ? 'max-w-[52px] rounded-t-xl' : 'max-w-[28px] rounded-t-lg'} overflow-hidden flex flex-col-reverse transition-all duration-300 group-hover:brightness-110" style="height:${heightPct}%; ${isSel ? 'outline:2px solid var(--btn-bg);' : ''}">${segments}</div>
-          <span class="${isMain ? 'text-xs mt-2 px-2 py-0.5 rounded-md text-center ' + (isSel ? 'theme-btn-primary' : '') : 'text-[11px] mt-2 ' + (isSel ? 'underline' : '')} font-bold transition" style="${!isSel ? 'color:var(--text-muted);' : ''}">
-            ${DAYS_SHORT[idx]}${dateSubLabel}
-          </span>
+        return `<div onclick="selectDay(${idx})" class="flex-1 h-full flex flex-col items-center justify-end cursor-pointer group relative">
+          <div class="w-full max-w-[52px] rounded-t-xl overflow-hidden flex flex-col-reverse transition-all duration-300 group-hover:brightness-110 relative" style="height:${heightPct}%; ${isSel ? 'outline:2px solid var(--btn-bg);' : ''}">${segments}</div>
+          <span class="absolute text-xs font-bold font-mono-timer opacity-90 group-hover:opacity-100 transition pointer-events-none" style="bottom: calc(${heightPct}% + 4px);">${totalMin > 0 ? hoursFormatted : '0h'}</span>
         </div>`;
       }).join('');
+
+      if ($('mainBarChartLabels')) {
+        $('mainBarChartLabels').innerHTML = weekDates.map((dateObj, idx) => {
+          const isSel = idx === selectedDayIndex;
+          return `<div onclick="selectDay(${idx})" class="flex-1 flex flex-col items-center cursor-pointer">
+            <span class="text-xs px-2 py-0.5 rounded-md text-center font-bold transition ${isSel ? 'theme-btn-primary' : ''}" style="${!isSel ? 'color:var(--text-muted);' : ''}">
+              ${DAYS_SHORT[idx]}
+              <span class="text-[10px] opacity-60 font-normal block leading-tight">${formatShortDate(dateObj)}</span>
+            </span>
+          </div>`;
+        }).join('');
+      }
     }
 
     function renderAll() {
@@ -2323,7 +2455,7 @@
       renderDailyGoals();
 
       $('miniSubjectLegend').innerHTML = state.subjects.map(s => `<span class="inline-flex items-center gap-1 text-[10px] font-semibold" style="color:var(--text-muted);"><span class="w-2 h-2 rounded-full" style="background-color:${esc(s.color)};"></span>${esc(s.name)}</span>`).join('');
-      $('miniBarChart').innerHTML = buildBarChartHtml(curWeekDates, Math.max(goalMin, ...curWeekTotals, 60), false);
+      renderCalibratedCharts(curWeekDates, Math.max(goalMin, ...curWeekTotals, 60), false);
 
       renderStatsView(streak);
       renderSettings();
@@ -2653,12 +2785,18 @@
       $('statTaskRate').textContent = `${weekTasks.length ? Math.round((doneWeekTasks / weekTasks.length) * 100) : 0}%`;
       $('statGoalRate').textContent = `${state.goals.length ? Math.round((weekGoalsChecks / maxWeekGoals) * 100) : 0}%`;
       $('chartGoalLegend').textContent = `${state.dailyGoalHours}h`;
+      if ($('goalLineBadgeText')) $('goalLineBadgeText').textContent = `Objectif ${state.dailyGoalHours}h`;
 
       $('mainChartLegend').innerHTML = state.subjects.map(s => `<span class="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-lg border" style="background-color:var(--bg-main);border-color:var(--border-color);"><span class="w-3 h-3 rounded-full" style="background-color:${esc(s.color)};"></span><span>${esc(s.name)}</span></span>`).join('');
 
-      const maxScaleMin = Math.max(state.dailyGoalHours * 72, ...dailyTotals, 120);
-      $('goalLine').style.bottom = `${Math.min(94, Math.round(((state.dailyGoalHours * 60) / maxScaleMin) * 100))}%`;
-      $('mainBarChart').innerHTML = buildBarChartHtml(weekDates, maxScaleMin, true);
+      // Échelle exacte commune aux barres et à la ligne d'objectif
+      const goalMin = state.dailyGoalHours * 60;
+      const highestDayMin = Math.max(...dailyTotals, 0);
+      const maxScaleMin = Math.max(Math.round(goalMin * 1.15), Math.round(highestDayMin * 1.12), 120);
+      const goalLineBottomPct = (goalMin / maxScaleMin) * 100;
+
+      $('goalLine').style.bottom = `${goalLineBottomPct}%`;
+      renderCalibratedCharts(weekDates, maxScaleMin, true);
 
       renderWeeklyGoalsTable(weekDates, weekDateKeys);
 
@@ -2858,7 +2996,7 @@
     }
 
     // =========================================================================
-    // CHRONO HAUTE PRÉCISION AVEC PERSISTANCE ANTI-REDÉMARRAGE EN ARRIÈRE-PLAN
+    // CHRONO HAUTE PRÉCISION AVEC FIN DE COMPTE À REBOURS AUTOMATIQUE + ALERTE
     // =========================================================================
     let timerInterval = null, timerRunning = false, timerMode = 'countup';
     let elapsedSeconds = 0, countdownTargetSeconds = 3600;
@@ -2913,7 +3051,7 @@
             timerAnchorTimestamp = null;
             localStorage.removeItem(TIMER_STORAGE_KEY);
             updateFlipClockDisplay();
-            finishAndSaveSession();
+            finishAndSaveSession(true);
             return true;
           }
 
@@ -3041,7 +3179,10 @@
       elapsedSeconds = timerBaseElapsed + Math.max(0, Math.floor((Date.now() - timerAnchorTimestamp) / 1000));
       if (timerMode === 'countdown' && elapsedSeconds >= countdownTargetSeconds) {
         elapsedSeconds = countdownTargetSeconds;
-        finishAndSaveSession();
+        timerRunning = false;
+        clearInterval(timerInterval);
+        updateFlipClockDisplay();
+        finishAndSaveSession(true);
         return;
       }
       updateFlipClockDisplay();
@@ -3050,6 +3191,12 @@
     function toggleTimer() {
       const startBtn = $('timerStartBtn');
       if (!timerRunning) {
+        // Débloque l'AudioContext au clic pour garantir que la sonnerie de fin puisse retentir
+        try {
+          if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          if (audioCtx.state === 'suspended') audioCtx.resume();
+        } catch {}
+
         timerRunning = true;
         timerAnchorTimestamp = Date.now();
         startBtn.textContent = 'Pause';
@@ -3091,8 +3238,8 @@
       $('flipSeconds').textContent = String(sec % 60).padStart(2, '0');
     }
 
-    function finishAndSaveSession() {
-      if (timerRunning) syncTimerWithRealClock();
+    function finishAndSaveSession(isAutoCompleted = false) {
+      if (timerRunning && !isAutoCompleted) syncTimerWithRealClock();
       if (elapsedSeconds < 10) {
         showToast("Session trop courte (< 10s). Utilise l'ajout manuel !", '⏱️');
         return;
@@ -3102,11 +3249,13 @@
       const startDate = new Date(endDate.getTime() - elapsedSeconds * 1000);
       const fmt = d => d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
       const slotStr = `${fmt(startDate)} → ${fmt(endDate)}`;
+      const savedSubject = currentTimerSubject;
+      const formattedDur = formatMinutes(addedMin);
 
       state.sessions.unshift({
         id: Date.now(),
         date: getTodayKey(),
-        subject: currentTimerSubject,
+        subject: savedSubject,
         minutes: addedMin,
         time: slotStr
       });
@@ -3114,7 +3263,14 @@
       saveState();
       resetTimer();
       renderAll();
-      showToast(`Session de ${formatMinutes(addedMin)} (${currentTimerSubject}) enregistrée !`, '🔥');
+
+      if (isAutoCompleted) {
+        playTimerEndRingtone();
+        TaskReminderEngine.fireTimerFinishedNotification(savedSubject, formattedDur, slotStr);
+        showToast(`Compte à rebours terminé ! + ${formattedDur} (${savedSubject}) enregistrées`, '🔔');
+      } else {
+        showToast(`Session de ${formattedDur} (${savedSubject}) enregistrée !`, '🔥');
+      }
     }
 
     function syncFullscreenBodyClass() {
@@ -3295,11 +3451,11 @@
     }
 
     // =========================================================================
-    // VISITE GUIDÉE SPOTLIGHT DIRECTEMENT SUR LES ÉLÉMENTS DE L'INTERFACE
+    // VISITE GUIDÉE SPOTLIGHT (10 ÉTAPES, THÈMES D'INTERFACE & NOTIF À LA FIN)
     // =========================================================================
     const OnboardingWizard = {
       step: 1,
-      totalSteps: 9,
+      totalSteps: 10,
       isOpen: false,
 
       stepsConfig: [
@@ -3319,8 +3475,7 @@
           tab: 'dashboard',
           targetId: 'tasksMainCard',
           title: '📋 Tes Tâches & Priorités du jour',
-          desc: "Ajoute ici tes cours ou QCM à faire, classe-les en Urgent / Important / À faire. S'il t'en reste à 18h00, FocusPASS t'enverra un rappel !",
-          showNotifButton: true
+          desc: "Ajoute ici tes cours ou QCM à faire et classe-les en Urgent, Important ou À faire. Les tâches oubliées des jours précédents s'affichent automatiquement en haut."
         },
         {
           tab: 'dashboard',
@@ -3331,32 +3486,39 @@
         {
           tab: 'timer',
           targetId: 'timerModeSegmented',
-          title: '⏳ Compte à rebours ou Chrono libre',
-          desc: "Choisis entre « Compter jusqu'à » (chrono libre) ou « Compte à rebours » (glisse sur les molettes à droite des chiffres pour régler ton temps). Le chrono continue même si tu changes d'appli !"
+          title: '⏳ Compte à rebours intelligent',
+          desc: "Choisis entre « Compter jusqu'à » ou « Compte à rebours » (glisse sur les molettes à droite des chiffres). Quand le compte à rebours atteint zéro, une sonnerie retentit et ta session est enregistrée automatiquement !"
         },
         {
           tab: 'timer',
           targetId: 'timerAudioPanel',
-          title: '🎧 Bruits de concentration en arrière-plan',
-          desc: "Active un Bruit Brun, Pluie ou des Ondes Binaurales 6 Hz. Le son est continu sans aucune coupure et continue de tourner même si tu vas sur Safari ou verrouilles ta tablette."
+          title: '🌧️ Pluie Douce & Bruits en arrière-plan',
+          desc: "Active la Pluie Douce apaisante, le Bruit Brun ou les Ondes Binaurales 6 Hz. Le son est continu sans coupure et continue même si tu changes d'appli."
         },
         {
           tab: 'stats',
           targetId: 'statsChartCard',
           title: '📈 Bilan, Semaines & Compte rendu détaillé',
-          desc: "Visualise tes heures en couleurs sur toute la semaine. Clique sur la colonne d'un jour pour inspecter toutes tes sessions, tâches et tes 11 Badges de régularité juste en dessous."
+          desc: "Visualise tes heures par rapport à ta ligne d'objectif. Clique sur la colonne d'un jour pour inspecter tes sessions, tes tâches et tes 11 Badges juste en dessous."
         },
         {
           tab: 'settings',
           targetId: 'settingsSubjectsCard',
-          title: '🎨 Paramétrer tes Matières & Couleurs',
+          title: '📚 Paramétrer tes Matières & Couleurs',
           desc: "C'est ici que tu ajoutes toutes tes matières avec leurs couleurs dédiées ou que tu les renommes à tout moment."
         },
         {
           tab: 'settings',
-          targetId: 'settingsSyncCard',
-          title: '☁️ Synchronisation Téléphone & Tablette',
-          desc: "Pour synchroniser tes données en direct entre ton téléphone et ta tablette, entre simplement ce même Code Synchro sur tes deux appareils puis clique sur « Lier » !"
+          targetId: 'settingsThemesCard',
+          title: '🎨 Personnaliser les couleurs de l’interface',
+          desc: "Tu peux changer à tout moment le thème complet de FocusPASS : Noir Pur OLED, Gris Sombre, Rouge Sombre, Mode Clair ou Vert Clair !"
+        },
+        {
+          tab: 'settings',
+          targetId: 'settingsReminderCard',
+          title: '🔔 Rappel du soir & Fin de Chrono',
+          desc: "Dernière étape ! Autorise les notifications ci-dessous pour recevoir une alerte quand ton compte à rebours se termine et un rappel à 18h00 avec tes tâches et objectifs non atteints.",
+          showNotifButton: true
         }
       ],
 
@@ -3368,6 +3530,7 @@
         if (!force && !this.shouldAutoStart()) return;
         this.step = 1;
         this.isOpen = true;
+        $('startupNotifBanner')?.classList.add('hidden');
         $('onboardingModal')?.classList.remove('hidden');
         this.renderStep();
       },
@@ -3380,6 +3543,8 @@
         $('onboardingModal')?.classList.add('hidden');
         switchTab('dashboard');
         showToast("Visite terminée ! Bon courage pour tes révisions 🚀", '🎓');
+        // Si l'utilisateur n'a pas encore autorisé les notifications pendant la dernière étape, on affiche la bannière
+        setTimeout(() => TaskReminderEngine.checkStartupNotificationPrompt(), 600);
       },
 
       next() {
@@ -3488,7 +3653,7 @@
 
         $('onboardingStepLabel').textContent = `Étape ${this.step} / ${this.totalSteps}`;
         $('onboardingPrevBtn').classList.toggle('invisible', this.step === 1);
-        $('onboardingNextBtn').textContent = this.step === this.totalSteps ? "C'est parti ! 🚀" : 'Suivant →';
+        $('onboardingNextBtn').textContent = this.step === this.totalSteps ? "Terminer 🚀" : 'Suivant →';
 
         $('onboardingDots').innerHTML = Array.from({ length: this.totalSteps }, (_, i) => {
           const active = i + 1 === this.step;
@@ -3498,12 +3663,12 @@
         const notifGranted = ('Notification' in window) && Notification.permission === 'granted';
         const notifBlock = cfg.showNotifButton && !notifGranted
           ? `<div class="pt-2">
-              <button type="button" onclick="TaskReminderEngine.authorizeFromStartup()" class="w-full py-2 px-3 rounded-xl text-xs font-extrabold bg-blue-500 text-white hover:bg-blue-400 transition flex items-center justify-center gap-2 shadow">
-                🔔 Autoriser les notifications (Rappel 18h00)
+              <button type="button" onclick="TaskReminderEngine.authorizeFromStartup()" class="w-full py-2.5 px-3 rounded-xl text-xs font-extrabold bg-blue-500 text-white hover:bg-blue-400 transition flex items-center justify-center gap-2 shadow-lg">
+                🔔 Autoriser les notifications maintenant
               </button>
             </div>`
           : (cfg.showNotifButton && notifGranted
-              ? `<div class="pt-1 text-[11px] font-bold text-emerald-400">✓ Notifications à 18h00 déjà autorisées</div>`
+              ? `<div class="pt-1 text-[11px] font-bold text-emerald-400">✓ Notifications déjà autorisées !</div>`
               : '');
 
         $('onboardingStepContent').innerHTML = `
