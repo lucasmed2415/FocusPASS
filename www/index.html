@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <!-- BOUCLIER CSP STRICT : Autorise Firebase, les flux audio Blob en arrière-plan et bloque toute exfiltration -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://focuspass-default-rtdb.firebaseio.com https://*.firebaseio.com https://*.googleapis.com; media-src 'self' blob: data:; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; object-src 'none'; base-uri 'none'; form-action 'none';" />
+  <!-- BOUCLIER CSP STRICT : Autorise Firebase, les Workers, les flux audio Blob en arrière-plan et bloque toute exfiltration -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://focuspass-default-rtdb.firebaseio.com https://*.firebaseio.com https://*.googleapis.com; media-src 'self' blob: data:; worker-src 'self' blob:; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; object-src 'none'; base-uri 'none'; form-action 'none';" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="referrer" content="no-referrer" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -56,7 +56,7 @@
       --bg-card: #ffffff;
       --bg-input: #f8fafc;
       --text-main: #0f172a;
-      --text-muted: #64748b;
+      --text-muted: #64788b;
       --border-color: #e2e8f0;
       --btn-bg: #0f172a;
       --btn-text: #ffffff;
@@ -170,7 +170,6 @@
     .theme-accent-text { color: var(--theme-accent); }
     .theme-accent-soft-bg { background-color: var(--theme-accent-soft); }
 
-    /* Sans transform à 100% pour ne pas décaler les éléments position:fixed sur tablette */
     @keyframes viewFadeSlide {
       0% { opacity: 0; }
       100% { opacity: 1; }
@@ -253,7 +252,7 @@
     .noise-pill:hover { background-color: #232329; color: #f4f4f5; transform: translateY(-1px); }
     .noise-pill.active { background-color: #ffffff; border-color: #ffffff; color: #000000; box-shadow: 0 0 18px rgba(255,255,255,0.24); }
 
-    /* MODE GRAND ÉCRAN FOCUS : Centrage parfait sur tablette & masquage des éléments superflus */
+    /* MODE GRAND ÉCRAN FOCUS */
     body.timer-is-fullscreen {
       overflow: hidden !important;
     }
@@ -360,14 +359,14 @@
     </div>
   </div>
 
-  <!-- INVITATION POUR AUTORISER LES NOTIFICATIONS (S'AFFICHE UNIQUEMENT APRÈS LE TUTORIEL) -->
+  <!-- INVITATION POUR AUTORISER LES NOTIFICATIONS (UNIQUEMENT APRÈS LE TUTORIEL) -->
   <div id="startupNotifBanner" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-lg card rounded-2xl p-4 border-2 border-blue-500/70 shadow-2xl backdrop-blur-xl">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="flex items-start gap-3">
         <div class="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center flex-shrink-0 text-lg">🔔</div>
         <div>
           <h4 class="text-xs font-extrabold uppercase tracking-wider text-blue-400">Activer les notifications (18h00 & Chrono)</h4>
-          <p class="text-xs mt-0.5 leading-relaxed" style="color: var(--text-muted);">Sois prévenu quand ton compte à rebours est terminé et à 18h00 s'il te reste des tâches ou objectifs non atteints.</p>
+          <p class="text-xs mt-0.5 leading-relaxed" style="color: var(--text-muted);">Sois prévenu quand ton compte à rebours est terminé (même en arrière-plan) et à 18h00 s'il te reste des tâches ou objectifs non atteints.</p>
         </div>
       </div>
       <div class="flex items-center justify-end gap-2 flex-shrink-0">
@@ -548,7 +547,7 @@
                 <h3 class="font-extrabold text-lg tracking-tight">Semaine en couleurs</h3>
               </div>
               <div id="miniSubjectLegend" class="flex flex-wrap gap-2 mb-3"></div>
-              <div id="miniBarChart" class="h-44 flex items-end justify-between gap-2 pt-2 pb-1 px-1"></div>
+              <div id="miniBarChart" class="h-44 flex items-end justify-between gap-2 pt-4 pb-1 px-1"></div>
             </div>
 
             <div class="mt-4 pt-3 border-t flex items-center justify-between text-xs" style="border-color: var(--border-color); color: var(--text-muted);">
@@ -626,14 +625,17 @@
 
         <!-- PANNEAU AUDIO : MASQUÉ EN MODE PLEIN ÉCRAN FOCUS -->
         <div id="timerAudioPanel" class="flex flex-col items-center gap-3 pt-3 pb-4 border-t border-zinc-900 relative z-10 w-full">
-          <!-- Lecteur HTML5 natif pour continuer la lecture en arrière-plan sur Safari / iOS / iPadOS / Android -->
+          <!-- Lecteurs HTML5 natifs : Bruit d'ambiance + Garde-temps silencieux d'arrière-plan + Sonnerie WAV -->
           <audio id="bgAudioPlayer" loop playsinline preload="auto" class="hidden"></audio>
+          <audio id="timerGuardAudio" loop playsinline preload="auto" class="hidden"></audio>
+          <audio id="alarmRingAudio" playsinline preload="auto" class="hidden"></audio>
+
           <div class="flex flex-wrap items-center justify-center gap-2">
             <button type="button" onclick="toggleAudioSource('brown')" id="noise-btn-brown" class="noise-pill">
               <span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Bruit Brun (Profond)</span>
             </button>
             <button type="button" onclick="toggleAudioSource('pink')" id="noise-btn-pink" class="noise-pill">
-              <span class="w-2 h-2 rounded-full bg-sky-400"></span><span>Pluie Douce (Apaisant)</span>
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span><span>Pluie Naturelle (Gouttes Douces)</span>
             </button>
             <button type="button" onclick="toggleAudioSource('white')" id="noise-btn-white" class="noise-pill">
               <span class="w-2 h-2 rounded-full bg-zinc-300"></span><span>Bruit Blanc Doux</span>
@@ -724,7 +726,7 @@
         </div>
       </div>
 
-      <!-- GRAPHIQUE HEURES & MATIÈRES DE LA SEMAINE SÉLECTIONNÉE (ÉCHELLE EXACTE) -->
+      <!-- GRAPHIQUE HEURES & MATIÈRES DE LA SEMAINE SÉLECTIONNÉE (CALIBRAGE PIXEL EXACT) -->
       <div id="statsChartCard" class="card rounded-2xl p-6">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
           <div>
@@ -736,13 +738,13 @@
 
         <div id="mainChartLegend" class="flex flex-wrap gap-3 mb-6 pb-3 border-b" style="border-color: var(--border-color);"></div>
 
-        <!-- Zone de tracé calibrée : les barres et la ligne d'objectif partagent exactement la même hauteur de référence (180px) -->
-        <div class="pt-4 px-2 sm:px-6">
+        <!-- Zone de tracé calibrée au pixel : Hauteur de référence stricte = 180px -->
+        <div class="pt-6 px-2 sm:px-6">
           <div class="relative h-[180px] border-b" style="border-color: var(--border-color);">
-            <div id="goalLine" class="absolute left-0 right-0 border-t-2 border-dashed border-amber-400/90 z-20 pointer-events-none flex justify-end pr-1 transition-all duration-300" style="bottom: 50%;">
+            <div id="goalLine" class="absolute left-0 right-0 border-t-2 border-dashed border-amber-400/90 z-20 pointer-events-none flex justify-end pr-1 transition-all duration-300" style="bottom: 90px;">
               <span id="goalLineBadgeText" class="text-[10px] font-extrabold bg-amber-400 text-black px-1.5 py-0.5 rounded -mt-2.5 shadow">Objectif</span>
             </div>
-            <div id="mainBarChart" class="h-full flex items-end justify-between gap-2 sm:gap-6 relative z-10"></div>
+            <div id="mainBarChart" class="h-[180px] flex items-end justify-between gap-2 sm:gap-6 relative z-10"></div>
           </div>
           <div id="mainBarChartLabels" class="flex items-start justify-between gap-2 sm:gap-6 pt-2.5 pb-1"></div>
         </div>
@@ -910,34 +912,6 @@
         </div>
       </div>
 
-      <!-- NOTIFICATION QUOTIDIENNE DES TÂCHES & OBJECTIFS RESTANTS -->
-      <div id="settingsReminderCard" class="card rounded-2xl p-6 space-y-4">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <h3 class="font-extrabold text-lg tracking-tight">Rappel quotidien (Tâches & Objectifs)</h3>
-            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Reçois une notification à l'heure choisie s'il te reste des tâches ou des objectifs quotidiens non atteints.</p>
-          </div>
-          <button type="button" onclick="TaskReminderEngine.toggleEnabled()" id="reminderToggleBtn" class="px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition">
-            🔔 Activé
-          </button>
-        </div>
-
-        <div class="p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
-          <div class="flex items-center gap-3">
-            <label for="reminderTimeInput" class="text-xs font-bold">Heure du rappel :</label>
-            <input type="time" id="reminderTimeInput" value="18:00" onchange="TaskReminderEngine.updateTime(this.value)" class="input-field px-3 py-1.5 rounded-xl text-xs font-mono-timer font-bold" />
-          </div>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="TaskReminderEngine.requestPermission(true)" id="notifPermBtn" class="px-3 py-1.5 rounded-xl text-xs font-bold border hover:opacity-85 transition" style="border-color: var(--border-color); background-color: var(--bg-input);">
-              Autoriser les notifications
-            </button>
-            <button type="button" onclick="TaskReminderEngine.testNotificationNow()" class="theme-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold">
-              Tester l'alerte
-            </button>
-          </div>
-        </div>
-      </div>
-
       <!-- SYNCHRONISATION MULTI-APPAREILS (TÉLÉPHONE & TABLETTE) -->
       <div id="settingsSyncCard" class="card rounded-2xl p-6 space-y-4">
         <div class="flex items-start justify-between gap-3">
@@ -963,6 +937,34 @@
           <div class="pt-2 border-t flex flex-wrap items-center justify-between gap-2 text-[11px]" style="border-color: var(--border-color); color: var(--text-muted);">
             <span id="lastSyncTimestampText">Dernière sauvegarde : à l'instant</span>
             <button type="button" onclick="CloudSyncEngine.forceSyncNow()" class="font-bold underline hover:opacity-80" style="color: var(--text-main);">↻ Synchroniser maintenant</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATION QUOTIDIENNE DES TÂCHES & OBJECTIFS RESTANTS -->
+      <div id="settingsReminderCard" class="card rounded-2xl p-6 space-y-4">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h3 class="font-extrabold text-lg tracking-tight">Rappel quotidien (Tâches & Objectifs)</h3>
+            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Reçois une notification à l'heure choisie s'il te reste des tâches ou des objectifs quotidiens non atteints, ainsi qu'à la fin de ton chrono.</p>
+          </div>
+          <button type="button" onclick="TaskReminderEngine.toggleEnabled()" id="reminderToggleBtn" class="px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition">
+            🔔 Activé
+          </button>
+        </div>
+
+        <div class="p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
+          <div class="flex items-center gap-3">
+            <label for="reminderTimeInput" class="text-xs font-bold">Heure du rappel :</label>
+            <input type="time" id="reminderTimeInput" value="18:00" onchange="TaskReminderEngine.updateTime(this.value)" class="input-field px-3 py-1.5 rounded-xl text-xs font-mono-timer font-bold" />
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="TaskReminderEngine.requestPermission(true)" id="notifPermBtn" class="px-3 py-1.5 rounded-xl text-xs font-bold border hover:opacity-85 transition" style="border-color: var(--border-color); background-color: var(--bg-input);">
+              Autoriser les notifications
+            </button>
+            <button type="button" onclick="TaskReminderEngine.testNotificationNow()" class="theme-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold">
+              Tester l'alerte
+            </button>
           </div>
         </div>
       </div>
@@ -995,23 +997,20 @@
 
   </main>
 
-  <!-- VISITE GUIDÉE SPOTLIGHT DIRECTEMENT SUR L'INTERFACE (1ÈRE OUVERTURE) -->
+  <!-- VISITE GUIDÉE SPOTLIGHT DIRECTEMENT SUR L'INTERFACE (11 ÉTAPES COMPLÈTES) -->
   <div id="onboardingModal" class="fixed inset-0 z-[9990] hidden pointer-events-none">
-    <!-- 4 panneaux floutés autour de l'élément mis en évidence -->
     <div id="spBlurTop" class="fixed left-0 right-0 top-0 bg-black/75 backdrop-blur-md transition-all duration-300 pointer-events-auto" onclick="OnboardingWizard.next()"></div>
     <div id="spBlurBottom" class="fixed left-0 right-0 bottom-0 bg-black/75 backdrop-blur-md transition-all duration-300 pointer-events-auto" onclick="OnboardingWizard.next()"></div>
     <div id="spBlurLeft" class="fixed left-0 bg-black/75 backdrop-blur-md transition-all duration-300 pointer-events-auto" onclick="OnboardingWizard.next()"></div>
     <div id="spBlurRight" class="fixed right-0 bg-black/75 backdrop-blur-md transition-all duration-300 pointer-events-auto" onclick="OnboardingWizard.next()"></div>
 
-    <!-- Cadre lumineux autour du composant ciblé -->
     <div id="spHighlightRing" class="fixed pointer-events-none rounded-2xl border-2 border-amber-400 transition-all duration-300" style="box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.2), 0 0 30px rgba(251, 191, 36, 0.55);"></div>
 
-    <!-- Bulle explicative flottante qui pointe vers l'élément -->
     <div id="spTooltipCard" class="fixed pointer-events-auto card rounded-2xl p-5 w-[92vw] max-w-sm border-2 border-amber-400/90 shadow-2xl transition-all duration-300 space-y-3.5" style="background-color: var(--bg-card); color: var(--text-main);">
       <div id="spArrowIndicator" class="w-3.5 h-3.5 rotate-45 absolute border-amber-400/90" style="background-color: var(--bg-card);"></div>
 
       <div class="flex items-center justify-between gap-2">
-        <span id="onboardingStepLabel" class="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-400 text-black">Étape 1 / 10</span>
+        <span id="onboardingStepLabel" class="text-[11px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-400 text-black">Étape 1 / 11</span>
         <button type="button" onclick="OnboardingWizard.finish()" class="text-xs font-bold opacity-60 hover:opacity-100 transition px-2 py-0.5 rounded-lg border" style="border-color: var(--border-color);">
           Passer ✕
         </button>
@@ -1625,7 +1624,7 @@
     };
 
     // =========================================================================
-    // MOTEUR DE RAPPEL QUOTIDIEN (TÂCHES + OBJECTIFS NON ATTEINTS) & NOTIF CHRONO
+    // MOTEUR DE RAPPEL QUOTIDIEN (TÂCHES + OBJECTIFS) & NOTIFICATIONS NATIVES/ARRIÈRE-PLAN
     // =========================================================================
     const TaskReminderEngine = {
       checkTimer: null,
@@ -1633,9 +1632,8 @@
       init() {
         this.updateSettingsUI();
         if (this.checkTimer) clearInterval(this.checkTimer);
-        this.checkTimer = setInterval(() => this.checkDueReminder(), 25000);
+        this.checkTimer = setInterval(() => this.checkDueReminder(), 20000);
         setTimeout(() => this.checkDueReminder(), 2500);
-        // La demande de notification ne s'affiche au démarrage QUE si le tutoriel a déjà été fait
         if (!OnboardingWizard.shouldAutoStart()) {
           this.checkStartupNotificationPrompt();
         }
@@ -1766,20 +1764,69 @@
         this.fireNotification(remainingTasks, unmetGoals, true);
       },
 
+      // Planifie une notification native à l'avance (pour que l'OS la déclenche même si l'application est totalement fermée)
+      scheduleFutureCountdownOSNotification(secondsFromNow, subject, formattedDuration) {
+        const fireDate = new Date(Date.now() + secondsFromNow * 1000);
+        const title = `⏱️ Session terminée — ${subject} (${formattedDuration})`;
+        const body = `Ton compte à rebours de ${formattedDuration} en ${subject} est terminé !`;
+
+        try {
+          if (window.Capacitor?.Plugins?.LocalNotifications) {
+            window.Capacitor.Plugins.LocalNotifications.schedule({
+              notifications: [{ id: 9901, title, body, schedule: { at: fireDate }, sound: 'default' }]
+            });
+          }
+          if (window.webkit?.messageHandlers?.localNotifications) {
+            window.webkit.messageHandlers.localNotifications.postMessage({
+              action: 'scheduleTimerEnd',
+              id: 9901,
+              title,
+              body,
+              fireAtMs: fireDate.getTime()
+            });
+          }
+          if ('Notification' in window && Notification.permission === 'granted' && 'showTrigger' in Notification.prototype && window.TimestampTrigger) {
+            navigator.serviceWorker?.ready.then(reg => {
+              reg.showNotification(title, {
+                body,
+                tag: 'focuspass-timer-done',
+                showTrigger: new window.TimestampTrigger(fireDate.getTime())
+              });
+            }).catch(() => {});
+          }
+        } catch {}
+      },
+
+      cancelScheduledCountdownOSNotification() {
+        try {
+          if (window.Capacitor?.Plugins?.LocalNotifications) {
+            window.Capacitor.Plugins.LocalNotifications.cancel({ notifications: [{ id: 9901 }] });
+          }
+          if (window.webkit?.messageHandlers?.localNotifications) {
+            window.webkit.messageHandlers.localNotifications.postMessage({ action: 'cancelTimerEnd', id: 9901 });
+          }
+        } catch {}
+      },
+
       sendSystemAndNativeNotif(title, body, tag = 'focuspass-notif') {
         if ('Notification' in window && Notification.permission === 'granted') {
           try {
             if (navigator.serviceWorker?.ready) {
-              navigator.serviceWorker.ready.then(reg => reg.showNotification(title, { body, tag })).catch(() => {});
+              navigator.serviceWorker.ready.then(reg => reg.showNotification(title, {
+                body,
+                tag,
+                renotify: true,
+                requireInteraction: true
+              })).catch(() => {});
             }
-            new Notification(title, { body, tag });
+            new Notification(title, { body, tag, renotify: true, requireInteraction: true });
           } catch {}
         }
 
         try {
           if (window.Capacitor?.Plugins?.LocalNotifications) {
             window.Capacitor.Plugins.LocalNotifications.schedule({
-              notifications: [{ id: Math.floor(Math.random() * 9000) + 1000, title, body, schedule: { at: new Date(Date.now() + 300) } }]
+              notifications: [{ id: Math.floor(Math.random() * 8000) + 1000, title, body, schedule: { at: new Date(Date.now() + 200) }, sound: 'default' }]
             });
           }
           if (window.webkit?.messageHandlers?.localNotifications) {
@@ -1880,7 +1927,7 @@
     }
 
     // =========================================================================
-    // CALCUL DE LA SÉRIE (STREAK), SONNERIES & ANIMATION CONFETTIS DE BADGE
+    // CALCUL DE LA SÉRIE (STREAK), SONNERIE WAV EN ARRIÈRE-PLAN & CONFETTIS
     // =========================================================================
     function isDateAllGoalsCompleted(dateKey) {
       if (!state.goals.length) return false;
@@ -1964,6 +2011,93 @@
     }
 
     let audioCtx = null;
+    let cachedAlarmWavUrl = null;
+    let cachedSilentGuardWavUrl = null;
+
+    // Génère un fichier WAV de sonnerie mélodique (peut être joué par <audio> même quand l'appli est en arrière-plan sur iPad/iPhone)
+    function getAlarmRingtoneWavUrl() {
+      if (cachedAlarmWavUrl) return cachedAlarmWavUrl;
+      const sampleRate = 22050;
+      const durationSec = 4.2;
+      const totalSamples = Math.floor(sampleRate * durationSec);
+      const buf = new ArrayBuffer(44 + totalSamples * 2);
+      const view = new DataView(buf);
+      const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+
+      writeStr(0, 'RIFF');
+      view.setUint32(4, 36 + totalSamples * 2, true);
+      writeStr(8, 'WAVE');
+      writeStr(12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeStr(36, 'data');
+      view.setUint32(40, totalSamples * 2, true);
+
+      const pcm = new Int16Array(buf, 44, totalSamples);
+      const notes = [
+        { freq: 587.33, start: 0.00, dur: 0.28 },
+        { freq: 783.99, start: 0.22, dur: 0.28 },
+        { freq: 880.00, start: 0.44, dur: 0.30 },
+        { freq: 1174.66, start: 0.68, dur: 0.75 },
+        { freq: 587.33, start: 1.75, dur: 0.28 },
+        { freq: 783.99, start: 1.97, dur: 0.28 },
+        { freq: 880.00, start: 2.19, dur: 0.30 },
+        { freq: 1174.66, start: 2.43, dur: 1.15 }
+      ];
+
+      const twoPi = 2 * Math.PI;
+      notes.forEach(n => {
+        const sIdx = Math.floor(n.start * sampleRate);
+        const eIdx = Math.min(totalSamples, Math.floor((n.start + n.dur) * sampleRate));
+        for (let i = sIdx; i < eIdx; i++) {
+          const localT = (i - sIdx) / sampleRate;
+          const env = Math.min(1, localT / 0.015) * Math.exp(-localT * 3.8);
+          const tone = Math.sin(twoPi * n.freq * localT) + 0.3 * Math.sin(twoPi * n.freq * 2 * localT);
+          const val = Math.round(tone * env * 14500);
+          pcm[i] = Math.max(-32000, Math.min(32000, pcm[i] + val));
+        }
+      });
+
+      cachedAlarmWavUrl = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+      return cachedAlarmWavUrl;
+    }
+
+    // Génère une piste WAV quasi-silencieuse qui maintient le thread JavaScript et le chrono éveillés en arrière-plan sur iOS/iPadOS/Android
+    function getSilentGuardWavUrl() {
+      if (cachedSilentGuardWavUrl) return cachedSilentGuardWavUrl;
+      const sampleRate = 8000;
+      const totalSamples = sampleRate * 10; // boucle de 10s
+      const buf = new ArrayBuffer(44 + totalSamples * 2);
+      const view = new DataView(buf);
+      const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+
+      writeStr(0, 'RIFF');
+      view.setUint32(4, 36 + totalSamples * 2, true);
+      writeStr(8, 'WAVE');
+      writeStr(12, 'fmt ');
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeStr(36, 'data');
+      view.setUint32(40, totalSamples * 2, true);
+
+      const pcm = new Int16Array(buf, 44, totalSamples);
+      for (let i = 0; i < totalSamples; i++) {
+        pcm[i] = (i % 2 === 0) ? 1 : -1; // Signal imperceptible non-nul pour empêcher la mise en veille OS
+      }
+      cachedSilentGuardWavUrl = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+      return cachedSilentGuardWavUrl;
+    }
+
     function playCelebrationChime() {
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1986,8 +2120,18 @@
       } catch {}
     }
 
-    // Sonnerie claire et agréable quand le compte à rebours atteint 00:00:00
+    // Joue la sonnerie de fin via l'élément <audio> (fonctionne même en arrière-plan) + fallback WebAudio
     function playTimerEndRingtone() {
+      try {
+        const alarmEl = $('alarmRingAudio');
+        if (alarmEl) {
+          alarmEl.src = getAlarmRingtoneWavUrl();
+          alarmEl.volume = 1.0;
+          alarmEl.currentTime = 0;
+          alarmEl.play().catch(() => {});
+        }
+      } catch {}
+
       try {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -1995,9 +2139,7 @@
           { freq: 587.33, delay: 0.00, dur: 0.22 },
           { freq: 783.99, delay: 0.18, dur: 0.22 },
           { freq: 880.00, delay: 0.36, dur: 0.25 },
-          { freq: 1174.66, delay: 0.56, dur: 0.55 },
-          { freq: 880.00, delay: 1.25, dur: 0.22 },
-          { freq: 1174.66, delay: 1.45, dur: 0.70 }
+          { freq: 1174.66, delay: 0.56, dur: 0.55 }
         ];
         pattern.forEach(n => {
           const osc = audioCtx.createOscillator();
@@ -2006,7 +2148,7 @@
           osc.frequency.value = n.freq;
           const start = audioCtx.currentTime + n.delay;
           gain.gain.setValueAtTime(0.001, start);
-          gain.gain.linearRampToValueAtTime(0.24, start + 0.025);
+          gain.gain.linearRampToValueAtTime(0.20, start + 0.025);
           gain.gain.exponentialRampToValueAtTime(0.0001, start + n.dur);
           osc.connect(gain);
           gain.connect(audioCtx.destination);
@@ -2014,7 +2156,7 @@
           osc.stop(start + n.dur + 0.02);
         });
         if (navigator.vibrate) {
-          navigator.vibrate([200, 100, 200, 100, 350]);
+          navigator.vibrate([250, 120, 250, 120, 400]);
         }
       } catch {}
     }
@@ -2041,7 +2183,7 @@
     }
 
     // =========================================================================
-    // MOTEUR AUDIO CONTINU 15 MIN SANS COUPURE (AVEC VRAIE PLUIE DOUCE FEUTRÉE)
+    // MOTEUR AUDIO CONTINU 15 MIN : VRAIE PLUIE AVEC GOUTTELETTES D'EAU COMME LA VIDÉO
     // =========================================================================
     let activeAudioType = null;
     let noiseVolume = 0.35;
@@ -2103,53 +2245,82 @@
         const rawLen = baseLen + fadeLen;
         const raw = new Float32Array(rawLen);
 
-        let b0 = 0, b1 = 0, b2 = 0, lastBrown = 0;
-        let lp1 = 0, lp2 = 0, lp3 = 0, lp4 = 0;
+        let lastBrown = 0, lp1 = 0, lp2 = 0;
 
-        // Préchauffage de 1 seconde pour stabiliser tous les filtres
-        for (let w = 0; w < sampleRate; w++) {
-          const r = Math.random() * 2 - 1;
-          lastBrown = (lastBrown + 0.02 * r) / 1.02;
-          b0 = 0.997 * b0 + r * 0.03;
-          b1 = 0.985 * b1 + r * 0.06;
-          b2 = 0.940 * b2 + r * 0.12;
-          const warmRain = (b0 + b1 + b2) * 0.35 + lastBrown * 0.55;
-          lp1 += 0.065 * (warmRain - lp1);
-          lp2 += 0.065 * (lp1 - lp2);
-          lp3 += 0.065 * (lp2 - lp3);
-          lp4 += 0.065 * (lp3 - lp4);
-        }
+        if (type === 'pink') {
+          // =========================================================================
+          // SYNTHÈSE ACOUSTIQUE DE PLUIE NATURELLE (COMME SUR TA VIDÉO) :
+          // 1) Fond d'averse doux et feutré (sans souffle radio agressif)
+          // 2) + Des milliers de gouttelettes d'eau individuelles qui crépitent sur les feuilles et le sol
+          // =========================================================================
+          let rainBedLp1 = 0, rainBedLp2 = 0, rainBedHp = 0;
+          for (let i = 0; i < rawLen; i++) {
+            const w = Math.random() * 2 - 1;
+            lastBrown = (lastBrown + 0.025 * w) / 1.025;
+            rainBedLp1 += 0.14 * (lastBrown - rainBedLp1);
+            rainBedLp2 += 0.22 * (w * 0.18 - rainBedLp2);
+            rainBedHp += 0.03 * (rainBedLp2 - rainBedHp);
+            const softShowerBed = rainBedLp1 * 0.45 + (rainBedLp2 - rainBedHp) * 0.35;
+            raw[i] = softShowerBed;
+          }
 
-        const twoPi = 2 * Math.PI;
-        for (let i = 0; i < rawLen; i++) {
-          const w = Math.random() * 2 - 1;
-          if (type === 'pink') {
-            // PLUIE DOUCE ULTRA FEUTRÉE : Quadruple filtre passe-bas en cascade (coupe 100% des aigus agressifs) + respiration naturelle d'averse
-            b0 = 0.997 * b0 + w * 0.03;
-            b1 = 0.985 * b1 + w * 0.06;
-            b2 = 0.940 * b2 + w * 0.12;
-            lastBrown = (lastBrown + 0.02 * w) / 1.02;
-            const warmRain = (b0 + b1 + b2) * 0.32 + lastBrown * 0.58;
+          // Superposition de ~7500 gouttes d'eau organiques sur la boucle de 34s (~220 gouttes/seconde)
+          const numDroplets = 7600;
+          const twoPi = 2 * Math.PI;
+          for (let d = 0; d < numDroplets; d++) {
+            const startIdx = Math.floor(Math.random() * (rawLen - 450));
+            const isCloseDrop = Math.random() < 0.28; // Goutte proche (patter d'eau) vs goutte sur feuille
+            const dropDurSamples = isCloseDrop
+              ? (85 + Math.floor(Math.random() * 130))  // 5 à 13 ms
+              : (35 + Math.floor(Math.random() * 65));  // 2 à 6 ms
 
-            lp1 += 0.065 * (warmRain - lp1);
-            lp2 += 0.065 * (lp1 - lp2);
-            lp3 += 0.065 * (lp2 - lp3);
-            lp4 += 0.065 * (lp3 - lp4);
+            // Fréquence de résonance d'une vraie goutte d'eau (900 Hz à 2750 Hz, avec léger chirp montant)
+            const baseFreq = isCloseDrop
+              ? (850 + Math.random() * 1150)
+              : (1350 + Math.random() * 1450);
+            const amp = isCloseDrop
+              ? (0.045 + Math.random() * 0.075)
+              : (0.020 + Math.random() * 0.045);
 
-            // Légère ondulation périodique sur 30s pour un effet de pluie vivante très douce
-            const tSec = i / sampleRate;
-            const gentleWave = 0.90 + 0.10 * Math.sin((twoPi * tSec) / 15.0);
-            raw[i] = lp4 * 1.15 * gentleWave;
-          } else if (type === 'brown') {
-            lastBrown = (lastBrown + 0.02 * w) / 1.02;
-            lp1 += 0.12 * (lastBrown * 1.55 - lp1);
-            lp2 += 0.12 * (lp1 - lp2);
-            raw[i] = lp2;
-          } else {
-            // Bruit blanc adouci (sans sifflement métallique)
-            lp1 += 0.25 * (w * 0.26 - lp1);
-            lp2 += 0.25 * (lp1 - lp2);
-            raw[i] = lp2;
+            let dropLp = 0;
+            for (let k = 0; k < dropDurSamples; k++) {
+              const tNorm = k / dropDurSamples;
+              const tSec = k / sampleRate;
+              // Enveloppe percussive douce (attaque 15%, déclin exponentiel naturel)
+              const env = Math.sin(Math.min(1, tNorm * 5.5) * (Math.PI * 0.5)) * Math.exp(-tNorm * 4.4);
+              // Chirp caractéristique d'une goutte d'eau + micro-impact boisé/feuille
+              const instFreq = baseFreq * (1 + 0.28 * tNorm);
+              const waterResonance = Math.sin(twoPi * instFreq * tSec) * 0.62;
+              const leafPatter = (Math.random() * 2 - 1) * 0.38;
+              dropLp += 0.36 * ((waterResonance + leafPatter) * env * amp - dropLp);
+              raw[startIdx + k] += dropLp;
+            }
+          }
+
+          // Léger filtre de cohésion acoustique final pour un rendu 100% naturel
+          let finalLp = 0;
+          for (let i = 0; i < rawLen; i++) {
+            finalLp += 0.48 * (raw[i] - finalLp);
+            raw[i] = finalLp;
+          }
+        } else {
+          // Bruit Brun & Bruit Blanc Doux
+          for (let w = 0; w < sampleRate; w++) {
+            const r = Math.random() * 2 - 1;
+            lastBrown = (lastBrown + 0.02 * r) / 1.02;
+          }
+          for (let i = 0; i < rawLen; i++) {
+            const w = Math.random() * 2 - 1;
+            if (type === 'brown') {
+              lastBrown = (lastBrown + 0.02 * w) / 1.02;
+              lp1 += 0.12 * (lastBrown * 1.55 - lp1);
+              lp2 += 0.12 * (lp1 - lp2);
+              raw[i] = lp2;
+            } else {
+              lp1 += 0.25 * (w * 0.26 - lp1);
+              lp2 += 0.25 * (lp1 - lp2);
+              raw[i] = lp2;
+            }
           }
         }
 
@@ -2184,7 +2355,7 @@
           player.load();
         } catch {}
       }
-      if ('mediaSession' in navigator) {
+      if ('mediaSession' in navigator && !timerRunning) {
         try { navigator.mediaSession.playbackState = 'none'; } catch {}
       }
     }
@@ -2211,7 +2382,7 @@
         if ('mediaSession' in navigator) {
           const labels = {
             brown: 'Bruit Brun (Profond)',
-            pink: 'Pluie Douce (Apaisant)',
+            pink: 'Pluie Naturelle (Gouttes Douces)',
             white: 'Bruit Blanc Doux',
             binaural: 'Ondes Binaurales 6 Hz'
           };
@@ -2358,13 +2529,18 @@
       }).join('');
     }
 
-    // Graphique calibré au pixel près : la hauteur des barres et la ligne d'objectif partagent exactement 100% de la zone de tracé
+    // =========================================================================
+    // GRAPHIQUES CALIBRÉS EN PIXELS STRICTS (PLUS JAMAIS DE DÉCALAGE CSS FLEX)
+    // =========================================================================
     function renderCalibratedCharts(weekDates, maxScaleMin, isMain) {
       if (!isMain) {
+        const miniMaxPx = 112;
         $('miniBarChart').innerHTML = weekDates.map((dateObj, idx) => {
           const dKey = toDateKey(dateObj);
           const totalMin = getDateTotalMinutes(dKey);
-          const heightPct = totalMin > 0 ? Math.min(100, Math.max(8, Math.round((totalMin / maxScaleMin) * 100))) : 4;
+          const barPx = totalMin > 0
+            ? Math.min(miniMaxPx, Math.max(8, Math.round((totalMin / maxScaleMin) * miniMaxPx)))
+            : 4;
           const hoursFormatted = (totalMin / 60).toFixed(1).replace('.0', '') + 'h';
           const isSel = idx === selectedDayIndex;
           const breakdown = getDateSubjectBreakdown(dKey);
@@ -2372,10 +2548,10 @@
             ? Object.entries(breakdown).map(([subj, min]) => `<div style="height:${(min / totalMin) * 100}%;background-color:${esc(getSubjectColor(subj))};" class="w-full bar-segment" title="${esc(subj)}: ${formatMinutes(min)}"></div>`).join('')
             : `<div class="w-full h-full" style="background-color:var(--bg-input);"></div>`;
 
-          return `<div onclick="selectDay(${idx}); statsWeekOffset=0; switchTab('stats');" class="flex-1 flex flex-col items-center h-full justify-end cursor-pointer group">
+          return `<div onclick="selectDay(${idx}); statsWeekOffset=0; switchTab('stats');" class="flex-1 flex flex-col items-center justify-end cursor-pointer group">
             <span class="text-[10px] mb-1 font-mono-timer opacity-80 group-hover:opacity-100 transition">${totalMin > 0 ? hoursFormatted : ''}</span>
             <div class="w-full h-[112px] flex items-end justify-center">
-              <div class="w-full max-w-[28px] rounded-t-lg overflow-hidden flex flex-col-reverse transition-all duration-300 group-hover:brightness-110" style="height:${heightPct}%; ${isSel ? 'outline:2px solid var(--btn-bg);' : ''}">${segments}</div>
+              <div class="w-full max-w-[28px] rounded-t-lg overflow-hidden flex flex-col-reverse transition-all duration-300 group-hover:brightness-110" style="height:${barPx}px; ${isSel ? 'outline:2px solid var(--btn-bg);' : ''}">${segments}</div>
             </div>
             <span class="text-[11px] mt-2 ${isSel ? 'underline' : ''} font-bold transition" style="${!isSel ? 'color:var(--text-muted);' : ''}">${DAYS_SHORT[idx]}</span>
           </div>`;
@@ -2383,11 +2559,14 @@
         return;
       }
 
-      // Graphique principal du Bilan : les barres occupent exactement la boîte relative de 180px où se trouve #goalLine
+      // Graphique principal du Bilan : hauteur de référence mathématique stricte = 180px
+      const plotHeightPx = 180;
       $('mainBarChart').innerHTML = weekDates.map((dateObj, idx) => {
         const dKey = toDateKey(dateObj);
         const totalMin = getDateTotalMinutes(dKey);
-        const heightPct = totalMin > 0 ? Math.min(100, Math.max(4, (totalMin / maxScaleMin) * 100)) : 2;
+        const barPx = totalMin > 0
+          ? Math.min(plotHeightPx, Math.max(6, Math.round((totalMin / maxScaleMin) * plotHeightPx)))
+          : 4;
         const hoursFormatted = (totalMin / 60).toFixed(1).replace('.0', '') + 'h';
         const isSel = idx === selectedDayIndex;
         const breakdown = getDateSubjectBreakdown(dKey);
@@ -2395,9 +2574,9 @@
           ? Object.entries(breakdown).map(([subj, min]) => `<div style="height:${(min / totalMin) * 100}%;background-color:${esc(getSubjectColor(subj))};" class="w-full bar-segment" title="${esc(subj)}: ${formatMinutes(min)}"></div>`).join('')
           : `<div class="w-full h-full opacity-25" style="background-color:var(--bg-input);"></div>`;
 
-        return `<div onclick="selectDay(${idx})" class="flex-1 h-full flex flex-col items-center justify-end cursor-pointer group relative">
-          <div class="w-full max-w-[52px] rounded-t-xl overflow-hidden flex flex-col-reverse transition-all duration-300 group-hover:brightness-110 relative" style="height:${heightPct}%; ${isSel ? 'outline:2px solid var(--btn-bg);' : ''}">${segments}</div>
-          <span class="absolute text-xs font-bold font-mono-timer opacity-90 group-hover:opacity-100 transition pointer-events-none" style="bottom: calc(${heightPct}% + 4px);">${totalMin > 0 ? hoursFormatted : '0h'}</span>
+        return `<div onclick="selectDay(${idx})" class="flex-1 h-[180px] flex flex-col items-center justify-end cursor-pointer group relative">
+          <div class="w-full max-w-[52px] rounded-t-xl overflow-hidden flex flex-col-reverse transition-all duration-300 group-hover:brightness-110 relative" style="height:${barPx}px; ${isSel ? 'outline:2px solid var(--btn-bg);' : ''}">${segments}</div>
+          <span class="absolute text-xs font-bold font-mono-timer opacity-95 group-hover:opacity-100 transition pointer-events-none z-30" style="bottom: ${barPx + 5}px;">${totalMin > 0 ? hoursFormatted : '0h'}</span>
         </div>`;
       }).join('');
 
@@ -2789,13 +2968,14 @@
 
       $('mainChartLegend').innerHTML = state.subjects.map(s => `<span class="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-lg border" style="background-color:var(--bg-main);border-color:var(--border-color);"><span class="w-3 h-3 rounded-full" style="background-color:${esc(s.color)};"></span><span>${esc(s.name)}</span></span>`).join('');
 
-      // Échelle exacte commune aux barres et à la ligne d'objectif
+      // Échelle exacte en pixels (180px) commune aux barres et à la ligne d'objectif
+      const plotHeightPx = 180;
       const goalMin = state.dailyGoalHours * 60;
       const highestDayMin = Math.max(...dailyTotals, 0);
-      const maxScaleMin = Math.max(Math.round(goalMin * 1.15), Math.round(highestDayMin * 1.12), 120);
-      const goalLineBottomPct = (goalMin / maxScaleMin) * 100;
+      const maxScaleMin = Math.max(Math.round(goalMin * 1.18), Math.round(highestDayMin * 1.15), 120);
+      const goalLineBottomPx = Math.min(plotHeightPx - 4, Math.max(8, Math.round((goalMin / maxScaleMin) * plotHeightPx)));
 
-      $('goalLine').style.bottom = `${goalLineBottomPct}%`;
+      $('goalLine').style.bottom = `${goalLineBottomPx}px`;
       renderCalibratedCharts(weekDates, maxScaleMin, true);
 
       renderWeeklyGoalsTable(weekDates, weekDateKeys);
@@ -2996,12 +3176,65 @@
     }
 
     // =========================================================================
-    // CHRONO HAUTE PRÉCISION AVEC FIN DE COMPTE À REBOURS AUTOMATIQUE + ALERTE
+    // CHRONO HAUTE PRÉCISION + WEB WORKER + GARDE-TEMPS AUDIO D'ARRIÈRE-PLAN
     // =========================================================================
     let timerInterval = null, timerRunning = false, timerMode = 'countup';
     let elapsedSeconds = 0, countdownTargetSeconds = 3600;
     let timerAnchorTimestamp = null, timerBaseElapsed = 0, wakeLockSentinel = null;
     const wheelOffsets = { h: 0, m: 0, s: 0 };
+    let timerBgWorker = null;
+
+    function initBackgroundTimerWorker() {
+      if (timerBgWorker) return;
+      try {
+        const workerCode = `
+          let id = null;
+          self.onmessage = function(e) {
+            if (e.data === 'start') {
+              if (id) clearInterval(id);
+              id = setInterval(() => self.postMessage('tick'), 500);
+            } else if (e.data === 'stop') {
+              if (id) clearInterval(id);
+              id = null;
+            }
+          };
+        `;
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        timerBgWorker = new Worker(URL.createObjectURL(blob));
+        timerBgWorker.onmessage = () => {
+          if (timerRunning) syncTimerWithRealClock();
+        };
+      } catch {}
+    }
+
+    // Démarre ou arrête le garde-temps audio silencieux qui empêche iOS/iPadOS/Android de suspendre le chrono en arrière-plan
+    function setSilentTimerGuardActive(enable) {
+      const guard = $('timerGuardAudio');
+      if (!guard) return;
+      if (enable) {
+        try {
+          if (navigator.audioSession) navigator.audioSession.type = 'playback';
+        } catch {}
+        if (!guard.src) guard.src = getSilentGuardWavUrl();
+        guard.loop = true;
+        guard.volume = 0.01;
+        guard.ontimeupdate = () => {
+          if (timerRunning) syncTimerWithRealClock();
+        };
+        guard.play().catch(() => {});
+        // Pré-charge aussi le lecteur d'alarme pendant le geste utilisateur pour autoriser la sonnerie en arrière-plan
+        const alarmEl = $('alarmRingAudio');
+        if (alarmEl && !alarmEl.src) {
+          alarmEl.src = getAlarmRingtoneWavUrl();
+          alarmEl.load();
+        }
+      } else {
+        try {
+          guard.ontimeupdate = null;
+          guard.pause();
+        } catch {}
+      }
+    }
 
     function saveTimerPersistence() {
       try {
@@ -3062,6 +3295,8 @@
           }
           $('timerSaveBtn')?.classList.remove('hidden');
           requestWakeLock(true);
+          initBackgroundTimerWorker();
+          timerBgWorker?.postMessage('start');
           if (timerInterval) clearInterval(timerInterval);
           timerInterval = setInterval(syncTimerWithRealClock, 500);
           updateFlipClockDisplay();
@@ -3120,6 +3355,7 @@
       timerMode = mode === 'countdown' ? 'countdown' : 'countup';
       elapsedSeconds = 0; timerBaseElapsed = 0;
       localStorage.removeItem(TIMER_STORAGE_KEY);
+      TaskReminderEngine.cancelScheduledCountdownOSNotification();
       $('seg-countdown').classList.toggle('active', timerMode === 'countdown');
       $('seg-countup').classList.toggle('active', timerMode === 'countup');
       ['h', 'm', 's'].forEach(u => $(`wheel-${u}`)?.classList.toggle('wheel-interactive', timerMode === 'countdown'));
@@ -3181,6 +3417,8 @@
         elapsedSeconds = countdownTargetSeconds;
         timerRunning = false;
         clearInterval(timerInterval);
+        timerBgWorker?.postMessage('stop');
+        setSilentTimerGuardActive(false);
         updateFlipClockDisplay();
         finishAndSaveSession(true);
         return;
@@ -3191,7 +3429,6 @@
     function toggleTimer() {
       const startBtn = $('timerStartBtn');
       if (!timerRunning) {
-        // Débloque l'AudioContext au clic pour garantir que la sonnerie de fin puisse retentir
         try {
           if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -3203,6 +3440,16 @@
         startBtn.classList.add('is-running');
         $('timerSaveBtn').classList.remove('hidden');
         requestWakeLock(true);
+        setSilentTimerGuardActive(true);
+        initBackgroundTimerWorker();
+        timerBgWorker?.postMessage('start');
+
+        if (timerMode === 'countdown') {
+          const remSec = Math.max(1, countdownTargetSeconds - elapsedSeconds);
+          const plannedDur = formatMinutes(Math.max(1, Math.round(countdownTargetSeconds / 60)));
+          TaskReminderEngine.scheduleFutureCountdownOSNotification(remSec, currentTimerSubject, plannedDur);
+        }
+
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(syncTimerWithRealClock, 500);
         saveTimerPersistence();
@@ -3212,6 +3459,9 @@
         timerRunning = false;
         timerAnchorTimestamp = null;
         clearInterval(timerInterval);
+        timerBgWorker?.postMessage('stop');
+        setSilentTimerGuardActive(false);
+        TaskReminderEngine.cancelScheduledCountdownOSNotification();
         requestWakeLock(false);
         startBtn.textContent = 'Reprendre';
         startBtn.classList.remove('is-running');
@@ -3222,6 +3472,9 @@
     function resetTimer() {
       timerRunning = false; timerAnchorTimestamp = null; timerBaseElapsed = 0; elapsedSeconds = 0;
       clearInterval(timerInterval);
+      timerBgWorker?.postMessage('stop');
+      setSilentTimerGuardActive(false);
+      TaskReminderEngine.cancelScheduledCountdownOSNotification();
       localStorage.removeItem(TIMER_STORAGE_KEY);
       requestWakeLock(false);
       const startBtn = $('timerStartBtn');
@@ -3451,11 +3704,11 @@
     }
 
     // =========================================================================
-    // VISITE GUIDÉE SPOTLIGHT (10 ÉTAPES, THÈMES D'INTERFACE & NOTIF À LA FIN)
+    // VISITE GUIDÉE SPOTLIGHT (11 ÉTAPES : THÈMES + LIAISON 2 APPAREILS + NOTIF FINALE)
     // =========================================================================
     const OnboardingWizard = {
       step: 1,
-      totalSteps: 10,
+      totalSteps: 11,
       isOpen: false,
 
       stepsConfig: [
@@ -3487,13 +3740,13 @@
           tab: 'timer',
           targetId: 'timerModeSegmented',
           title: '⏳ Compte à rebours intelligent',
-          desc: "Choisis entre « Compter jusqu'à » ou « Compte à rebours » (glisse sur les molettes à droite des chiffres). Quand le compte à rebours atteint zéro, une sonnerie retentit et ta session est enregistrée automatiquement !"
+          desc: "Choisis entre « Compter jusqu'à » ou « Compte à rebours » (glisse sur les molettes à droite des chiffres). Quand il atteint zéro, une sonnerie retentit et ta session s'enregistre automatiquement, même en arrière-plan !"
         },
         {
           tab: 'timer',
           targetId: 'timerAudioPanel',
-          title: '🌧️ Pluie Douce & Bruits en arrière-plan',
-          desc: "Active la Pluie Douce apaisante, le Bruit Brun ou les Ondes Binaurales 6 Hz. Le son est continu sans coupure et continue même si tu changes d'appli."
+          title: '🌧️ Pluie Naturelle & Bruits en arrière-plan',
+          desc: "Active la Pluie Naturelle (avec de vraies gouttes d'eau apaisantes), le Bruit Brun ou les Ondes Binaurales 6 Hz. Le son continue sans coupure même si tu changes d'application."
         },
         {
           tab: 'stats',
@@ -3510,14 +3763,20 @@
         {
           tab: 'settings',
           targetId: 'settingsThemesCard',
-          title: '🎨 Personnaliser les couleurs de l’interface',
-          desc: "Tu peux changer à tout moment le thème complet de FocusPASS : Noir Pur OLED, Gris Sombre, Rouge Sombre, Mode Clair ou Vert Clair !"
+          title: '🎨 Modifier les couleurs de l’interface',
+          desc: "Personnalise l'apparence complète de FocusPASS : Noir Pur OLED, Gris Sombre, Rouge Sombre, Mode Clair ou Vert Clair !"
+        },
+        {
+          tab: 'settings',
+          targetId: 'settingsSyncCard',
+          title: '☁️ Lier deux appareils (Téléphone & Tablette)',
+          desc: "Pour synchroniser tes données en direct entre ton téléphone et ta tablette, entre simplement ce même Code Synchro sur tes deux appareils puis clique sur « Lier » !"
         },
         {
           tab: 'settings',
           targetId: 'settingsReminderCard',
-          title: '🔔 Rappel du soir & Fin de Chrono',
-          desc: "Dernière étape ! Autorise les notifications ci-dessous pour recevoir une alerte quand ton compte à rebours se termine et un rappel à 18h00 avec tes tâches et objectifs non atteints.",
+          title: '🔔 Rappel du soir & Alerte de fin de Chrono',
+          desc: "Dernière étape ! Autorise les notifications ci-dessous pour recevoir une alerte quand ton compte à rebours est terminé et un rappel à 18h00 avec tes tâches et objectifs non atteints.",
           showNotifButton: true
         }
       ],
@@ -3543,7 +3802,6 @@
         $('onboardingModal')?.classList.add('hidden');
         switchTab('dashboard');
         showToast("Visite terminée ! Bon courage pour tes révisions 🚀", '🎓');
-        // Si l'utilisateur n'a pas encore autorisé les notifications pendant la dernière étape, on affiche la bannière
         setTimeout(() => TaskReminderEngine.checkStartupNotificationPrompt(), 600);
       },
 
