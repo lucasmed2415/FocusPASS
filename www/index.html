@@ -299,6 +299,9 @@
     #flipClockContainer:fullscreen #timerSubjectPickerWrap,
     #flipClockContainer:-webkit-full-screen #timerSubjectPickerWrap,
     #flipClockContainer.is-fullscreen #timerSubjectPickerWrap,
+    #flipClockContainer:fullscreen #countdownPresetsRow,
+    #flipClockContainer:-webkit-full-screen #countdownPresetsRow,
+    #flipClockContainer.is-fullscreen #countdownPresetsRow,
     #flipClockContainer:fullscreen #timerAudioPanel,
     #flipClockContainer:-webkit-full-screen #timerAudioPanel,
     #flipClockContainer.is-fullscreen #timerAudioPanel,
@@ -595,6 +598,15 @@
             <div id="customSubjectDropdownMenu" class="hidden absolute left-1/2 -translate-x-1/2 mt-2 w-56 bg-zinc-950/95 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl py-1.5 overflow-hidden"></div>
           </div>
 
+          <!-- Préréglages rapides pour le mode Compte à rebours -->
+          <div id="countdownPresetsRow" class="hidden flex-wrap items-center justify-center gap-1.5 mb-5 z-20">
+            <button type="button" onclick="setCountdownPreset(25)" class="px-3 py-1 rounded-full text-[11px] font-mono-timer font-bold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 transition">25m</button>
+            <button type="button" onclick="setCountdownPreset(45)" class="px-3 py-1 rounded-full text-[11px] font-mono-timer font-bold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 transition">45m</button>
+            <button type="button" onclick="setCountdownPreset(60)" class="px-3 py-1 rounded-full text-[11px] font-mono-timer font-bold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 transition">1h00</button>
+            <button type="button" onclick="setCountdownPreset(90)" class="px-3 py-1 rounded-full text-[11px] font-mono-timer font-bold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 transition">1h30</button>
+            <button type="button" onclick="setCountdownPreset(120)" class="px-3 py-1 rounded-full text-[11px] font-mono-timer font-bold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 transition">2h00</button>
+          </div>
+
           <div class="grid grid-cols-3 gap-3 sm:gap-6 w-full max-w-4xl mx-auto px-1 sm:px-4">
             <div class="flex flex-col items-center">
               <div class="flip-card w-full aspect-[1/1.05] flex items-center justify-center relative overflow-hidden">
@@ -635,7 +647,7 @@
               <span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Bruit Brun (Profond)</span>
             </button>
             <button type="button" onclick="toggleAudioSource('pink')" id="noise-btn-pink" class="noise-pill">
-              <span class="w-2 h-2 rounded-full bg-sky-400"></span><span>Pluie Naturelle (Gouttes Douces)</span>
+              <span class="w-2 h-2 rounded-full bg-sky-400"></span><span>Pluie Douce</span>
             </button>
             <button type="button" onclick="toggleAudioSource('white')" id="noise-btn-white" class="noise-pill">
               <span class="w-2 h-2 rounded-full bg-zinc-300"></span><span>Bruit Blanc Doux</span>
@@ -741,8 +753,9 @@
         <!-- Zone de tracé calibrée au pixel : Hauteur de référence stricte = 180px -->
         <div class="pt-6 px-2 sm:px-6">
           <div class="relative h-[180px] border-b" style="border-color: var(--border-color);">
-            <div id="goalLine" class="absolute left-0 right-0 border-t-2 border-dashed border-amber-400/90 z-20 pointer-events-none flex justify-end pr-1 transition-all duration-300" style="bottom: 90px;">
-              <span id="goalLineBadgeText" class="text-[10px] font-extrabold bg-amber-400 text-black px-1.5 py-0.5 rounded -mt-2.5 shadow">Objectif</span>
+            <!-- Ligne d'objectif de hauteur 0px (h-0) pour que la bordure pointillée repose pile sur le sommet de la barre -->
+            <div id="goalLine" class="absolute left-0 right-0 h-0 border-t-2 border-dashed border-amber-400/90 z-20 pointer-events-none transition-all duration-300" style="bottom: 90px; transform: translateY(1px);">
+              <span id="goalLineBadgeText" class="absolute right-1 top-0 -translate-y-1/2 text-[10px] font-extrabold bg-amber-400 text-black px-1.5 py-0.5 rounded shadow">Objectif</span>
             </div>
             <div id="mainBarChart" class="h-[180px] flex items-end justify-between gap-2 sm:gap-6 relative z-10"></div>
           </div>
@@ -928,8 +941,9 @@
               <span class="text-xs font-bold block">Identifiant de synchronisation Cloud</span>
               <span class="text-[11px]" style="color: var(--text-muted);">Entre ce même code sur ta tablette et ton téléphone puis clique sur « Lier »</span>
             </div>
-            <div class="flex items-center gap-2">
-              <input type="text" id="syncKeyInput" maxlength="24" autocomplete="off" spellcheck="false" placeholder="Code Synchro" class="input-field px-3 py-1.5 rounded-xl text-xs font-mono-timer font-bold w-36 text-center uppercase" />
+            <div class="flex items-center gap-1.5">
+              <input type="text" id="syncKeyInput" maxlength="24" autocomplete="off" spellcheck="false" placeholder="Code Synchro" class="input-field px-3 py-1.5 rounded-xl text-xs font-mono-timer font-bold w-32 sm:w-36 text-center uppercase" />
+              <button type="button" onclick="copyCurrentSyncKey()" title="Copier mon code Cloud" class="px-2.5 py-1.5 rounded-xl text-xs font-bold border hover:opacity-85 transition" style="background-color: var(--bg-input); border-color: var(--border-color);">📋</button>
               <button type="button" onclick="applyCustomSyncKey()" class="theme-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold">Lier</button>
             </div>
           </div>
@@ -958,12 +972,15 @@
             <label for="reminderTimeInput" class="text-xs font-bold">Heure du rappel :</label>
             <input type="time" id="reminderTimeInput" value="18:00" onchange="TaskReminderEngine.updateTime(this.value)" class="input-field px-3 py-1.5 rounded-xl text-xs font-mono-timer font-bold" />
           </div>
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
             <button type="button" onclick="TaskReminderEngine.requestPermission(true)" id="notifPermBtn" class="px-3 py-1.5 rounded-xl text-xs font-bold border hover:opacity-85 transition" style="border-color: var(--border-color); background-color: var(--bg-input);">
               Autoriser les notifications
             </button>
             <button type="button" onclick="TaskReminderEngine.testNotificationNow()" class="theme-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold">
               Tester l'alerte
+            </button>
+            <button type="button" onclick="TaskReminderEngine.installNativeOSAlarmIcs()" class="px-3 py-1.5 rounded-xl text-xs font-extrabold border border-amber-400/50 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition" title="Installe une alarme système quotidienne native qui sonne même si l'application est totalement fermée">
+              📲 Alarme Système (Appli fermée)
             </button>
           </div>
         </div>
@@ -980,6 +997,26 @@
         <input type="range" id="goalRangeInput" min="1" max="14" step="0.5" value="7" oninput="updateDailyGoal(this.value)" class="w-full accent-current cursor-pointer" />
         <div class="flex justify-between text-[11px]" style="color: var(--text-muted);">
           <span>1h (Léger)</span><span>6h (Régulier)</span><span>10h (Intensif)</span><span>14h (Concours)</span>
+        </div>
+      </div>
+
+      <!-- SAUVEGARDE LOCALE & SÉCURITÉ DES DONNÉES (EXPORT / IMPORT JSON) -->
+      <div class="card rounded-2xl p-6 space-y-4">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <h3 class="font-extrabold text-lg tracking-tight">Sauvegarde locale & Sécurité</h3>
+            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Exporte une copie de secours de tes données (`.json`) ou restaure une sauvegarde existante.</p>
+          </div>
+          <span class="text-[11px] font-bold px-2.5 py-1 rounded-full border flex-shrink-0" style="background-color: var(--bg-main); border-color: var(--border-color);">🔒 Intégrité vérifiée</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2.5 pt-1">
+          <button type="button" onclick="exportBackupJson()" class="theme-btn-primary px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1.5">
+            <span>📥 Exporter (.json)</span>
+          </button>
+          <label class="px-4 py-2 rounded-xl text-xs font-extrabold border cursor-pointer hover:opacity-85 transition flex items-center gap-1.5" style="background-color: var(--bg-main); border-color: var(--border-color);">
+            <span>📤 Importer (.json)</span>
+            <input type="file" id="importBackupFileInput" accept=".json,application/json" onchange="importBackupJson(event)" class="hidden" />
+          </label>
         </div>
       </div>
 
@@ -1090,6 +1127,41 @@
           <button type="submit" class="theme-btn-primary px-5 py-2 rounded-xl text-sm font-bold">Enregistrer</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODALE DE SÉCURITÉ : CONFIRMATION AVANT DE LIER UN CODE CLOUD DÉJÀ UTILISÉ -->
+  <div id="confirmSyncLinkModal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4" onclick="CloudSyncEngine.cancelPendingLink()">
+    <div class="card rounded-2xl max-w-md w-full p-6 space-y-4 border-2 border-amber-400/80 shadow-2xl view-animate" onclick="event.stopPropagation()">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-400/15 border border-amber-400/40 flex items-center justify-center text-xl flex-shrink-0">⚠️</div>
+          <div>
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-400">Vérification de sécurité</span>
+            <h3 class="font-extrabold text-base leading-tight">Ce code est déjà utilisé</h3>
+          </div>
+        </div>
+        <button type="button" onclick="CloudSyncEngine.cancelPendingLink()" class="text-sm opacity-70 hover:opacity-100 p-1">✕</button>
+      </div>
+
+      <p class="text-xs leading-relaxed" style="color: var(--text-muted);">
+        Le code <strong id="pendingSyncKeyLabel" class="font-mono-timer text-amber-400">FP-XXXXXX</strong> est déjà associé à un profil existant. Pour éviter de te connecter au compte d'un autre utilisateur par erreur, vérifie qu'il s'agit bien du tien :
+      </p>
+
+      <div id="pendingSyncAccountPreview" class="p-3.5 rounded-xl border space-y-2 text-xs" style="background-color: var(--bg-main); border-color: var(--border-color);"></div>
+
+      <p class="text-[11px] leading-relaxed px-3 py-2 rounded-xl bg-amber-400/10 border border-amber-400/30 text-amber-300">
+        Souhaites-tu vraiment lier cet appareil à ce code ? Les données actuelles de cet écran seront synchronisées avec ce compte.
+      </p>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="CloudSyncEngine.cancelPendingLink()" class="px-4 py-2.5 rounded-xl text-xs font-bold border hover:opacity-85 transition" style="background-color: var(--bg-main); border-color: var(--border-color);">
+          Non, annuler
+        </button>
+        <button type="button" onclick="CloudSyncEngine.confirmPendingLink()" class="px-4 py-2.5 rounded-xl text-xs font-extrabold bg-amber-400 text-black hover:opacity-90 transition shadow-lg">
+          Oui, c'est mon compte
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1436,6 +1508,8 @@
       broadcastChannel: ('BroadcastChannel' in window) ? new BroadcastChannel('focuspass_sync_channel') : null,
       lastPushTime: 0,
       pollTimer: null,
+      pendingLinkKey: null,
+      pendingRemoteData: null,
 
       init() {
         if (this.broadcastChannel) {
@@ -1596,19 +1670,103 @@
       },
 
       async linkSyncKey(newKey) {
+        if (newKey === state.syncKey) {
+          showToast('Cet appareil est déjà lié à ce code Cloud', 'ℹ️');
+          await this.forceSyncNow();
+          return;
+        }
+
+        this.setStatusUI('Vérification...', true);
+
+        if (this.cloudEndpoint && newKey.length >= 4) {
+          try {
+            const resp = await SecurityGuard.safeCloudFetch(`${this.cloudEndpoint}/focuspass_users/${encodeURIComponent(newKey)}.json`, {
+              cache: 'no-store'
+            });
+            if (resp.ok) {
+              const rawText = await resp.text();
+              if (rawText && rawText !== 'null') {
+                const remote = SecurityGuard.safeJsonParse(rawText);
+                if (remote && Array.isArray(remote.subjects)) {
+                  // Ce code est déjà utilisé sur le Cloud : on demande confirmation à l'utilisateur
+                  this.pendingLinkKey = newKey;
+                  this.pendingRemoteData = remote;
+                  this.setStatusUI('Protégé & Synchro', false);
+                  this.openConfirmLinkModal(newKey, remote);
+                  return;
+                }
+              }
+            }
+          } catch {}
+        }
+
+        // Le code est libre : on le crée et on y sauvegarde les données actuelles
         this.setStatusUI('Liaison...', true);
         state.syncKey = newKey;
+        state.updatedAt = Date.now();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        await this.pushToCloud();
+        renderSettings();
+        showToast(`Nouveau code Cloud "${newKey}" créé et synchronisé`, '🔗');
+      },
 
-        const pulled = await this.pullFromCloud(false, true);
-        if (pulled) {
-          showToast(`Données du code "${newKey}" récupérées !`, '☁️');
+      openConfirmLinkModal(newKey, remote) {
+        $('pendingSyncKeyLabel').textContent = newKey;
+
+        const subjectsList = Array.isArray(remote.subjects)
+          ? remote.subjects.slice(0, 6).map(s => SecurityGuard.cleanText(s?.name, 30)).filter(Boolean).join(', ')
+          : 'Aucune';
+        const sessionsCount = Array.isArray(remote.sessions) ? remote.sessions.length : 0;
+        const tasksCount = Array.isArray(remote.tasks) ? remote.tasks.length : 0;
+        const lastUpdateStr = remote.updatedAt
+          ? new Date(Number(remote.updatedAt)).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+          : 'Inconnue';
+
+        $('pendingSyncAccountPreview').innerHTML = `
+          <div class="flex justify-between gap-2">
+            <span style="color: var(--text-muted);">Matières du compte :</span>
+            <span class="font-bold text-right">${esc(subjectsList || 'Anatomie')}</span>
+          </div>
+          <div class="flex justify-between gap-2">
+            <span style="color: var(--text-muted);">Historique enregistré :</span>
+            <span class="font-bold">${sessionsCount} session${sessionsCount > 1 ? 's' : ''} • ${tasksCount} tâche${tasksCount > 1 ? 's' : ''}</span>
+          </div>
+          <div class="flex justify-between gap-2">
+            <span style="color: var(--text-muted);">Dernière activité :</span>
+            <span class="font-mono-timer font-semibold">${esc(lastUpdateStr)}</span>
+          </div>
+        `;
+
+        $('confirmSyncLinkModal')?.classList.remove('hidden');
+      },
+
+      confirmPendingLink() {
+        const newKey = this.pendingLinkKey;
+        const remote = this.pendingRemoteData;
+        this.pendingLinkKey = null;
+        this.pendingRemoteData = null;
+        $('confirmSyncLinkModal')?.classList.add('hidden');
+
+        if (!newKey) return;
+        state.syncKey = newKey;
+        if (remote) {
+          this.applyRemoteState(remote, false);
         } else {
-          state.updatedAt = Date.now();
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-          await this.pushToCloud();
-          showToast(`Code Cloud "${newKey}" créé et synchronisé`, '🔗');
+          this.pullFromCloud(false, true);
         }
+        renderSettings();
+        showToast(`Appareil lié au compte "${newKey}" avec succès !`, '☁️');
+      },
+
+      cancelPendingLink() {
+        this.pendingLinkKey = null;
+        this.pendingRemoteData = null;
+        $('confirmSyncLinkModal')?.classList.add('hidden');
+        if ($('syncKeyInput')) {
+          $('syncKeyInput').value = state.syncKey || '';
+        }
+        showToast('Liaison annulée, ton code actuel a été conservé', '🛡️');
       },
 
       async forceSyncNow() {
@@ -1632,8 +1790,16 @@
       init() {
         this.updateSettingsUI();
         if (this.checkTimer) clearInterval(this.checkTimer);
-        this.checkTimer = setInterval(() => this.checkDueReminder(), 20000);
-        setTimeout(() => this.checkDueReminder(), 2500);
+        this.checkTimer = setInterval(() => this.checkDueReminder(), 10000);
+        initBackgroundTimerWorker();
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            this.checkDueReminder();
+          }
+        });
+
+        setTimeout(() => this.checkDueReminder(), 2000);
         if (!OnboardingWizard.shouldAutoStart()) {
           this.checkStartupNotificationPrompt();
         }
@@ -1764,7 +1930,57 @@
         this.fireNotification(remainingTasks, unmetGoals, true);
       },
 
-      // Planifie une notification native à l'avance (pour que l'OS la déclenche même si l'application est totalement fermée)
+      installNativeOSAlarmIcs() {
+        const target = SecurityGuard.isValidTime(state.reminderTime) ? state.reminderTime : '18:00';
+        const [hh, mm] = target.split(':');
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+
+        const remainingTasks = this.getRemainingTodayTasks();
+        const unmetGoals = this.getUnmetTodayGoals();
+        const taskNames = remainingTasks.slice(0, 4).map(t => t.title).join(', ') || 'Vérifier mes tâches du jour';
+        const goalNames = unmetGoals.slice(0, 4).map(g => g.title).join(', ') || 'Valider mes objectifs quotidiens';
+
+        const icsLines = [
+          'BEGIN:VCALENDAR',
+          'VERSION:2.0',
+          'PRODID:-//FocusPASS//Rappel Quotidien//FR',
+          'CALSCALE:GREGORIAN',
+          'BEGIN:VEVENT',
+          `UID:focuspass-daily-reminder-${y}${m}${d}@focuspass.app`,
+          `DTSTAMP:${y}${m}${d}T${hh}${mm}00`,
+          `DTSTART:${y}${m}${d}T${hh}${mm}00`,
+          `DTEND:${y}${m}${d}T${hh}${mm}00`,
+          'RRULE:FREQ=DAILY',
+          'SUMMARY:⏰ FocusPASS — Bilan Tâches & Objectifs du jour',
+          `DESCRIPTION:Pense à valider tes tâches (${taskNames}) et tes objectifs quotidiens (${goalNames}) sur FocusPASS !`,
+          'BEGIN:VALARM',
+          'TRIGGER:-PT0M',
+          'ACTION:AUDIO',
+          'END:VALARM',
+          'BEGIN:VALARM',
+          'TRIGGER:-PT0M',
+          'ACTION:DISPLAY',
+          'DESCRIPTION:⏰ FocusPASS — Il est temps de faire le point sur tes tâches et objectifs du jour !',
+          'END:VALARM',
+          'END:VEVENT',
+          'END:VCALENDAR'
+        ].join('\r\n');
+
+        const blob = new Blob([icsLines], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `FocusPASS-Rappel-${hh}h${mm}.ics`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+        showToast(`Alarme système de ${target} prête à être ajoutée !`, '📲');
+      },
+
       scheduleFutureCountdownOSNotification(secondsFromNow, subject, formattedDuration) {
         const fireDate = new Date(Date.now() + secondsFromNow * 1000);
         const title = `⏱️ Session terminée — ${subject} (${formattedDuration})`;
@@ -1872,6 +2088,7 @@
           banner.classList.remove('hidden');
         }
 
+        playTimerEndRingtone();
         this.sendSystemAndNativeNotif(title, body, 'focuspass-daily-reminder');
       },
 
@@ -1906,6 +2123,79 @@
       }
       if (input) input.value = val;
       CloudSyncEngine.linkSyncKey(val);
+    }
+
+    function copyCurrentSyncKey() {
+      const code = SecurityGuard.cleanSyncKey(state.syncKey || '');
+      if (!code) return;
+      try {
+        const tmp = document.createElement('textarea');
+        tmp.value = code;
+        tmp.style.position = 'fixed';
+        tmp.style.opacity = '0';
+        document.body.appendChild(tmp);
+        tmp.select();
+        document.execCommand('copy');
+        document.body.removeChild(tmp);
+        showToast(`Code "${code}" copié dans le presse-papiers !`, '📋');
+      } catch {
+        showToast(`Code : ${code}`, '📋');
+      }
+    }
+
+    function exportBackupJson() {
+      try {
+        const exportPayload = JSON.stringify(state, null, 2);
+        const blob = new Blob([exportPayload], { type: 'application/json;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `FocusPASS-Sauvegarde-${getTodayKey()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 4000);
+        showToast('Sauvegarde .json téléchargée avec succès', '📥');
+      } catch {
+        showToast('Erreur lors de la création de la sauvegarde', '⚠️');
+      }
+    }
+
+    function importBackupJson(event) {
+      const file = event?.target?.files?.[0];
+      if (!file) return;
+      if (file.size > 500000) {
+        showToast('Fichier trop volumineux (max 500 Ko)', '⚠️');
+        event.target.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = e => {
+        const parsed = SecurityGuard.safeJsonParse(String(e.target?.result || ''));
+        if (!parsed || !Array.isArray(parsed.subjects)) {
+          showToast('Fichier de sauvegarde invalide ou corrompu', '⚠️');
+          return;
+        }
+        const currentSync = state.syncKey;
+        state = migrateLoadedState(parsed);
+        if (currentSync) state.syncKey = currentSync;
+        saveState();
+        applyTheme();
+        renderAll();
+        showToast('Sauvegarde restaurée et vérifiée avec succès !', '📤');
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function startFocusOnSubject(subjectName) {
+      const cleanSubj = SecurityGuard.cleanText(subjectName, 40);
+      if (state.subjects.some(s => s.name === cleanSubj)) {
+        currentTimerSubject = cleanSubj;
+        saveTimerPersistence();
+      }
+      switchTab('timer');
+      showToast(`Prêt à réviser : ${currentTimerSubject}`, '⏱️');
     }
 
     const getSubjectColor = name => state.subjects.find(s => s.name === name)?.color || '#3b82f6';
@@ -2014,7 +2304,6 @@
     let cachedAlarmWavUrl = null;
     let cachedSilentGuardWavUrl = null;
 
-    // Génère un fichier WAV de sonnerie mélodique (peut être joué par <audio> même quand l'appli est en arrière-plan sur iPad/iPhone)
     function getAlarmRingtoneWavUrl() {
       if (cachedAlarmWavUrl) return cachedAlarmWavUrl;
       const sampleRate = 22050;
@@ -2067,11 +2356,10 @@
       return cachedAlarmWavUrl;
     }
 
-    // Génère une piste WAV quasi-silencieuse qui maintient le thread JavaScript et le chrono éveillés en arrière-plan sur iOS/iPadOS/Android
     function getSilentGuardWavUrl() {
       if (cachedSilentGuardWavUrl) return cachedSilentGuardWavUrl;
       const sampleRate = 8000;
-      const totalSamples = sampleRate * 10; // boucle de 10s
+      const totalSamples = sampleRate * 10;
       const buf = new ArrayBuffer(44 + totalSamples * 2);
       const view = new DataView(buf);
       const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
@@ -2091,8 +2379,9 @@
       view.setUint32(40, totalSamples * 2, true);
 
       const pcm = new Int16Array(buf, 44, totalSamples);
+      const twoPi = 2 * Math.PI;
       for (let i = 0; i < totalSamples; i++) {
-        pcm[i] = (i % 2 === 0) ? 1 : -1; // Signal imperceptible non-nul pour empêcher la mise en veille OS
+        pcm[i] = Math.round(Math.sin(twoPi * 28 * (i / sampleRate)) * 45);
       }
       cachedSilentGuardWavUrl = URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
       return cachedSilentGuardWavUrl;
@@ -2120,12 +2409,23 @@
       } catch {}
     }
 
-    // Joue la sonnerie de fin via l'élément <audio> (fonctionne même en arrière-plan) + fallback WebAudio
     function playTimerEndRingtone() {
+      const ringUrl = getAlarmRingtoneWavUrl();
+      try {
+        const guardEl = $('timerGuardAudio');
+        if (guardEl) {
+          guardEl.ontimeupdate = null;
+          guardEl.loop = false;
+          guardEl.src = ringUrl;
+          guardEl.volume = 1.0;
+          guardEl.play().catch(() => {});
+        }
+      } catch {}
+
       try {
         const alarmEl = $('alarmRingAudio');
         if (alarmEl) {
-          alarmEl.src = getAlarmRingtoneWavUrl();
+          alarmEl.src = ringUrl;
           alarmEl.volume = 1.0;
           alarmEl.currentTime = 0;
           alarmEl.play().catch(() => {});
@@ -2183,7 +2483,7 @@
     }
 
     // =========================================================================
-    // MOTEUR AUDIO CONTINU 15 MIN : VRAIE PLUIE AVEC GOUTTELETTES D'EAU COMME LA VIDÉO
+    // MOTEUR AUDIO CONTINU OPTIMISÉ : BOUCLE 60S SANS COUTURE (93% RAM EN MOINS)
     // =========================================================================
     let activeAudioType = null;
     let noiseVolume = 0.35;
@@ -2195,7 +2495,7 @@
       const sampleRate = 16000;
       const isStereo = type === 'binaural';
       const numChannels = isStereo ? 2 : 1;
-      const totalSeconds = 900; // 15 minutes continues sans aucune coupure
+      const totalSeconds = 60;
       const totalSamples = sampleRate * totalSeconds;
       const totalInterleaved = totalSamples * numChannels;
 
@@ -2231,8 +2531,8 @@
         const twoPi = 2 * Math.PI;
         for (let i = 0; i < unitSamples; i++) {
           const t = i / sampleRate;
-          unitBlock[i * 2] = Math.round(Math.sin(twoPi * 200 * t) * 8500);
-          unitBlock[i * 2 + 1] = Math.round(Math.sin(twoPi * 206 * t) * 8500);
+          unitBlock[i * 2] = Math.round(Math.sin(twoPi * 200 * t) * 7500);
+          unitBlock[i * 2 + 1] = Math.round(Math.sin(twoPi * 206 * t) * 7500);
         }
         for (let sec = 0; sec < totalSeconds; sec++) {
           pcm16.set(unitBlock, sec * unitBlock.length);
@@ -2248,63 +2548,61 @@
         let lastBrown = 0, lp1 = 0, lp2 = 0;
 
         if (type === 'pink') {
-          // =========================================================================
-          // SYNTHÈSE ACOUSTIQUE DE PLUIE NATURELLE (COMME SUR TA VIDÉO) :
-          // 1) Fond d'averse doux et feutré (sans souffle radio agressif)
-          // 2) + Des milliers de gouttelettes d'eau individuelles qui crépitent sur les feuilles et le sol
-          // =========================================================================
-          let rainBedLp1 = 0, rainBedLp2 = 0, rainBedHp = 0;
-          for (let i = 0; i < rawLen; i++) {
-            const w = Math.random() * 2 - 1;
-            lastBrown = (lastBrown + 0.025 * w) / 1.025;
-            rainBedLp1 += 0.14 * (lastBrown - rainBedLp1);
-            rainBedLp2 += 0.22 * (w * 0.18 - rainBedLp2);
-            rainBedHp += 0.03 * (rainBedLp2 - rainBedHp);
-            const softShowerBed = rainBedLp1 * 0.45 + (rainBedLp2 - rainBedHp) * 0.35;
-            raw[i] = softShowerBed;
+          let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+          let rainLp1 = 0, rainLp2 = 0, rainHp = 0;
+          const twoPi = 2 * Math.PI;
+
+          for (let w = 0; w < sampleRate; w++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.99886 * b0 + white * 0.0555179;
+            b1 = 0.99332 * b1 + white * 0.0750759;
+            b2 = 0.96900 * b2 + white * 0.1538520;
+            b3 = 0.86650 * b3 + white * 0.3104856;
+            b4 = 0.55000 * b4 + white * 0.5329522;
+            b5 = -0.7616 * b5 - white * 0.0168980;
+            const pink = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.04;
+            b6 = white * 0.115926;
+            rainLp1 += 0.16 * (pink - rainLp1);
+            rainLp2 += 0.16 * (rainLp1 - rainLp2);
+            rainHp += 0.008 * (rainLp2 - rainHp);
           }
 
-          // Superposition de ~7500 gouttes d'eau organiques sur la boucle de 34s (~220 gouttes/seconde)
-          const numDroplets = 7600;
-          const twoPi = 2 * Math.PI;
-          for (let d = 0; d < numDroplets; d++) {
-            const startIdx = Math.floor(Math.random() * (rawLen - 450));
-            const isCloseDrop = Math.random() < 0.28; // Goutte proche (patter d'eau) vs goutte sur feuille
-            const dropDurSamples = isCloseDrop
-              ? (85 + Math.floor(Math.random() * 130))  // 5 à 13 ms
-              : (35 + Math.floor(Math.random() * 65));  // 2 à 6 ms
+          for (let i = 0; i < rawLen; i++) {
+            const white = Math.random() * 2 - 1;
+            b0 = 0.99886 * b0 + white * 0.0555179;
+            b1 = 0.99332 * b1 + white * 0.0750759;
+            b2 = 0.96900 * b2 + white * 0.1538520;
+            b3 = 0.86650 * b3 + white * 0.3104856;
+            b4 = 0.55000 * b4 + white * 0.5329522;
+            b5 = -0.7616 * b5 - white * 0.0168980;
+            const pink = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.04;
+            b6 = white * 0.115926;
 
-            // Fréquence de résonance d'une vraie goutte d'eau (900 Hz à 2750 Hz, avec léger chirp montant)
-            const baseFreq = isCloseDrop
-              ? (850 + Math.random() * 1150)
-              : (1350 + Math.random() * 1450);
-            const amp = isCloseDrop
-              ? (0.045 + Math.random() * 0.075)
-              : (0.020 + Math.random() * 0.045);
+            rainLp1 += 0.16 * (pink - rainLp1);
+            rainLp2 += 0.16 * (rainLp1 - rainLp2);
+            rainHp += 0.008 * (rainLp2 - rainHp);
 
-            let dropLp = 0;
-            for (let k = 0; k < dropDurSamples; k++) {
-              const tNorm = k / dropDurSamples;
-              const tSec = k / sampleRate;
-              // Enveloppe percussive douce (attaque 15%, déclin exponentiel naturel)
-              const env = Math.sin(Math.min(1, tNorm * 5.5) * (Math.PI * 0.5)) * Math.exp(-tNorm * 4.4);
-              // Chirp caractéristique d'une goutte d'eau + micro-impact boisé/feuille
-              const instFreq = baseFreq * (1 + 0.28 * tNorm);
-              const waterResonance = Math.sin(twoPi * instFreq * tSec) * 0.62;
-              const leafPatter = (Math.random() * 2 - 1) * 0.38;
-              dropLp += 0.36 * ((waterResonance + leafPatter) * env * amp - dropLp);
-              raw[startIdx + k] += dropLp;
+            const t = i / sampleRate;
+            const breezeMod = 0.93 + 0.07 * Math.sin(twoPi * t / 10.0);
+            raw[i] = (rainLp2 - rainHp * 0.45) * breezeMod * 0.85;
+          }
+
+          const numVelvetDrops = 1800;
+          for (let d = 0; d < numVelvetDrops; d++) {
+            const startIdx = Math.floor(Math.random() * (rawLen - 220));
+            const len = 55 + Math.floor(Math.random() * 80);
+            const dropGain = 0.012 + Math.random() * 0.022;
+            let dLp1 = 0, dLp2 = 0;
+            for (let k = 0; k < len; k++) {
+              const u = k / len;
+              const env = Math.sin(u * Math.PI) * Math.exp(-u * 2.8);
+              const n = (Math.random() * 2 - 1) * env * dropGain;
+              dLp1 += 0.22 * (n - dLp1);
+              dLp2 += 0.22 * (dLp1 - dLp2);
+              raw[startIdx + k] += dLp2;
             }
           }
-
-          // Léger filtre de cohésion acoustique final pour un rendu 100% naturel
-          let finalLp = 0;
-          for (let i = 0; i < rawLen; i++) {
-            finalLp += 0.48 * (raw[i] - finalLp);
-            raw[i] = finalLp;
-          }
         } else {
-          // Bruit Brun & Bruit Blanc Doux
           for (let w = 0; w < sampleRate; w++) {
             const r = Math.random() * 2 - 1;
             lastBrown = (lastBrown + 0.02 * r) / 1.02;
@@ -2313,12 +2611,12 @@
             const w = Math.random() * 2 - 1;
             if (type === 'brown') {
               lastBrown = (lastBrown + 0.02 * w) / 1.02;
-              lp1 += 0.12 * (lastBrown * 1.55 - lp1);
+              lp1 += 0.12 * (lastBrown * 1.35 - lp1);
               lp2 += 0.12 * (lp1 - lp2);
               raw[i] = lp2;
             } else {
-              lp1 += 0.25 * (w * 0.26 - lp1);
-              lp2 += 0.25 * (lp1 - lp2);
+              lp1 += 0.24 * (w * 0.22 - lp1);
+              lp2 += 0.24 * (lp1 - lp2);
               raw[i] = lp2;
             }
           }
@@ -2331,8 +2629,8 @@
             const theta = (i / fadeLen) * (Math.PI * 0.5);
             val = raw[i] * Math.sin(theta) + raw[baseLen + i] * Math.cos(theta);
           }
-          const clamped = Math.max(-0.92, Math.min(0.92, val));
-          unitBlock[i] = Math.round(clamped * 26000);
+          const softLimited = Math.tanh(val * 1.15);
+          unitBlock[i] = Math.round(softLimited * 14500);
         }
 
         const repeats = Math.floor(totalSamples / baseLen);
@@ -2382,7 +2680,7 @@
         if ('mediaSession' in navigator) {
           const labels = {
             brown: 'Bruit Brun (Profond)',
-            pink: 'Pluie Naturelle (Gouttes Douces)',
+            pink: 'Pluie Douce',
             white: 'Bruit Blanc Doux',
             binaural: 'Ondes Binaurales 6 Hz'
           };
@@ -2559,7 +2857,6 @@
         return;
       }
 
-      // Graphique principal du Bilan : hauteur de référence mathématique stricte = 180px
       const plotHeightPx = 180;
       $('mainBarChart').innerHTML = weekDates.map((dateObj, idx) => {
         const dKey = toDateKey(dateObj);
@@ -2576,7 +2873,7 @@
 
         return `<div onclick="selectDay(${idx})" class="flex-1 h-[180px] flex flex-col items-center justify-end cursor-pointer group relative">
           <div class="w-full max-w-[52px] rounded-t-xl overflow-hidden flex flex-col-reverse transition-all duration-300 group-hover:brightness-110 relative" style="height:${barPx}px; ${isSel ? 'outline:2px solid var(--btn-bg);' : ''}">${segments}</div>
-          <span class="absolute text-xs font-bold font-mono-timer opacity-95 group-hover:opacity-100 transition pointer-events-none z-30" style="bottom: ${barPx + 5}px;">${totalMin > 0 ? hoursFormatted : '0h'}</span>
+          <span class="absolute text-xs font-extrabold font-mono-timer px-1.5 py-0.5 rounded opacity-95 group-hover:opacity-100 transition pointer-events-none z-30" style="bottom: ${barPx + 6}px; background-color: color-mix(in srgb, var(--bg-card) 85%, transparent);">${totalMin > 0 ? hoursFormatted : '0h'}</span>
         </div>`;
       }).join('');
 
@@ -2763,7 +3060,10 @@
                   </div>
                 </div>
               </label>
-              <button onclick="deleteTask(${safeId})" class="text-xs opacity-50 hover:opacity-100 hover:text-red-400 p-1">✕</button>
+              <div class="flex items-center gap-1 flex-shrink-0">
+                ${!t.done ? `<button type="button" onclick="startFocusOnSubject('${esc(t.subject)}')" class="text-[11px] font-bold px-2 py-1 rounded-lg opacity-65 hover:opacity-100 border transition" style="border-color:var(--border-color);background-color:var(--bg-card);" title="Lancer le Chrono sur ${esc(t.subject)}">▶ Chrono</button>` : ''}
+                <button onclick="deleteTask(${safeId})" class="text-xs opacity-50 hover:opacity-100 hover:text-red-400 p-1" title="Supprimer">✕</button>
+              </div>
             </div>`;
           }).join('');
     }
@@ -2968,7 +3268,6 @@
 
       $('mainChartLegend').innerHTML = state.subjects.map(s => `<span class="inline-flex items-center gap-2 text-xs font-semibold px-2.5 py-1 rounded-lg border" style="background-color:var(--bg-main);border-color:var(--border-color);"><span class="w-3 h-3 rounded-full" style="background-color:${esc(s.color)};"></span><span>${esc(s.name)}</span></span>`).join('');
 
-      // Échelle exacte en pixels (180px) commune aux barres et à la ligne d'objectif
       const plotHeightPx = 180;
       const goalMin = state.dailyGoalHours * 60;
       const highestDayMin = Math.max(...dailyTotals, 0);
@@ -3176,7 +3475,7 @@
     }
 
     // =========================================================================
-    // CHRONO HAUTE PRÉCISION + WEB WORKER + GARDE-TEMPS AUDIO D'ARRIÈRE-PLAN
+    // CHRONO HAUTE PRÉCISION + WEB WORKER UNIFIÉ + GARDE-TEMPS AUDIO D'ARRIÈRE-PLAN
     // =========================================================================
     let timerInterval = null, timerRunning = false, timerMode = 'countup';
     let elapsedSeconds = 0, countdownTargetSeconds = 3600;
@@ -3189,13 +3488,19 @@
       try {
         const workerCode = `
           let id = null;
+          let intervalMs = 4000;
+          function restart() {
+            if (id) clearInterval(id);
+            id = setInterval(() => self.postMessage('tick'), intervalMs);
+          }
+          restart();
           self.onmessage = function(e) {
             if (e.data === 'start') {
-              if (id) clearInterval(id);
-              id = setInterval(() => self.postMessage('tick'), 500);
+              intervalMs = 500;
+              restart();
             } else if (e.data === 'stop') {
-              if (id) clearInterval(id);
-              id = null;
+              intervalMs = 4000;
+              restart();
             }
           };
         `;
@@ -3203,11 +3508,11 @@
         timerBgWorker = new Worker(URL.createObjectURL(blob));
         timerBgWorker.onmessage = () => {
           if (timerRunning) syncTimerWithRealClock();
+          TaskReminderEngine.checkDueReminder();
         };
       } catch {}
     }
 
-    // Démarre ou arrête le garde-temps audio silencieux qui empêche iOS/iPadOS/Android de suspendre le chrono en arrière-plan
     function setSilentTimerGuardActive(enable) {
       const guard = $('timerGuardAudio');
       if (!guard) return;
@@ -3215,14 +3520,15 @@
         try {
           if (navigator.audioSession) navigator.audioSession.type = 'playback';
         } catch {}
-        if (!guard.src) guard.src = getSilentGuardWavUrl();
+        guard.src = getSilentGuardWavUrl();
         guard.loop = true;
-        guard.volume = 0.01;
+        guard.volume = 0.02;
         guard.ontimeupdate = () => {
           if (timerRunning) syncTimerWithRealClock();
+          TaskReminderEngine.checkDueReminder();
         };
         guard.play().catch(() => {});
-        // Pré-charge aussi le lecteur d'alarme pendant le geste utilisateur pour autoriser la sonnerie en arrière-plan
+
         const alarmEl = $('alarmRingAudio');
         if (alarmEl && !alarmEl.src) {
           alarmEl.src = getAlarmRingtoneWavUrl();
@@ -3269,6 +3575,8 @@
 
         $('seg-countdown')?.classList.toggle('active', timerMode === 'countdown');
         $('seg-countup')?.classList.toggle('active', timerMode === 'countup');
+        $('countdownPresetsRow')?.classList.toggle('hidden', timerMode !== 'countdown');
+        $('countdownPresetsRow')?.classList.toggle('flex', timerMode === 'countdown');
         ['h', 'm', 's'].forEach(u => $(`wheel-${u}`)?.classList.toggle('wheel-interactive', timerMode === 'countdown'));
 
         const startBtn = $('timerStartBtn');
@@ -3358,8 +3666,20 @@
       TaskReminderEngine.cancelScheduledCountdownOSNotification();
       $('seg-countdown').classList.toggle('active', timerMode === 'countdown');
       $('seg-countup').classList.toggle('active', timerMode === 'countup');
+      $('countdownPresetsRow')?.classList.toggle('hidden', timerMode !== 'countdown');
+      $('countdownPresetsRow')?.classList.toggle('flex', timerMode === 'countdown');
       ['h', 'm', 's'].forEach(u => $(`wheel-${u}`)?.classList.toggle('wheel-interactive', timerMode === 'countdown'));
       updateFlipClockDisplay();
+    }
+
+    function setCountdownPreset(minutes) {
+      if (timerRunning) toggleTimer();
+      if (timerMode !== 'countdown') setTimerMode('countdown');
+      countdownTargetSeconds = SecurityGuard.clampNumber(minutes, 1, 720, 25) * 60;
+      elapsedSeconds = 0;
+      timerBaseElapsed = 0;
+      updateFlipClockDisplay();
+      showToast(`Compte à rebours réglé sur ${formatMinutes(minutes)}`, '⏳');
     }
 
     function adjustCountdownByWheel(unit, stepDir) {
@@ -3418,7 +3738,6 @@
         timerRunning = false;
         clearInterval(timerInterval);
         timerBgWorker?.postMessage('stop');
-        setSilentTimerGuardActive(false);
         updateFlipClockDisplay();
         finishAndSaveSession(true);
         return;
@@ -3433,6 +3752,10 @@
           if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           if (audioCtx.state === 'suspended') audioCtx.resume();
         } catch {}
+
+        if ('Notification' in window && Notification.permission === 'default') {
+          TaskReminderEngine.requestPermission(false);
+        }
 
         timerRunning = true;
         timerAnchorTimestamp = Date.now();
@@ -3486,9 +3809,28 @@
 
     function updateFlipClockDisplay() {
       const sec = timerMode === 'countdown' ? Math.max(0, countdownTargetSeconds - elapsedSeconds) : elapsedSeconds;
-      $('flipHours').textContent = String(Math.floor(sec / 3600)).padStart(2, '0');
-      $('flipMinutes').textContent = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
-      $('flipSeconds').textContent = String(sec % 60).padStart(2, '0');
+      const hh = String(Math.floor(sec / 3600)).padStart(2, '0');
+      const mm = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+      const ss = String(sec % 60).padStart(2, '0');
+      $('flipHours').textContent = hh;
+      $('flipMinutes').textContent = mm;
+      $('flipSeconds').textContent = ss;
+
+      if (timerRunning) {
+        document.title = `⏳ ${hh}:${mm}:${ss} • ${currentTimerSubject} — FocusPASS`;
+      } else if (document.title !== 'FocusPASS — Suivi & Organisation') {
+        document.title = 'FocusPASS — Suivi & Organisation';
+      }
+
+      if (timerRunning && 'mediaSession' in navigator && !activeAudioType) {
+        try {
+          navigator.mediaSession.metadata = new MediaMetadata({
+            title: `${hh}:${mm}:${ss} — ${currentTimerSubject}`,
+            artist: 'FocusPASS',
+            album: timerMode === 'countdown' ? 'Compte à rebours' : 'Chrono Focus'
+          });
+        } catch {}
+      }
     }
 
     function finishAndSaveSession(isAutoCompleted = false) {
@@ -3514,14 +3856,25 @@
       });
       localStorage.removeItem(TIMER_STORAGE_KEY);
       saveState();
-      resetTimer();
-      renderAll();
 
       if (isAutoCompleted) {
         playTimerEndRingtone();
         TaskReminderEngine.fireTimerFinishedNotification(savedSubject, formattedDur, slotStr);
+        timerRunning = false; timerAnchorTimestamp = null; timerBaseElapsed = 0; elapsedSeconds = 0;
+        clearInterval(timerInterval);
+        timerBgWorker?.postMessage('stop');
+        TaskReminderEngine.cancelScheduledCountdownOSNotification();
+        requestWakeLock(false);
+        const startBtn = $('timerStartBtn');
+        startBtn.textContent = 'Commencer';
+        startBtn.classList.remove('is-running');
+        $('timerSaveBtn').classList.add('hidden');
+        updateFlipClockDisplay();
+        renderAll();
         showToast(`Compte à rebours terminé ! + ${formattedDur} (${savedSubject}) enregistrées`, '🔔');
       } else {
+        resetTimer();
+        renderAll();
         showToast(`Session de ${formattedDur} (${savedSubject}) enregistrée !`, '🔥');
       }
     }
@@ -3745,8 +4098,8 @@
         {
           tab: 'timer',
           targetId: 'timerAudioPanel',
-          title: '🌧️ Pluie Naturelle & Bruits en arrière-plan',
-          desc: "Active la Pluie Naturelle (avec de vraies gouttes d'eau apaisantes), le Bruit Brun ou les Ondes Binaurales 6 Hz. Le son continue sans coupure même si tu changes d'application."
+          title: '🌧️ Pluie Douce & Bruits en arrière-plan',
+          desc: "Active la Pluie Douce, le Bruit Brun ou les Ondes Binaurales 6 Hz. Le son continue sans coupure même si tu changes d'application."
         },
         {
           tab: 'stats',
@@ -3946,6 +4299,22 @@
 
     window.addEventListener('resize', () => OnboardingWizard.updateSpotlightGeometry());
     window.addEventListener('scroll', () => OnboardingWizard.updateSpotlightGeometry(), { passive: true });
+
+    // Raccourcis clavier pratiques (Espace = Pause/Play sur le Chrono, Échap = Fermer les modales)
+    window.addEventListener('keydown', e => {
+      const tag = document.activeElement?.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      if (e.code === 'Space' && currentActiveTab === 'timer' && !OnboardingWizard.isOpen) {
+        e.preventDefault();
+        toggleTimer();
+      } else if (e.key === 'Escape') {
+        $('manualTimeModal')?.classList.add('hidden');
+        $('badgeCelebrationModal')?.classList.add('hidden');
+        if (!$('confirmSyncLinkModal')?.classList.contains('hidden')) {
+          CloudSyncEngine.cancelPendingLink();
+        }
+      }
+    });
 
     initFlipWheels();
     applyTheme();
