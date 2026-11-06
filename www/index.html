@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <!-- BOUCLIER CSP STRICT : Autorise Firebase, les Workers, les flux audio Blob en arrière-plan et bloque toute exfiltration -->
+  <!-- BOUCLIER CSP STRICT : Autorise Firebase, les Workers et les flux audio Blob en arrière-plan -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com https://fonts.gstatic.com; connect-src 'self' https://focuspass-default-rtdb.firebaseio.com https://*.firebaseio.com https://*.googleapis.com; media-src 'self' blob: data:; worker-src 'self' blob:; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; object-src 'none'; base-uri 'none'; form-action 'none';" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
   <meta name="referrer" content="no-referrer" />
@@ -362,19 +362,26 @@
     </div>
   </div>
 
-  <!-- INVITATION POUR AUTORISER LES NOTIFICATIONS (UNIQUEMENT APRÈS LE TUTORIEL) -->
-  <div id="startupNotifBanner" class="hidden fixed top-16 left-1/2 -translate-x-1/2 z-40 w-[94%] max-w-lg card rounded-2xl p-4 border-2 border-blue-500/70 shadow-2xl backdrop-blur-xl">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div class="flex items-start gap-3">
-        <div class="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-400/40 flex items-center justify-center flex-shrink-0 text-lg">🔔</div>
-        <div>
-          <h4 class="text-xs font-extrabold uppercase tracking-wider text-blue-400">Activer les notifications (18h00 & Chrono)</h4>
-          <p class="text-xs mt-0.5 leading-relaxed" style="color: var(--text-muted);">Sois prévenu quand ton compte à rebours est terminé (même en arrière-plan) et à 18h00 s'il te reste des tâches ou objectifs non atteints.</p>
-        </div>
+  <!-- MODALE D'ACTIVATION DES NOTIFICATIONS APRÈS LE TUTORIEL (COMME UNE APPLICATION NATIVE) -->
+  <div id="startupNotifBanner" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="card rounded-3xl max-w-sm w-full p-6 text-center space-y-4 border-2 border-blue-500/60 shadow-2xl view-animate">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-blue-500/15 border border-blue-400/40 flex items-center justify-center text-3xl shadow-inner">
+        🔔
       </div>
-      <div class="flex items-center justify-end gap-2 flex-shrink-0">
-        <button type="button" onclick="TaskReminderEngine.dismissStartupPrompt()" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold opacity-60 hover:opacity-100 transition">Plus tard</button>
-        <button type="button" onclick="TaskReminderEngine.authorizeFromStartup()" class="theme-btn-primary px-4 py-2 rounded-xl text-xs font-extrabold shadow-lg">Autoriser</button>
+      <div class="space-y-1.5">
+        <span class="text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400">Notifications FocusPASS</span>
+        <h3 class="text-lg font-extrabold tracking-tight">Activer les notifications ?</h3>
+        <p class="text-xs leading-relaxed" style="color: var(--text-muted);">
+          Autorise FocusPASS à t'envoyer une notification quand ton <strong>compte à rebours est terminé</strong> et un rappel à <strong>18h00</strong> s'il te reste des tâches ou des objectifs à valider.
+        </p>
+      </div>
+      <div class="flex flex-col gap-2 pt-2">
+        <button type="button" onclick="NotificationCenter.authorizeFromStartup()" class="w-full py-3 rounded-2xl text-xs font-extrabold bg-blue-500 text-white hover:bg-blue-400 transition shadow-lg">
+          Autoriser les notifications
+        </button>
+        <button type="button" onclick="NotificationCenter.dismissStartupPrompt()" class="w-full py-2.5 rounded-2xl text-xs font-semibold opacity-65 hover:opacity-100 transition">
+          Plus tard
+        </button>
       </div>
     </div>
   </div>
@@ -955,32 +962,29 @@
         </div>
       </div>
 
-      <!-- NOTIFICATION QUOTIDIENNE DES TÂCHES & OBJECTIFS RESTANTS -->
+      <!-- NOTIFICATIONS DU TÉLÉPHONE (CHRONO & RAPPEL DE 18H00) -->
       <div id="settingsReminderCard" class="card rounded-2xl p-6 space-y-4">
         <div class="flex items-start justify-between gap-3">
           <div>
-            <h3 class="font-extrabold text-lg tracking-tight">Rappel quotidien (Tâches & Objectifs)</h3>
-            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Reçois une notification à l'heure choisie s'il te reste des tâches ou des objectifs quotidiens non atteints, ainsi qu'à la fin de ton chrono.</p>
+            <h3 class="font-extrabold text-lg tracking-tight">Notifications (Chrono & Bilan de 18h00)</h3>
+            <p class="text-xs mt-0.5" style="color: var(--text-muted);">Reçois une notification directement sur ton téléphone à la fin de ton compte à rebours et à l'heure choisie s'il te reste des tâches ou des objectifs non atteints.</p>
           </div>
-          <button type="button" onclick="TaskReminderEngine.toggleEnabled()" id="reminderToggleBtn" class="px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition">
+          <button type="button" onclick="NotificationCenter.toggleEnabled()" id="reminderToggleBtn" class="px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition flex-shrink-0">
             🔔 Activé
           </button>
         </div>
 
         <div class="p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-3" style="background-color: var(--bg-main); border-color: var(--border-color);">
           <div class="flex items-center gap-3">
-            <label for="reminderTimeInput" class="text-xs font-bold">Heure du rappel :</label>
-            <input type="time" id="reminderTimeInput" value="18:00" onchange="TaskReminderEngine.updateTime(this.value)" class="input-field px-3 py-1.5 rounded-xl text-xs font-mono-timer font-bold" />
+            <label for="reminderTimeInput" class="text-xs font-bold">Heure du rappel quotidien :</label>
+            <input type="time" id="reminderTimeInput" value="18:00" onchange="NotificationCenter.updateTime(this.value)" class="input-field px-3 py-1.5 rounded-xl text-xs font-mono-timer font-bold" />
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <button type="button" onclick="TaskReminderEngine.requestPermission(true)" id="notifPermBtn" class="px-3 py-1.5 rounded-xl text-xs font-bold border hover:opacity-85 transition" style="border-color: var(--border-color); background-color: var(--bg-input);">
+            <button type="button" onclick="NotificationCenter.requestPermission(true)" id="notifPermBtn" class="px-3.5 py-2 rounded-xl text-xs font-bold border hover:opacity-85 transition" style="border-color: var(--border-color); background-color: var(--bg-input);">
               Autoriser les notifications
             </button>
-            <button type="button" onclick="TaskReminderEngine.testNotificationNow()" class="theme-btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold">
-              Tester l'alerte
-            </button>
-            <button type="button" onclick="TaskReminderEngine.installNativeOSAlarmIcs()" class="px-3 py-1.5 rounded-xl text-xs font-extrabold border border-amber-400/50 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition" title="Installe une alarme système quotidienne native qui sonne même si l'application est totalement fermée">
-              📲 Alarme Système (Appli fermée)
+            <button type="button" onclick="NotificationCenter.testLocalAlertNow()" class="theme-btn-primary px-3.5 py-2 rounded-xl text-xs font-extrabold">
+              🔔 Tester la notification
             </button>
           </div>
         </div>
@@ -1782,33 +1786,73 @@
     };
 
     // =========================================================================
-    // MOTEUR DE RAPPEL QUOTIDIEN (TÂCHES + OBJECTIFS) & NOTIFICATIONS NATIVES/ARRIÈRE-PLAN
+    // MOTEUR DE NOTIFICATIONS NATIVES & MAINTIEN EN ARRIÈRE-PLAN SUR TÉLÉPHONE
     // =========================================================================
-    const TaskReminderEngine = {
+    const NotificationCenter = {
       checkTimer: null,
+      bgKeepAliveUnlocked: false,
 
       init() {
         this.updateSettingsUI();
-        if (this.checkTimer) clearInterval(this.checkTimer);
-        this.checkTimer = setInterval(() => this.checkDueReminder(), 10000);
         initBackgroundTimerWorker();
 
+        if (this.checkTimer) clearInterval(this.checkTimer);
+        this.checkTimer = setInterval(() => this.checkDueReminder(), 5000);
+
+        // Déverrouille silencieusement le maintien en arrière-plan dès le premier geste sur l'écran
+        const unlockOnGesture = () => {
+          this.ensureBackgroundKeepAlive();
+          this.syncScheduledOSReminder();
+        };
+        window.addEventListener('pointerdown', unlockOnGesture, { once: true, passive: true });
+        window.addEventListener('keydown', unlockOnGesture, { once: true, passive: true });
+
         document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') {
+          if (document.visibilityState === 'hidden') {
+            this.ensureBackgroundKeepAlive();
+            this.syncScheduledOSReminder();
+          } else if (document.visibilityState === 'visible') {
             this.checkDueReminder();
           }
         });
 
-        setTimeout(() => this.checkDueReminder(), 2000);
+        setTimeout(() => {
+          this.checkDueReminder();
+          this.syncScheduledOSReminder();
+        }, 1500);
+
         if (!OnboardingWizard.shouldAutoStart()) {
           this.checkStartupNotificationPrompt();
         }
       },
 
+      // Maintient le processus éveillé en arrière-plan sur mobile (Web Lock + flux audio inaudible)
+      // tant que le chrono tourne OU que le rappel de 18h00 attend d'être envoyé aujourd'hui
+      ensureBackgroundKeepAlive() {
+        if (state.reminderEnabled === false && !timerRunning) return;
+        const todayKey = getTodayKey();
+        const reminderPendingToday = state.reminderEnabled !== false &&
+          localStorage.getItem(LAST_NOTIF_STORAGE_KEY) !== todayKey &&
+          (this.getRemainingTodayTasks().length > 0 || this.getUnmetTodayGoals().length > 0);
+
+        if (timerRunning || reminderPendingToday) {
+          setSilentTimerGuardActive(true);
+          this.bgKeepAliveUnlocked = true;
+        }
+
+        if ('locks' in navigator && !this.webLockHeld) {
+          this.webLockHeld = true;
+          try {
+            navigator.locks.request('focuspass_bg_keepalive', { mode: 'shared' }, () => new Promise(() => {}));
+          } catch {}
+        }
+      },
+
       checkStartupNotificationPrompt() {
         if (OnboardingWizard.isOpen) return;
-        if (!('Notification' in window)) return;
-        if (Notification.permission === 'default' && localStorage.getItem(STARTUP_NOTIF_PROMPT_KEY) !== '1') {
+        if (!('Notification' in window) && !window.Capacitor?.Plugins?.LocalNotifications) return;
+        const perm = ('Notification' in window) ? Notification.permission : 'default';
+        if (perm === 'default' && localStorage.getItem(STARTUP_NOTIF_PROMPT_KEY) !== '1') {
           $('startupNotifBanner')?.classList.remove('hidden');
         } else {
           $('startupNotifBanner')?.classList.add('hidden');
@@ -1821,7 +1865,11 @@
         state.reminderEnabled = true;
         saveState();
         await this.requestPermission(true);
-        if (OnboardingWizard.isOpen) OnboardingWizard.renderStep();
+        this.ensureBackgroundKeepAlive();
+        this.syncScheduledOSReminder();
+        if (OnboardingWizard.isOpen) {
+          OnboardingWizard.renderStep();
+        }
       },
 
       dismissStartupPrompt() {
@@ -1837,7 +1885,7 @@
         if (toggleBtn) {
           const on = state.reminderEnabled !== false;
           toggleBtn.textContent = on ? '🔔 Activé' : '🔕 Désactivé';
-          toggleBtn.className = `px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition ${
+          toggleBtn.className = `px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition flex-shrink-0 ${
             on ? 'bg-amber-400/15 text-amber-400 border-amber-400/40' : 'opacity-60 border-zinc-700'
           }`;
         }
@@ -1846,30 +1894,45 @@
         }
         if (permBtn && ('Notification' in window)) {
           if (Notification.permission === 'granted') {
-            permBtn.textContent = '✓ Notifications autorisées';
+            permBtn.textContent = '✓ Notifications autorisées sur ce téléphone';
             permBtn.classList.add('text-emerald-400');
             $('startupNotifBanner')?.classList.add('hidden');
           } else if (Notification.permission === 'denied') {
-            permBtn.textContent = 'Notifications bloquées (navigateur)';
+            permBtn.textContent = 'Notifications bloquées (réglages téléphone)';
+            permBtn.classList.remove('text-emerald-400');
           } else {
             permBtn.textContent = 'Autoriser les notifications';
+            permBtn.classList.remove('text-emerald-400');
           }
         }
       },
 
       async requestPermission(notifyUser = false) {
+        try {
+          if (window.Capacitor?.Plugins?.LocalNotifications?.requestPermissions) {
+            await window.Capacitor.Plugins.LocalNotifications.requestPermissions();
+          }
+          if (window.webkit?.messageHandlers?.localNotifications) {
+            window.webkit.messageHandlers.localNotifications.postMessage({ action: 'requestPermission' });
+          }
+        } catch {}
+
         if (!('Notification' in window)) {
-          if (notifyUser) showToast('Rappel actif via bannière intégrée sur cet appareil', '🔔');
-          return false;
+          if (notifyUser) showToast('Notifications internes activées sur cet appareil', '🔔');
+          return true;
         }
         try {
           const perm = await Notification.requestPermission();
           this.updateSettingsUI();
-          if (notifyUser) {
-            if (perm === 'granted') showToast('Notifications système activées !', '🔔');
-            else showToast('Bannière de rappel interne activée', '⏰');
+          if (perm === 'granted') {
+            this.ensureBackgroundKeepAlive();
+            this.syncScheduledOSReminder();
+            if (notifyUser) showToast('Notifications activées sur ton téléphone !', '🔔');
+            return true;
+          } else if (notifyUser) {
+            showToast('Pense à autoriser les notifications dans les réglages de ton téléphone', '⚠️');
           }
-          return perm === 'granted';
+          return false;
         } catch {
           return false;
         }
@@ -1877,10 +1940,14 @@
 
       toggleEnabled() {
         state.reminderEnabled = !state.reminderEnabled;
-        if (state.reminderEnabled) this.requestPermission(false);
+        if (state.reminderEnabled) {
+          this.requestPermission(false);
+          this.ensureBackgroundKeepAlive();
+        }
         saveState();
+        this.syncScheduledOSReminder();
         this.updateSettingsUI();
-        showToast(state.reminderEnabled ? `Rappel activé à ${state.reminderTime}` : 'Rappel quotidien désactivé', '⏰');
+        showToast(state.reminderEnabled ? `Notifications activées (${state.reminderTime})` : 'Notifications désactivées', '⏰');
       },
 
       updateTime(val) {
@@ -1888,6 +1955,8 @@
         state.reminderTime = val;
         localStorage.removeItem(LAST_NOTIF_STORAGE_KEY);
         saveState();
+        this.ensureBackgroundKeepAlive();
+        this.syncScheduledOSReminder();
         this.updateSettingsUI();
         showToast(`Heure du rappel réglée sur ${val}`, '⏰');
       },
@@ -1900,6 +1969,157 @@
       getUnmetTodayGoals() {
         const todayKey = getTodayKey();
         return state.goals.filter(g => !Array.isArray(g.completedDates) || !g.completedDates.includes(todayKey));
+      },
+
+      buildDailySummaryPayload(remainingTasks, unmetGoals, isTest = false) {
+        const tCount = remainingTasks.length;
+        const gCount = unmetGoals.length;
+        const timeStr = SecurityGuard.isValidTime(state.reminderTime) ? state.reminderTime : '18:00';
+
+        let title = `🎉 FocusPASS — Tout est validé aujourd'hui !`;
+        if (tCount > 0 && gCount > 0) {
+          title = `⏰ FocusPASS — ${tCount} tâche${tCount > 1 ? 's' : ''} & ${gCount} objectif${gCount > 1 ? 's' : ''} restants`;
+        } else if (tCount > 0) {
+          title = `📋 FocusPASS — Il te reste ${tCount} tâche${tCount > 1 ? 's' : ''} aujourd'hui`;
+        } else if (gCount > 0) {
+          title = `🎯 FocusPASS — ${gCount} objectif${gCount > 1 ? 's' : ''} quotidien${gCount > 1 ? 's' : ''} à valider`;
+        }
+        if (isTest) title = `🔔 ${title}`;
+
+        const sections = [];
+        if (tCount > 0) {
+          const tPreview = remainingTasks.slice(0, 4).map(t => `• ${t.title} (${t.subject})`).join('\n');
+          const tMore = tCount > 4 ? `\n+ ${tCount - 4} autre(s) tâche(s)` : '';
+          sections.push(`📋 Tâches à finir (${tCount}) :\n${tPreview}${tMore}`);
+        }
+        if (gCount > 0) {
+          const gPreview = unmetGoals.slice(0, 4).map(g => `• ${g.title}`).join('\n');
+          const gMore = gCount > 4 ? `\n+ ${gCount - 4} autre(s) objectif(s)` : '';
+          sections.push(`🎯 Objectifs du jour (${gCount}) :\n${gPreview}${gMore}`);
+        }
+        const body = sections.length > 0
+          ? sections.join('\n\n')
+          : `Bravo ! Toutes tes tâches et tous tes objectifs quotidiens du jour sont cochés.`;
+
+        return { title, body };
+      },
+
+      // Planifie automatiquement le rappel de 18h00 auprès du système d'exploitation (iOS / Android / PWA)
+      // dès qu'une tâche, un objectif ou l'heure change, pour que l'OS connaisse l'alerte à l'avance
+      syncScheduledOSReminder() {
+        try {
+          if (window.Capacitor?.Plugins?.LocalNotifications) {
+            window.Capacitor.Plugins.LocalNotifications.cancel({ notifications: [{ id: 8800 }] }).catch(() => {});
+          }
+          if (window.webkit?.messageHandlers?.localNotifications) {
+            window.webkit.messageHandlers.localNotifications.postMessage({ action: 'cancelDailyReminder', id: 8800 });
+          }
+        } catch {}
+
+        if (state.reminderEnabled === false) return;
+        const remainingTasks = this.getRemainingTodayTasks();
+        const unmetGoals = this.getUnmetTodayGoals();
+        if (remainingTasks.length === 0 && unmetGoals.length === 0) return;
+
+        const target = SecurityGuard.isValidTime(state.reminderTime) ? state.reminderTime : '18:00';
+        const [tH, tM] = target.split(':').map(Number);
+        const now = new Date();
+        const fireDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), tH, tM, 0);
+        if (fireDate.getTime() <= now.getTime()) return;
+
+        const { title, body } = this.buildDailySummaryPayload(remainingTasks, unmetGoals, false);
+
+        try {
+          if (window.Capacitor?.Plugins?.LocalNotifications) {
+            window.Capacitor.Plugins.LocalNotifications.schedule({
+              notifications: [{ id: 8800, title, body, schedule: { at: fireDate }, sound: 'default' }]
+            }).catch(() => {});
+          }
+          if (window.cordova?.plugins?.notification?.local) {
+            window.cordova.plugins.notification.local.schedule({
+              id: 8800,
+              title,
+              text: body,
+              trigger: { at: fireDate },
+              foreground: true
+            });
+          }
+          if (window.webkit?.messageHandlers?.localNotifications) {
+            window.webkit.messageHandlers.localNotifications.postMessage({
+              action: 'scheduleDailyReminder',
+              id: 8800,
+              title,
+              body,
+              fireAtMs: fireDate.getTime()
+            });
+          }
+          if ('Notification' in window && Notification.permission === 'granted' && 'showTrigger' in Notification.prototype && window.TimestampTrigger) {
+            navigator.serviceWorker?.getRegistration?.().then(reg => {
+              reg?.showNotification(title, {
+                body,
+                tag: 'focuspass-daily-reminder',
+                showTrigger: new window.TimestampTrigger(fireDate.getTime())
+              });
+            }).catch(() => {});
+          }
+        } catch {}
+      },
+
+      // Planifie auprès de l'OS la notification de fin du Compte à Rebours dès qu'il démarre
+      scheduleFutureCountdownOSNotification(secondsFromNow, subject, formattedDuration) {
+        if (secondsFromNow < 2) return;
+        const fireDate = new Date(Date.now() + secondsFromNow * 1000);
+        const title = `⏱️ Chrono terminé — ${subject} (${formattedDuration})`;
+        const body = `Bravo ! Ton compte à rebours de ${formattedDuration} en ${subject} est terminé.`;
+
+        try {
+          if (window.Capacitor?.Plugins?.LocalNotifications) {
+            window.Capacitor.Plugins.LocalNotifications.schedule({
+              notifications: [{ id: 9901, title, body, schedule: { at: fireDate }, sound: 'default' }]
+            }).catch(() => {});
+          }
+          if (window.cordova?.plugins?.notification?.local) {
+            window.cordova.plugins.notification.local.schedule({
+              id: 9901,
+              title,
+              text: body,
+              trigger: { at: fireDate },
+              foreground: true
+            });
+          }
+          if (window.webkit?.messageHandlers?.localNotifications) {
+            window.webkit.messageHandlers.localNotifications.postMessage({
+              action: 'scheduleTimerEnd',
+              id: 9901,
+              title,
+              body,
+              fireAtMs: fireDate.getTime()
+            });
+          }
+          if ('Notification' in window && Notification.permission === 'granted' && 'showTrigger' in Notification.prototype && window.TimestampTrigger) {
+            navigator.serviceWorker?.getRegistration?.().then(reg => {
+              reg?.showNotification(title, {
+                body,
+                tag: 'focuspass-timer-done',
+                showTrigger: new window.TimestampTrigger(fireDate.getTime())
+              });
+            }).catch(() => {});
+          }
+        } catch {}
+      },
+
+      cancelScheduledCountdownOSNotification() {
+        try {
+          if (window.Capacitor?.Plugins?.LocalNotifications) {
+            window.Capacitor.Plugins.LocalNotifications.cancel({ notifications: [{ id: 9901 }] }).catch(() => {});
+          }
+          if (window.cordova?.plugins?.notification?.local) {
+            window.cordova.plugins.notification.local.cancel(9901);
+          }
+          if (window.webkit?.messageHandlers?.localNotifications) {
+            window.webkit.messageHandlers.localNotifications.postMessage({ action: 'cancelTimerEnd', id: 9901 });
+          }
+        } catch {}
       },
 
       checkDueReminder() {
@@ -1918,178 +2138,76 @@
           const unmetGoals = this.getUnmetTodayGoals();
           localStorage.setItem(LAST_NOTIF_STORAGE_KEY, todayKey);
           if (remainingTasks.length > 0 || unmetGoals.length > 0) {
-            this.fireNotification(remainingTasks, unmetGoals, false);
+            this.fireLocalAndSystemNotification(remainingTasks, unmetGoals, false);
+          }
+          if (!timerRunning) {
+            setSilentTimerGuardActive(false);
           }
         }
       },
 
-      async testNotificationNow() {
+      async testLocalAlertNow() {
         await this.requestPermission(false);
+        this.ensureBackgroundKeepAlive();
         const remainingTasks = this.getRemainingTodayTasks();
         const unmetGoals = this.getUnmetTodayGoals();
-        this.fireNotification(remainingTasks, unmetGoals, true);
+        this.fireLocalAndSystemNotification(remainingTasks, unmetGoals, true);
       },
 
-      installNativeOSAlarmIcs() {
-        const target = SecurityGuard.isValidTime(state.reminderTime) ? state.reminderTime : '18:00';
-        const [hh, mm] = target.split(':');
-        const now = new Date();
-        const y = now.getFullYear();
-        const m = String(now.getMonth() + 1).padStart(2, '0');
-        const d = String(now.getDate()).padStart(2, '0');
-
-        const remainingTasks = this.getRemainingTodayTasks();
-        const unmetGoals = this.getUnmetTodayGoals();
-        const taskNames = remainingTasks.slice(0, 4).map(t => t.title).join(', ') || 'Vérifier mes tâches du jour';
-        const goalNames = unmetGoals.slice(0, 4).map(g => g.title).join(', ') || 'Valider mes objectifs quotidiens';
-
-        const icsLines = [
-          'BEGIN:VCALENDAR',
-          'VERSION:2.0',
-          'PRODID:-//FocusPASS//Rappel Quotidien//FR',
-          'CALSCALE:GREGORIAN',
-          'BEGIN:VEVENT',
-          `UID:focuspass-daily-reminder-${y}${m}${d}@focuspass.app`,
-          `DTSTAMP:${y}${m}${d}T${hh}${mm}00`,
-          `DTSTART:${y}${m}${d}T${hh}${mm}00`,
-          `DTEND:${y}${m}${d}T${hh}${mm}00`,
-          'RRULE:FREQ=DAILY',
-          'SUMMARY:⏰ FocusPASS — Bilan Tâches & Objectifs du jour',
-          `DESCRIPTION:Pense à valider tes tâches (${taskNames}) et tes objectifs quotidiens (${goalNames}) sur FocusPASS !`,
-          'BEGIN:VALARM',
-          'TRIGGER:-PT0M',
-          'ACTION:AUDIO',
-          'END:VALARM',
-          'BEGIN:VALARM',
-          'TRIGGER:-PT0M',
-          'ACTION:DISPLAY',
-          'DESCRIPTION:⏰ FocusPASS — Il est temps de faire le point sur tes tâches et objectifs du jour !',
-          'END:VALARM',
-          'END:VEVENT',
-          'END:VCALENDAR'
-        ].join('\r\n');
-
-        const blob = new Blob([icsLines], { type: 'text/calendar;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `FocusPASS-Rappel-${hh}h${mm}.ics`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 5000);
-        showToast(`Alarme système de ${target} prête à être ajoutée !`, '📲');
-      },
-
-      scheduleFutureCountdownOSNotification(secondsFromNow, subject, formattedDuration) {
-        const fireDate = new Date(Date.now() + secondsFromNow * 1000);
-        const title = `⏱️ Session terminée — ${subject} (${formattedDuration})`;
-        const body = `Ton compte à rebours de ${formattedDuration} en ${subject} est terminé !`;
-
+      async sendBrowserNotificationSafe(title, body, tag = 'focuspass-notif') {
         try {
           if (window.Capacitor?.Plugins?.LocalNotifications) {
             window.Capacitor.Plugins.LocalNotifications.schedule({
-              notifications: [{ id: 9901, title, body, schedule: { at: fireDate }, sound: 'default' }]
-            });
-          }
-          if (window.webkit?.messageHandlers?.localNotifications) {
-            window.webkit.messageHandlers.localNotifications.postMessage({
-              action: 'scheduleTimerEnd',
-              id: 9901,
-              title,
-              body,
-              fireAtMs: fireDate.getTime()
-            });
-          }
-          if ('Notification' in window && Notification.permission === 'granted' && 'showTrigger' in Notification.prototype && window.TimestampTrigger) {
-            navigator.serviceWorker?.ready.then(reg => {
-              reg.showNotification(title, {
-                body,
-                tag: 'focuspass-timer-done',
-                showTrigger: new window.TimestampTrigger(fireDate.getTime())
-              });
+              notifications: [{ id: Math.floor(Math.random() * 7000) + 1000, title, body, schedule: { at: new Date(Date.now() + 150) }, sound: 'default' }]
             }).catch(() => {});
-          }
-        } catch {}
-      },
-
-      cancelScheduledCountdownOSNotification() {
-        try {
-          if (window.Capacitor?.Plugins?.LocalNotifications) {
-            window.Capacitor.Plugins.LocalNotifications.cancel({ notifications: [{ id: 9901 }] });
-          }
-          if (window.webkit?.messageHandlers?.localNotifications) {
-            window.webkit.messageHandlers.localNotifications.postMessage({ action: 'cancelTimerEnd', id: 9901 });
-          }
-        } catch {}
-      },
-
-      sendSystemAndNativeNotif(title, body, tag = 'focuspass-notif') {
-        if ('Notification' in window && Notification.permission === 'granted') {
-          try {
-            if (navigator.serviceWorker?.ready) {
-              navigator.serviceWorker.ready.then(reg => reg.showNotification(title, {
-                body,
-                tag,
-                renotify: true,
-                requireInteraction: true
-              })).catch(() => {});
-            }
-            new Notification(title, { body, tag, renotify: true, requireInteraction: true });
-          } catch {}
-        }
-
-        try {
-          if (window.Capacitor?.Plugins?.LocalNotifications) {
-            window.Capacitor.Plugins.LocalNotifications.schedule({
-              notifications: [{ id: Math.floor(Math.random() * 8000) + 1000, title, body, schedule: { at: new Date(Date.now() + 200) }, sound: 'default' }]
-            });
           }
           if (window.webkit?.messageHandlers?.localNotifications) {
             window.webkit.messageHandlers.localNotifications.postMessage({ title, body });
           }
         } catch {}
+
+        if ('Notification' in window && Notification.permission === 'granted') {
+          let shownViaSW = false;
+          try {
+            if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistration) {
+              const reg = await navigator.serviceWorker.getRegistration();
+              if (reg && typeof reg.showNotification === 'function') {
+                await reg.showNotification(title, {
+                  body,
+                  tag,
+                  renotify: true,
+                  requireInteraction: true,
+                  vibrate: [250, 120, 250, 120, 400]
+                });
+                shownViaSW = true;
+              }
+            }
+          } catch {}
+
+          if (!shownViaSW) {
+            try {
+              new Notification(title, { body, tag, renotify: true });
+            } catch {}
+          }
+        }
       },
 
-      fireNotification(remainingTasks, unmetGoals, isTest = false) {
-        const tCount = remainingTasks.length;
-        const gCount = unmetGoals.length;
+      fireLocalAndSystemNotification(remainingTasks, unmetGoals, isTest = false) {
         const timeStr = SecurityGuard.isValidTime(state.reminderTime) ? state.reminderTime : '18:00';
-
-        let title = `🎉 FocusPASS — Tout est validé aujourd'hui !`;
-        if (tCount > 0 && gCount > 0) {
-          title = `⏰ FocusPASS — ${tCount} tâche${tCount > 1 ? 's' : ''} & ${gCount} objectif${gCount > 1 ? 's' : ''} restants`;
-        } else if (tCount > 0) {
-          title = `📋 FocusPASS — Il te reste ${tCount} tâche${tCount > 1 ? 's' : ''} aujourd'hui`;
-        } else if (gCount > 0) {
-          title = `🎯 FocusPASS — ${gCount} objectif${gCount > 1 ? 's' : ''} quotidien${gCount > 1 ? 's' : ''} à valider`;
-        }
-
-        const sections = [];
-        if (tCount > 0) {
-          const tPreview = remainingTasks.slice(0, 3).map(t => `• ${t.title} (${t.subject})`).join('\n');
-          const tMore = tCount > 3 ? `\n+ ${tCount - 3} autre(s) tâche(s)` : '';
-          sections.push(`📋 Tâches restantes (${tCount}) :\n${tPreview}${tMore}`);
-        }
-        if (gCount > 0) {
-          const gPreview = unmetGoals.slice(0, 4).map(g => `• ${g.title}`).join('\n');
-          const gMore = gCount > 4 ? `\n+ ${gCount - 4} autre(s) objectif(s)` : '';
-          sections.push(`🎯 Objectifs non atteints (${gCount}) :\n${gPreview}${gMore}`);
-        }
-        const body = sections.length > 0
-          ? sections.join('\n\n')
-          : `Bravo ! Toutes tes tâches et tous tes objectifs quotidiens du jour sont cochés.`;
+        const { title, body } = this.buildDailySummaryPayload(remainingTasks, unmetGoals, isTest);
 
         const banner = $('reminderBannerModal');
         if (banner) {
           $('reminderBannerIcon').textContent = '⏰';
-          $('reminderBannerTitle').textContent = isTest ? `Test du rappel (${timeStr}) — Tâches & Objectifs` : `Rappel de ${timeStr} — Bilan de ta journée`;
+          $('reminderBannerTitle').textContent = isTest
+            ? `Test de notification (${timeStr}) — Tâches & Objectifs`
+            : `Rappel de ${timeStr} — Bilan de ta journée`;
           $('reminderBannerBody').textContent = body;
           banner.classList.remove('hidden');
         }
 
         playTimerEndRingtone();
-        this.sendSystemAndNativeNotif(title, body, 'focuspass-daily-reminder');
+        this.sendBrowserNotificationSafe(title, body, 'focuspass-daily-reminder');
       },
 
       fireTimerFinishedNotification(subject, formattedDuration, slotStr) {
@@ -2104,7 +2222,7 @@
           banner.classList.remove('hidden');
         }
 
-        this.sendSystemAndNativeNotif(title, body, 'focuspass-timer-done');
+        this.sendBrowserNotificationSafe(title, body, 'focuspass-timer-done');
       }
     };
 
@@ -2112,6 +2230,7 @@
       state.updatedAt = Date.now();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       CloudSyncEngine.pushToCloud();
+      NotificationCenter.syncScheduledOSReminder();
     }
 
     function applyCustomSyncKey() {
@@ -2936,7 +3055,7 @@
       renderStatsView(streak);
       renderSettings();
       renderTodaySessions();
-      TaskReminderEngine.updateSettingsUI();
+      NotificationCenter.updateSettingsUI();
     }
 
     // =========================================================================
@@ -3508,7 +3627,7 @@
         timerBgWorker = new Worker(URL.createObjectURL(blob));
         timerBgWorker.onmessage = () => {
           if (timerRunning) syncTimerWithRealClock();
-          TaskReminderEngine.checkDueReminder();
+          NotificationCenter.checkDueReminder();
         };
       } catch {}
     }
@@ -3525,7 +3644,7 @@
         guard.volume = 0.02;
         guard.ontimeupdate = () => {
           if (timerRunning) syncTimerWithRealClock();
-          TaskReminderEngine.checkDueReminder();
+          NotificationCenter.checkDueReminder();
         };
         guard.play().catch(() => {});
 
@@ -3663,7 +3782,7 @@
       timerMode = mode === 'countdown' ? 'countdown' : 'countup';
       elapsedSeconds = 0; timerBaseElapsed = 0;
       localStorage.removeItem(TIMER_STORAGE_KEY);
-      TaskReminderEngine.cancelScheduledCountdownOSNotification();
+      NotificationCenter.cancelScheduledCountdownOSNotification();
       $('seg-countdown').classList.toggle('active', timerMode === 'countdown');
       $('seg-countup').classList.toggle('active', timerMode === 'countup');
       $('countdownPresetsRow')?.classList.toggle('hidden', timerMode !== 'countdown');
@@ -3754,7 +3873,7 @@
         } catch {}
 
         if ('Notification' in window && Notification.permission === 'default') {
-          TaskReminderEngine.requestPermission(false);
+          NotificationCenter.requestPermission(false);
         }
 
         timerRunning = true;
@@ -3770,7 +3889,7 @@
         if (timerMode === 'countdown') {
           const remSec = Math.max(1, countdownTargetSeconds - elapsedSeconds);
           const plannedDur = formatMinutes(Math.max(1, Math.round(countdownTargetSeconds / 60)));
-          TaskReminderEngine.scheduleFutureCountdownOSNotification(remSec, currentTimerSubject, plannedDur);
+          NotificationCenter.scheduleFutureCountdownOSNotification(remSec, currentTimerSubject, plannedDur);
         }
 
         if (timerInterval) clearInterval(timerInterval);
@@ -3784,7 +3903,7 @@
         clearInterval(timerInterval);
         timerBgWorker?.postMessage('stop');
         setSilentTimerGuardActive(false);
-        TaskReminderEngine.cancelScheduledCountdownOSNotification();
+        NotificationCenter.cancelScheduledCountdownOSNotification();
         requestWakeLock(false);
         startBtn.textContent = 'Reprendre';
         startBtn.classList.remove('is-running');
@@ -3797,7 +3916,7 @@
       clearInterval(timerInterval);
       timerBgWorker?.postMessage('stop');
       setSilentTimerGuardActive(false);
-      TaskReminderEngine.cancelScheduledCountdownOSNotification();
+      NotificationCenter.cancelScheduledCountdownOSNotification();
       localStorage.removeItem(TIMER_STORAGE_KEY);
       requestWakeLock(false);
       const startBtn = $('timerStartBtn');
@@ -3859,11 +3978,11 @@
 
       if (isAutoCompleted) {
         playTimerEndRingtone();
-        TaskReminderEngine.fireTimerFinishedNotification(savedSubject, formattedDur, slotStr);
+        NotificationCenter.fireTimerFinishedNotification(savedSubject, formattedDur, slotStr);
         timerRunning = false; timerAnchorTimestamp = null; timerBaseElapsed = 0; elapsedSeconds = 0;
         clearInterval(timerInterval);
         timerBgWorker?.postMessage('stop');
-        TaskReminderEngine.cancelScheduledCountdownOSNotification();
+        NotificationCenter.cancelScheduledCountdownOSNotification();
         requestWakeLock(false);
         const startBtn = $('timerStartBtn');
         startBtn.textContent = 'Commencer';
@@ -4155,7 +4274,8 @@
         $('onboardingModal')?.classList.add('hidden');
         switchTab('dashboard');
         showToast("Visite terminée ! Bon courage pour tes révisions 🚀", '🎓');
-        setTimeout(() => TaskReminderEngine.checkStartupNotificationPrompt(), 600);
+        // Affiche immédiatement la demande d'activation des notifications à la fin du tutoriel
+        setTimeout(() => NotificationCenter.checkStartupNotificationPrompt(), 350);
       },
 
       next() {
@@ -4274,7 +4394,7 @@
         const notifGranted = ('Notification' in window) && Notification.permission === 'granted';
         const notifBlock = cfg.showNotifButton && !notifGranted
           ? `<div class="pt-2">
-              <button type="button" onclick="TaskReminderEngine.authorizeFromStartup()" class="w-full py-2.5 px-3 rounded-xl text-xs font-extrabold bg-blue-500 text-white hover:bg-blue-400 transition flex items-center justify-center gap-2 shadow-lg">
+              <button type="button" onclick="NotificationCenter.authorizeFromStartup()" class="w-full py-2.5 px-3 rounded-xl text-xs font-extrabold bg-blue-500 text-white hover:bg-blue-400 transition flex items-center justify-center gap-2 shadow-lg">
                 🔔 Autoriser les notifications maintenant
               </button>
             </div>`
@@ -4320,7 +4440,7 @@
     applyTheme();
     setTimerMode('countup');
     CloudSyncEngine.init();
-    TaskReminderEngine.init();
+    NotificationCenter.init();
 
     const hadRunningTimer = restoreTimerPersistence();
     switchTab(hadRunningTimer ? 'timer' : 'dashboard');
